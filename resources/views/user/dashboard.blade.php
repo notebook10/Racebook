@@ -1,11 +1,13 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+{{--<script src="{{ asset('js/date.js') }}"></script>--}}
 DASHBOARD
+<div id="auth">{{ Auth::user()->id }}</div>
 <a href="logout">Logout</a>
 <?php
-    date_default_timezone_set('America/Los_Angeles');
-    use App\Horses;
+date_default_timezone_set('America/Los_Angeles');
+use App\Horses;
 ?>
 
 <style>
@@ -50,7 +52,7 @@ DASHBOARD
             @endforeach
             {{-- ---------------------------------------------------------------------------------------------------------------------------------------------------------------- --}}
             {{--@foreach($tracks as $value)--}}
-                {{--<div class="trkName" data-code="{!! $value->code !!}">{!! $value->name !!}</div>--}}
+            {{--<div class="trkName" data-code="{!! $value->code !!}">{!! $value->name !!}</div>--}}
             {{--@endforeach--}}
         </div>
         <div class="col-md-8">
@@ -66,15 +68,18 @@ DASHBOARD
                     <option value="trifectabox">Trifecta Box</option>
                 </select>
                 <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
-                <input type="hidden" id="selectedTrack">
-                <input type="hidden" id="selectedRaceNum">
+                <input type="text" id="selectedTrack">
+                <input type="text" id="selectedRaceNum">
+                <input type="text" id="selectedRacePostTime">
             </div>
             <div id="tempRaces"></div>
             <div id="submitBet" style="display: none">
-                <form method="post">
-                    <input type="text" placeholder="Put your bet">
-                    <input type="submit" value="SUBMIT BET">
-                </form>
+                <input type="text" id="betAmount" placeholder="Put your bet">
+                <button id="submitBetButton">SUBMIT BET</button>
+            </div>
+            <div id="betTicket">
+                <!-- Confirm Bet -->
+                <div id="ticket"></div>
             </div>
         </div>
     </div>
@@ -108,16 +113,21 @@ DASHBOARD
                         var raceCount = "";
                         var raceTime = "";
                         var raceTimeArr = [];
+                        var race = []; //array to get first race number
                         $.each(obj, function(index, value){
-                            if(raceTimeArr.indexOf(obj[index].race_time) > -1){
-
-                            }else{
+                            // For race number
+                            if(raceTimeArr.indexOf(obj[index].race_time) > -1){}else{
                                 raceTimeArr.push(obj[index].race_time);
                             }
+                            // For race number
+                            if(race.indexOf(obj[index].race_number) > -1){}else{
+                                race.push(obj[index].race_number);
+                            }
                         });
-                        console.log(raceTimeArr);
-                        for(var i = 1; i <= raceTimeArr.length; i++){
-                            $(".panel."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
+                        console.log(race);
+                        var firstRace = race[0].replace(/\D/g,'');
+                        for(var i = firstRace; i <= raceTimeArr.length; i++){
+                            $(".panel."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
                         }
                     },
                     error : function(){
@@ -131,6 +141,7 @@ DASHBOARD
             var wager = $("#selectWager").val();
             var trk = $(this).data("track");
             var num = $(this).data("number");
+            var post = $(this).data("post");
 //            $("#tempRaces").append("<ul class='"+ trk + num +"'></ul>");
             switch(wager){
                 case "wps":
@@ -257,6 +268,8 @@ DASHBOARD
 //            $("#selectedTrkAndRace").attr("data-trk",trk).attr("data-raceNum",num);
             $("#selectedTrack").val(trk);
             $("#selectedRaceNum").val(num);
+            $("#selectedRacePostTime").val(post);
+            $("#submitBet").css("display","block");
         });
 
         //ACCORDION
@@ -399,7 +412,41 @@ DASHBOARD
                 }
             });
         });
+        $("#submitBetButton").on("click",function(){
+            var betType = $("#selectWager").val();
+            var trk = $("#selectedTrack").val();
+            var raceNumber = $("#selectedRaceNum").val();
+            var racePostTime = $("#selectedRacePostTime").val();
+            var amount = $("#betAmount").val();
+            var betArray = [];
+            $("input[type=checkbox]").each(function(){
+                if(this.checked){
+                    betArray.push($(this).data("id"));
+                }else{
 
+                }
+            });
+            console.log(betArray);
+            $.ajax({
+                "url" : BASE_URL + '/dashboard/saveBet',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    bettype : betType,
+                    track : trk,
+                    raceNum : raceNumber,
+                    racePost : racePostTime,
+                    betamount : amount,
+                    bet : betArray
+                },
+                success : function(response){
+                    alert(response);
+                },
+                error : function(){
+                    alert("error123");
+                }
+            });
+        });
     });
 
 </script>
