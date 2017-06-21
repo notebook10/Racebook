@@ -1,0 +1,126 @@
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+DASHBOARD
+<a href="logout">Logout</a>
+<?php
+    date_default_timezone_set('America/Los_Angeles');
+    use App\Horses;
+?>
+
+<input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
+<input type="hidden" name="_token" value="{{csrf_token()}}">
+<div class="container">
+    <div class="row">
+        <div class="col-md-4" style="background: darkgrey">
+            <h3 id="date" data-date="<?php echo date('mdy',time()) ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
+            @foreach($tracks as $value)
+                <div class="trkName" data-code="{!! $value->code !!}">{!! $value->name !!}</div>
+            @endforeach
+        </div>
+        <div class="col-md-8">
+            <div class="jumbotron text-center">
+                <h1>RACES</h1>
+            </div>
+
+            <div id="tempRaces"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("document").ready(function(){
+        var BASE_URL = $("#hiddenURL").val();
+        var CURRENT_DATE = $("#date").data("date");
+        $(".trkName").on("click",function(){
+            if($(this).hasClass("on")){
+                $(".trkName.on div.raceNum").html("");
+                $(this).removeClass("on");
+            }else{
+                $('.trkName').css("color","#000");
+                $(this).css("color","red");
+//            $("#tempRaces").html("");
+                $(".trkName.on div.raceNum").html("");
+                var code = $(this).data("code");
+                $.ajax({
+                    "url" : BASE_URL + "/dashboard/getRaces",
+                    type : "POST",
+                    data : {
+                        _token : $('[name="_token"]').val(),
+                        code : code,
+                        date : CURRENT_DATE
+                    },
+                    dataType: "json",
+                    success : function(response){
+                        var od = JSON.stringify(response);
+                        var obj = JSON.parse(od);
+                        var raceCount = "";
+                        var raceTime = "";
+                        $.each(obj, function(index, value){
+//                        $("#tempRaces").append("<p>" + response[index].race_number + "</p>");
+                            console.log(obj[index].horse);
+                            if (index == response.length - 1) {
+                                raceCount = response[index].race_number;
+                                raceCount = raceCount.replace(/\D/g,'');
+                                for(var i = 1; i <= raceCount; i++){
+                                    $("*[data-code='"+ code +"']").append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"'>RACE "+ i +" : " + + "</div>").addClass("on");
+//                                    funcGetRaceTime(code,CURRENT_DATE,i,BASE_URL)
+//                                $("#tempRaces").append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"'>RACE "+ i +"</div>");
+                                }
+                            }
+                        });
+                    },
+                    error : function(){
+                        alert("error");
+                    }
+                });
+            }
+        });
+        $("body").delegate(".raceNum","click",function(){
+            $("#tempRaces ul").remove();
+            var trk = $(this).data("track");
+            var num = $(this).data("number");
+            $("#tempRaces").append("<ul class='"+ trk + num +"'></ul>");
+            $.ajax({
+                "url" : BASE_URL + "/dashboard/getHorsesPerRace",
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    code : trk,
+                    date : CURRENT_DATE,
+                    number : num
+                },
+                success : function(response){
+                    var od = JSON.stringify(response);
+                    var obj = JSON.parse(od);
+                    $.each(obj, function(index, value){
+                        $("ul."+ trk + num).append("<li>"+ obj[index].horse + "</li>");
+                    });
+                },
+                error : function(){
+                    alert("Error");
+                }
+            });
+        });
+    });
+    function funcGetRaceTime($code,$date,$raceNum,$url){
+        $.ajax({
+            "url" : $url + "/dashboard/getRaceTime",
+            type : "POST",
+            data : {
+                _token : $('[name="_token"]').val(),
+                code : $code,
+                date : $date,
+                raceN : "Race " + $raceNum
+            },
+            dataType: "json",
+            success : function(response){
+                console.log(response);
+                return response["race_time"];
+            },
+            error : function(xhr){
+                alert("error");
+            }
+        });
+    }
+</script>
