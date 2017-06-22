@@ -57,11 +57,11 @@
         box-sizing: border-box;
         font-size: 14px;
     }
-    #submit {
+    .submit-button {
         font-family: "Roboto", sans-serif;
         text-transform: uppercase;
         outline: 0;
-        background: #4CAF50;
+        background: #4CC098 !important;
         width: 100%;
         border: 0;
         padding: 15px;
@@ -71,8 +71,8 @@
         transition: all 0.3 ease;
         cursor: pointer;
     }
-    #submit:hover,#submit:active,#submit:focus {
-        background: #43A047;
+    .submit-button:hover,.submit-button:active,.submit-button:focus {
+        background: #00724b !important;
     }
     .form .message {
         margin: 15px 0 0;
@@ -120,11 +120,11 @@
         color: #EF3B3A;
     }
     body {
-        background: #76b852; /* fallback for old browsers */
-        background: -webkit-linear-gradient(right, #76b852, #8DC26F);
-        background: -moz-linear-gradient(right, #76b852, #8DC26F);
-        background: -o-linear-gradient(right, #76b852, #8DC26F);
-        background: linear-gradient(to left, #76b852, #8DC26F);
+        background: #4CC098; /* fallback for old browsers */
+        background: -webkit-linear-gradient(right, #4CC098, #328e6e);
+        background: -moz-linear-gradient(right, #4CC098, #328e6e);
+        background: -o-linear-gradient(right, #4CC098, #328e6e);
+        background: linear-gradient(to left, #4CC098, #328e6e);
         font-family: "Roboto", sans-serif;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;

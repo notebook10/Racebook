@@ -74,7 +74,7 @@ class HomeController extends Controller
         $data = [
             'tracks' => $racingTracks
         ];
-        return view('user/dashboard',$data);
+        return view('user/UserPage',$data);
     }
     public function getRaces(Request $request){
         $tracks = new Horses();
