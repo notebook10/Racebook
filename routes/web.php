@@ -13,6 +13,7 @@ Route::group(['middleware' => ['auth']],function(){
     Route::post('dashboard/getHorsesPerRace','HomeController@getHorsesPerRace');
     Route::post('dashboard/getRaceTime','HomeController@getRaceTime');
     Route::post('dashboard/getRaceTimeNew','HomeController@getRaceTimeNew');
+    Route::post('dashboard/saveBet','HomeController@saveBet');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');

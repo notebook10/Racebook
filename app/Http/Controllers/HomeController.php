@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Bets;
 use App\Horses;
 use Illuminate\Http\Request;
 use App\User;
@@ -84,5 +85,19 @@ class HomeController extends Controller
         $Model = new Horses();
         $horses = $Model->getHorsesPerRace($request->input("code"),$request->input("date"),$request->input("number"));
         return $horses;
+    }
+    public function saveBet(Request $request){
+        $dataArray = [
+            'bettype' => $request->input("bettype"),
+            'track' => $request->input("track"),
+            'raceNum' => $request->input("raceNum"),
+            'racePost' => $request->input("racePost"),
+            'betamount' => $request->input("betamount"),
+            'bet' => json_encode($request->input("bet")),
+            'user' => Auth::user()->id
+        ];
+        $model = new Bets();
+        $temp = $model->saveBets($dataArray);
+        return $temp;
     }
 }
