@@ -56,7 +56,10 @@ use App\Horses;
             {{--@endforeach--}}
         </div>
         <div class="col-md-8">
-            <div id="board"></div>
+            <div id="board">
+                <div id="raceTrackName"></div>
+                <div id="raceNumberAndPostTime"></div>
+            </div>
             <div>
                 <select id="selectWager">
                     <option value="wps">Win/Place/Show</option>
@@ -68,9 +71,9 @@ use App\Horses;
                     <option value="trifectabox">Trifecta Box</option>
                 </select>
                 <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
-                <input type="text" id="selectedTrack">
-                <input type="text" id="selectedRaceNum">
-                <input type="text" id="selectedRacePostTime">
+                <input type="hidden" id="selectedTrack">
+                <input type="hidden" id="selectedRaceNum">
+                <input type="hidden" id="selectedRacePostTime">
             </div>
             <div id="tempRaces"></div>
             <div id="submitBet" style="display: none">
@@ -270,6 +273,22 @@ use App\Horses;
             $("#selectedRaceNum").val(num);
             $("#selectedRacePostTime").val(post);
             $("#submitBet").css("display","block");
+            $.ajax({
+                'url' : BASE_URL + '/dashboard/getTrackName',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    trk : trk
+                },
+                success : function(response){
+                    $("#raceTrackName, #raceNumberAndPostTime").html("");
+                    $("#raceTrackName").append(response);
+                    $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
+                },
+                error : function(){
+                    alert("Error");
+                }
+            });
         });
 
         //ACCORDION
