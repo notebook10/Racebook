@@ -4,6 +4,6 @@
     <input type="text" name="lastname">
     <input type="text" name="username">
     <input type="password" name="password">
-    <input type="text" name="usertype">
+    <input type="hidden" name="usertype" value="1">
     <input type="submit" value="Insert">
 </form>
