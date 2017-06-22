@@ -12,4 +12,9 @@ class Tracks extends Model
             ->where('date',$date)
             ->get();
     }
+    public function getTrackName($trackCode){
+        return DB::table($this->table)
+            ->where('code',$trackCode)
+            ->first();
+    }
 }

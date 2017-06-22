@@ -100,4 +100,9 @@ class HomeController extends Controller
         $temp = $model->saveBets($dataArray);
         return $temp;
     }
+    public function getTrackName(Request $request){
+        $model = new Tracks();
+        $foo = $model->getTrackName($request->input("trk"));
+        return $foo->name;
+    }
 }
