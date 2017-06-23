@@ -344,10 +344,10 @@ use App\Horses;
                         else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                         else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                         else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
-                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#fff"});}
+                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#000"});}
                         else if($(this).data("key") == 8){$(this).css({"background":"#40E0D0","color":"#000"});}
-                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#000"});}
+                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#fff"});}
                         else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
                         else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
                         else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
@@ -542,10 +542,10 @@ use App\Horses;
                         else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                         else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                         else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
-                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#fff"});}
+                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#000"});}
                         else if($(this).data("key") == 8){$(this).css({"background":"#40E0D0","color":"#000"});}
-                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#000"});}
+                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#fff"});}
                         else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
                         else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
                         else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
