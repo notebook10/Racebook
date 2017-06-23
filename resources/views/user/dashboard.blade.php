@@ -89,7 +89,7 @@ use App\Horses;
 <div class="container">
     <div class="row">
         <div class="col-md-4" style="background: #ededed;padding: 10px 20px; border: 1px solid #dcdcdc;">
-            <h3 id="date" data-date="<?php echo date('mdy',time()) ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
+            <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
             {{-- ---------------------------------------------------------------------------------------------------------------------------------------------------------------- --}}
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                 @foreach($tracks as $value)
@@ -348,8 +348,8 @@ use App\Horses;
                         else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
                         else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
                         else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
-                        else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
-                        else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
+                        else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
+                        else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
                         else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
                         else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
                         else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
@@ -546,8 +546,8 @@ use App\Horses;
                         else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
                         else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
                         else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
-                        else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
-                        else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
+                        else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
+                        else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
                         else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
                         else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
                         else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
