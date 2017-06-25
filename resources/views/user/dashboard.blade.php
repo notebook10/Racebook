@@ -82,41 +82,14 @@ use App\Horses;
     #betAmount, #submitBetButton {
         display: inline;
     }
-    div#raceNumberAndPostTime {
-        margin: 20px;
-        text-align: center;
-        font-size: 18px;
-    }
-    div#raceTrackName {
-        text-align: center;
-        font-size: 23px;
-        font-weight: bold;
-        background: #ededed;
-        border: 1px solid #dcdcdc;
-    }
-    .pp-class,.tdPP  {
-        width: 100px;
-        text-align: center;
-    }
-    .col-tracks {
-        background: #ededed;padding: 10px 20px; border: 1px solid #dcdcdc; max-height: 756px; overflow: auto;
-    }
-    .col-tracks::-webkit-scrollbar-track
-    {
-        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-        background-color: #F5F5F5;
-        width: 65px;
-        background: #F5F5F5;
-        overflow-y: scroll;
-    }
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
 <input type="hidden" name="_token" value="{{csrf_token()}}">
 <div class="container">
     <div class="row">
-        <div class="col-md-4 col-tracks">
-            <h3 id="date" data-date="<?php echo date('mdy',time()) ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
+        <div class="col-md-4" style="background: #ededed;padding: 10px 20px; border: 1px solid #dcdcdc;">
+            <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
             {{-- ---------------------------------------------------------------------------------------------------------------------------------------------------------------- --}}
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                 @foreach($tracks as $value)
@@ -144,7 +117,7 @@ use App\Horses;
         </div>
         <div class="col-md-8">
             <div id="board">
-                <div id="raceTrackName">Tracks Racing</div>
+                <div id="raceTrackName"></div>
                 <div id="raceNumberAndPostTime"></div>
             </div>
             <div>
@@ -236,25 +209,25 @@ use App\Horses;
 //            $("#tempRaces").append("<ul class='"+ trk + num +"'></ul>");
             switch(wager){
                 case "wps":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "superfecta":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "exacta":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "exactabox":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "trifecta":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "trifectabox":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "dailydouble":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 default:
                     break;
@@ -371,12 +344,12 @@ use App\Horses;
                         else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                         else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                         else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
-                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#fff"});}
-                        else if($(this).data("key") == 8){$(this).css({"background":"#40E0D0","color":"#000"});}
-                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#000"});}
-                        else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
-                        else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
+                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                        else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
+                        else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
+                        else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
+                        else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
+                        else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
                         else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
                         else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
                         else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
@@ -407,7 +380,7 @@ use App\Horses;
                 success : function(response){
                     $("#raceTrackName, #raceNumberAndPostTime").html("");
                     $("#raceTrackName").append(response);
-                    $("#raceNumberAndPostTime").append("Race " + num + "&nbsp &nbsp POST TIME: " + post);
+                    $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
                 },
                 error : function(){
                     alert("Error");
@@ -446,25 +419,25 @@ use App\Horses;
                     $("#tempRaces table").remove();
                     switch(selectedWager){
                         case "wps":
-                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>W</th><th>P</th><th>S</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "superfecta":
-                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "exacta":
-                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "exactabox":
-                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "trifecta":
-                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "trifectabox":
-                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "dailydouble":
-                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         default:
                             break;
@@ -569,12 +542,12 @@ use App\Horses;
                         else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                         else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                         else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
-                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#fff"});}
-                        else if($(this).data("key") == 8){$(this).css({"background":"#40E0D0","color":"#000"});}
-                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#000"});}
-                        else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
-                        else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
+                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                        else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
+                        else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
+                        else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
+                        else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
+                        else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
                         else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
                         else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
                         else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
