@@ -109,7 +109,6 @@ use App\Horses;
         background: #F5F5F5;
         overflow-y: scroll;
     }
-
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -224,7 +223,7 @@ use App\Horses;
                 });
 
             }else{
-
+                $(".panel-body div.raceNum").remove();
             }
             $(".panel-body div.raceNum").remove();
         });
@@ -249,7 +248,7 @@ use App\Horses;
                     $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "trifecta":
-                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>2</th><th>3</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "trifectabox":
                     $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
@@ -286,7 +285,7 @@ use App\Horses;
                                         "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pp +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
                                         "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "superfecta":
@@ -300,7 +299,7 @@ use App\Horses;
                                         "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "exacta":
@@ -312,7 +311,7 @@ use App\Horses;
                                     $("table."+ trk + num +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "exactabox":
@@ -323,7 +322,7 @@ use App\Horses;
                                 }else{
                                     $("table."+ trk + num +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='exactabox' data-id='"+ trk + num + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "trifecta":
@@ -336,7 +335,7 @@ use App\Horses;
                                         "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "trifectabox":
@@ -347,7 +346,7 @@ use App\Horses;
                                 }else{
                                     $("table."+ trk + num +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='trifectabox' data-id='"+ trk + num + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "dailydouble":
@@ -358,7 +357,7 @@ use App\Horses;
                                 }else{
                                     $("table."+ trk + num +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             default:
@@ -367,30 +366,26 @@ use App\Horses;
                         }
                     });
                     $(".tdPP").each(function(key,val){
-                        switch(key){
-                            case 0:$(this).css({"background":"#FF0000","color":"#fff"});break;
-                            case 1:$(this).css({"background":"#fff","color":"#000"});break;
-                            case 2:$(this).css({"background":"#0000FF","color":"#fff"});break;
-                            case 3:$(this).css({"background":"#FFFF00","color":"#000"});break;
-                            case 4:$(this).css({"background":"#008000","color":"#fff"});break;
-                            case 5:$(this).css({"background":"#000","color":"#fff"});break;
-                            case 6:$(this).css({"background":"#FFA500","color":"#fff"});break;
-                            case 7:$(this).css({"background":"#FFC0CB","color":"#000"});break;
-                            case 8:$(this).css({"background":"#40E0D0","color":"#000"});break;
-                            case 9:$(this).css({"background":"#800080","color":"#000"});break;
-                            case 10:$(this).css({"background":"#C0C0C0","color":"#fff"});break;
-                            case 11:$(this).css({"background":"#32CD32","color":"#fff"});break;
-                            case 12:$(this).css({"background":"#8A2BE2","color":"#fff"});break;
-                            case 13:$(this).css({"background":"#808000","color":"#fff"});break;
-                            case 14:$(this).css({"background":"#f0e68c","color":"#fff"});break;
-                            case 15:$(this).css({"background":"#2B547E","color":"#fff"});break;
-                            case 16:$(this).css({"background":"#000080","color":"#fff"});break;
-                            case 17:$(this).css({"background":"#228b22","color":"#fff"});break;
-                            case 18:$(this).css({"background":"#4169e1","color":"#fff"});break;
-                            case 19:$(this).css({"background":"#FF00FF","color":"#fff"});break;
-                            case 20:$(this).css({"background":"#9932CC","color":"#fff"});break;
-                            default: break;
-                        }
+                        if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
+                        else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
+                        else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
+                        else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
+                        else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
+                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
+                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#fff"});}
+                        else if($(this).data("key") == 8){$(this).css({"background":"#40E0D0","color":"#000"});}
+                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#000"});}
+                        else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
+                        else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
+                        else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
+                        else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
+                        else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
+                        else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
+                        else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
+                        else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
+                        else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
+                        else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
+                        else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
                     });
                 },
                 error : function(){
@@ -412,7 +407,7 @@ use App\Horses;
                 success : function(response){
                     $("#raceTrackName, #raceNumberAndPostTime").html("");
                     $("#raceTrackName").append(response);
-                    $("#raceNumberAndPostTime").append("Race " + num + "          POST TIME: " + post);
+                    $("#raceNumberAndPostTime").append("Race " + num + "&nbsp &nbsp POST TIME: " + post);
                 },
                 error : function(){
                     alert("Error");
@@ -488,7 +483,7 @@ use App\Horses;
                                         "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pp +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
                                         "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "superfecta":
@@ -502,7 +497,7 @@ use App\Horses;
                                         "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "exacta":
@@ -514,7 +509,7 @@ use App\Horses;
                                     $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='exacta' data-id='"+ selectedTrack + selectedRaceNum + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='exacta' data-id='"+ selectedTrack + selectedRaceNum + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "exactabox":
@@ -525,7 +520,7 @@ use App\Horses;
                                 }else{
                                     $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='exactabox' data-id='"+ selectedTrack + selectedRaceNum + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "trifecta":
@@ -538,7 +533,7 @@ use App\Horses;
                                         "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
                                         "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "trifectabox":
@@ -549,7 +544,7 @@ use App\Horses;
                                 }else{
                                     $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='trifectabox' data-id='"+ selectedTrack + selectedRaceNum + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             case "dailydouble":
@@ -560,7 +555,7 @@ use App\Horses;
                                 }else{
                                     $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
                                         "<td><input type='checkbox' class='dailydouble' data-id='"+ selectedTrack + selectedRaceNum + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                        "<td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }
                                 break;
                             default:
@@ -569,30 +564,26 @@ use App\Horses;
                         }
                     });
                     $(".tdPP").each(function(key,val){
-                        switch(key){
-                            case 0:$(this).css({"background":"#FF0000","color":"#fff"});break;
-                            case 1:$(this).css({"background":"#fff","color":"#000"});break;
-                            case 2:$(this).css({"background":"#0000FF","color":"#fff"});break;
-                            case 3:$(this).css({"background":"#FFFF00","color":"#000"});break;
-                            case 4:$(this).css({"background":"#008000","color":"#fff"});break;
-                            case 5:$(this).css({"background":"#000","color":"#fff"});break;
-                            case 6:$(this).css({"background":"#FFA500","color":"#fff"});break;
-                            case 7:$(this).css({"background":"#FFC0CB","color":"#000"});break;
-                            case 8:$(this).css({"background":"#40E0D0","color":"#000"});break;
-                            case 9:$(this).css({"background":"#800080","color":"#000"});break;
-                            case 10:$(this).css({"background":"#C0C0C0","color":"#fff"});break;
-                            case 11:$(this).css({"background":"#32CD32","color":"#fff"});break;
-                            case 12:$(this).css({"background":"#8A2BE2","color":"#fff"});break;
-                            case 13:$(this).css({"background":"#808000","color":"#fff"});break;
-                            case 14:$(this).css({"background":"#f0e68c","color":"#fff"});break;
-                            case 15:$(this).css({"background":"#2B547E","color":"#fff"});break;
-                            case 16:$(this).css({"background":"#000080","color":"#fff"});break;
-                            case 17:$(this).css({"background":"#228b22","color":"#fff"});break;
-                            case 18:$(this).css({"background":"#4169e1","color":"#fff"});break;
-                            case 19:$(this).css({"background":"#FF00FF","color":"#fff"});break;
-                            case 20:$(this).css({"background":"#9932CC","color":"#fff"});break;
-                            default: break;
-                        }
+                        if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
+                        else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
+                        else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
+                        else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
+                        else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
+                        else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
+                        else if($(this).data("key") == 7){$(this).css({"background":"#FFC0CB","color":"#fff"});}
+                        else if($(this).data("key") == 8){$(this).css({"background":"#40E0D0","color":"#000"});}
+                        else if($(this).data("key") == 9){$(this).css({"background":"#800080","color":"#000"});}
+                        else if($(this).data("key") == 10){$(this).css({"background":"#C0C0C0","color":"#000"});}
+                        else if($(this).data("key") == 11){$(this).css({"background":"#32CD32","color":"#fff"});}
+                        else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
+                        else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
+                        else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
+                        else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
+                        else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
+                        else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
+                        else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
+                        else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
+                        else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
                     });
                 },
                 error : function(){
