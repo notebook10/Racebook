@@ -31,7 +31,6 @@ use App\Horses;
     }
     .s-wager, #selectWager {
         display: inline;
-        margin-bottom: 15px;
     }
     .panel-title > a {
         display: block;
@@ -83,44 +82,14 @@ use App\Horses;
     #betAmount, #submitBetButton {
         display: inline;
     }
-    .clock{display: none;}
-    div#raceNumberAndPostTime {
-        margin: 20px;
-        text-align: center;
-        font-size: 18px;
-    }
-    div#raceTrackName {
-        text-align: center;
-        font-size: 23px;
-        font-weight: bold;
-        background: #ededed;
-        border: 1px solid #dcdcdc;
-    }
-    .pp-class,.tdPP  {
-        width: 100px;
-        text-align: center;
-    }
-    .col-tracks {
-        background: #ededed;padding: 10px 20px; border: 1px solid #dcdcdc; max-height: 756px; overflow: auto;
-    }
-    .col-tracks::-webkit-scrollbar-track
-    {
-        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-        background-color: #F5F5F5;
-        width: 65px;
-        background: #F5F5F5;
-        overflow-y: scroll;
-    }
-    .wager-div {
-        display: none;
-    }
+    .clock, #raceDiv{display: none;}
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
 <input type="hidden" name="_token" value="{{csrf_token()}}">
 <div class="container">
     <div class="row">
-        <div class="col-md-4 col-tracks">
+        <div class="col-md-4" style="background: #ededed;padding: 10px 20px; border: 1px solid #dcdcdc;">
             <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
             <h5 id="pdt" class="clock"></h5>
             <h5 id="mdt" class="clock"></h5>
@@ -152,30 +121,59 @@ use App\Horses;
             {{--@endforeach--}}
         </div>
         <div class="col-md-8">
-            <div id="board">
-                <div id="raceTrackName">Tracks Racing</div>
-                <div id="raceNumberAndPostTime"></div>
+            <!-- Upcoming Races -->
+            <div id="upcomingRacesDiv">
+                <h1>Upcoming Races</h1>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Track</th>
+                            <th>Race</th>
+                            <th>MTP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Camamiro</td>
+                            <td>2</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>Arlington</td>
+                            <td>2</td>
+                            <td>5</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="wager-div">
-                <label class="s-wager">Select Wager: </label>
-                <select id="selectWager" class="form-control">
-                    <option value="wps">Win/Place/Show</option>
-                    <option value="dailydouble">Daily Double</option>
-                    <option value="superfecta">Superfecta</option>
-                    <option value="exacta">Exacta</option>
-                    <option value="exactabox">Exacta Box</option>
-                    <option value="trifecta">Trifecta</option>
-                    <option value="trifectabox">Trifecta Box</option>
-                </select>
-                <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
-                <input type="hidden" id="selectedTrack">
-                <input type="hidden" id="selectedRaceNum">
-                <input type="hidden" id="selectedRacePostTime">
-            </div>
-            <div id="tempRaces"></div>
-            <div id="submitBet" style="display: none">
-                <input type="text" id="betAmount" class="form-control" placeholder="Put your bet">
-                <button id="submitBetButton" class="btn btn-success">SUBMIT BET</button>
+            <div id="raceDiv">
+                <!-- Race Info -->
+                <div id="board">
+                    <div id="raceTrackName"></div>
+                    <div id="raceNumberAndPostTime"></div>
+                </div>
+                <!-- Wager -->
+                <div>
+                    <label class="s-wager">Select Wager Type: </label>
+                    <select id="selectWager" class="form-control">
+                        <option value="wps">Win/Place/Show</option>
+                        <option value="dailydouble">Daily Double</option>
+                        <option value="superfecta">Superfecta</option>
+                        <option value="exacta">Exacta</option>
+                        <option value="exactabox">Exacta Box</option>
+                        <option value="trifecta">Trifecta</option>
+                        <option value="trifectabox">Trifecta Box</option>
+                    </select>
+                    <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
+                    <input type="hidden" id="selectedTrack">
+                    <input type="hidden" id="selectedRaceNum">
+                    <input type="hidden" id="selectedRacePostTime">
+                </div>
+                <div id="tempRaces"></div>
+                <div id="submitBet" style="display: none">
+                    <input type="text" id="betAmount" class="form-control" placeholder="Put your bet">
+                    <button id="submitBetButton" class="btn btn-success">SUBMIT BET</button>
+                </div>
             </div>
             <div id="betTicket">
                 <!-- Confirm Bet -->
@@ -191,7 +189,6 @@ use App\Horses;
         var CURRENT_DATE = $("#date").data("date");
         $(".trkName").on("click",function(){
             if($(this).hasClass("collapsed")){
-                $(".wager-div").css("display", "block");
                 //                $(".trkName > div.panel").css("color","red");
                 $(this).next("div.panel-body").find("div.raceNum").remove();
                 var code = $(this).data("code");
@@ -234,7 +231,6 @@ use App\Horses;
 
             }else{
                 $(".panel-body div.raceNum").remove();
-                $(".wager-div").css("display", "none");
             }
             $(".panel-body div.raceNum").remove();
         });
@@ -244,29 +240,28 @@ use App\Horses;
             var trk = $(this).data("track");
             var num = $(this).data("number");
             var post = $(this).data("post");
-
 //            $("#tempRaces").append("<ul class='"+ trk + num +"'></ul>");
             switch(wager){
                 case "wps":
-                    $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "superfecta":
-                    $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "exacta":
-                    $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "exactabox":
-                    $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "trifecta":
-                    $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "trifectabox":
-                    $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "dailydouble":
-                    $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<table class=' table table-bordred table-striped "+ trk + num +"'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 default:
                     break;
@@ -399,6 +394,8 @@ use App\Horses;
                         else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
                         else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
                     });
+                    $("#raceDiv").css("display","block");
+                    $("#upcomingRacesDiv").css("display","none");
                 },
                 error : function(){
                     alert("Error");
@@ -458,25 +455,25 @@ use App\Horses;
                     $("#tempRaces table").remove();
                     switch(selectedWager){
                         case "wps":
-                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>W</th><th>P</th><th>S</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "superfecta":
-                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "exacta":
-                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "exactabox":
-                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "trifecta":
-                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "trifectabox":
-                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "dailydouble":
-                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<table class=' table table-bordred table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         default:
                             break;
@@ -648,6 +645,7 @@ use App\Horses;
         $('.panel-group').on('shown.bs.collapse', toggleIcon);
 
         setInterval(getServerTime, 1000);
+        setInterval(getUpcomingRaces,20000);
         function getServerTime(){
             $.ajax({
                 "url" : BASE_URL + "/dashboard/getServerTime",
@@ -666,6 +664,62 @@ use App\Horses;
                 },
                 error : function(xhr,status,err){
                     console.log(err);
+                }
+            });
+        }
+        function getUpcomingRaces(){
+            $.ajax({
+                "url" : BASE_URL + "/dashboard/getUpcomingRaces",
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    date : CURRENT_DATE,
+                    pdt : $("h5#pdt").text(),
+                    mdt : $("h5#mdt").text(),
+                    cdt : $("h5#cdt").text(),
+                    edt : $("h5#edt").text(),
+                },
+                success : function(response){
+                    // PDT muna
+                    var pdtArr = [];
+                    var test = ["weqe","qweqwe"];
+                    $.each(response["pdtRes"], function(index, value){
+                        if(pdtArr.indexOf(response["pdtRes"][index].race_track + "&" + jQuery.trim(response["pdtRes"][index].race_number) + "@" + jQuery.trim(response["pdtRes"][index].race_time)) > -1){
+
+                        }else{
+                            pdtArr.push(response["pdtRes"][index].race_track + "&" + jQuery.trim(response["pdtRes"][index].race_number) + "@" + jQuery.trim(response["pdtRes"][index].race_time));
+                        }
+                    });
+                    // Dito yung ARRAY MERGE <---------------------------------------------------------------
+                    var upcomingRacesArr = $.merge(pdtArr,test);
+                    console.log(upcomingRacesArr);
+                    // Pagkatapos ng merge kunin si MTP per track
+
+                    //
+                    $.each(upcomingRacesArr, function(key, val){
+                        var time = upcomingRacesArr[key].substr(upcomingRacesArr[key].indexOf("@") + 1);
+                        var track = upcomingRacesArr[key].substr(0, upcomingRacesArr[key].indexOf('&'));
+                        var start_pos = upcomingRacesArr[key].indexOf('&') + 1;
+                        var racenumber =  upcomingRacesArr[key].substring(start_pos,upcomingRacesArr[key].indexOf('@',start_pos));
+                        $.ajax({
+                            "url " : BASE_URL + "/dashboard/appendUpcomingRaces",
+                            type : "GET",
+                            data : {
+                                _token : $('[name="_token"]').val(),
+                                raceTime : time,
+                                raceTrk : track,
+                                raceNum : racenumber,
+                                pacific : $("h5#pdt").text()
+                            },
+                            success : function(data){
+                                console.log(data);
+                            },
+                            error : function(xhr,status,err){console.log(err);}
+                        });
+                    });
+                },
+                error : function(xhr, status, err){
+
                 }
             });
         }
