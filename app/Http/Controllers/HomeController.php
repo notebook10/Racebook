@@ -9,6 +9,7 @@ use App\User;
 use App\Tracks;
 use Auth;
 use Validator;
+use Theme;
 use Illuminate\Support\Facades\Redirect;
 class HomeController extends Controller
 {
@@ -74,7 +75,9 @@ class HomeController extends Controller
         $data = [
             'tracks' => $racingTracks
         ];
-        return view('user/UserPage',$data);
+//        return view('user/UserPage',$data);
+        $theme = Theme::uses('default')->layout('layout')->setTitle('Dashboard');
+        return $theme->of('user/UserPage',$data)->render();
     }
     public function getRaces(Request $request){
         $tracks = new Horses();
