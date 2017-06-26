@@ -77,7 +77,7 @@ class HomeController extends Controller
         ];
 //        return view('user/UserPage',$data);
         $theme = Theme::uses('default')->layout('layout')->setTitle('Dashboard');
-        return $theme->of('user/UserPage',$data)->render();
+        return $theme->of('user/dashboard',$data)->render();
     }
     public function getRaces(Request $request){
         $tracks = new Horses();

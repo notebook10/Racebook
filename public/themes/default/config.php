@@ -64,6 +64,7 @@ return array(
 
 		'beforeRenderTheme' => function($theme)
 		{
+            $theme->asset()->add('css-bootstrap-min', 'css/bootstrap/bootstrap.min.css');
 			// To render partial composer
 			/*
 	        $theme->partialComposer('header', function($view){
@@ -72,6 +73,8 @@ return array(
 			*/
 //            $theme->asset()->add('css-bootstrap-min', 'css/bootstrap/bootstrap.min.css');
 
+//            $theme->asset()->add('js-jquery-3.2.1', 'js/jquery-3.2.1.min.js');
+            $theme->asset()->add('js-bootstrap-min', 'js/bootstrap/bootstrap.min.js');
 		},
 
 		'beforeRenderLayout' => array(
