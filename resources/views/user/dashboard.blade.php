@@ -82,7 +82,7 @@ use App\Horses;
     #betAmount, #submitBetButton {
         display: inline;
     }
-    .clock{display: none;}
+    /*.clock{display: none;}*/
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -121,12 +121,39 @@ use App\Horses;
             {{--@endforeach--}}
         </div>
         <div class="col-md-8">
+            <!-- Upcoming Races -->
+            <div>
+                <h1>Upcoming Races</h1>
+                <table class="table table-bordered table-striped">
+                    <thead>
+                        <tr>
+                            <th>Track</th>
+                            <th>Race</th>
+                            <th>MTP</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Camamiro</td>
+                            <td>2</td>
+                            <td>5</td>
+                        </tr>
+                        <tr>
+                            <td>Arlington</td>
+                            <td>2</td>
+                            <td>5</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <!-- Race Info -->
             <div id="board">
                 <div id="raceTrackName"></div>
                 <div id="raceNumberAndPostTime"></div>
             </div>
+            <!-- Wager -->
             <div>
-                <label class="s-wager">Select Wager: </label>
+                <label class="s-wager">Select Wager Type: </label>
                 <select id="selectWager" class="form-control">
                     <option value="wps">Win/Place/Show</option>
                     <option value="dailydouble">Daily Double</option>
