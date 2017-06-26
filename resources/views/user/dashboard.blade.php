@@ -82,6 +82,7 @@ use App\Horses;
     #betAmount, #submitBetButton {
         display: inline;
     }
+    .clock{display: none;}
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -90,6 +91,10 @@ use App\Horses;
     <div class="row">
         <div class="col-md-4" style="background: #ededed;padding: 10px 20px; border: 1px solid #dcdcdc;">
             <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
+            <h5 id="pdt" class="clock"></h5>
+            <h5 id="mdt" class="clock"></h5>
+            <h5 id="cdt" class="clock"></h5>
+            <h5 id="edt" class="clock"></h5>
             {{-- ---------------------------------------------------------------------------------------------------------------------------------------------------------------- --}}
             <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
                 @foreach($tracks as $value)
@@ -607,6 +612,28 @@ use App\Horses;
         }
         $('.panel-group').on('hidden.bs.collapse', toggleIcon);
         $('.panel-group').on('shown.bs.collapse', toggleIcon);
-    });
 
+        setInterval(getServerTime, 1000);
+        function getServerTime(){
+            $.ajax({
+                "url" : BASE_URL + "/dashboard/getServerTime",
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val()
+                },
+                success : function(response){
+                    $("h3#date").html("");
+                    $("h3#date").append("TRACKS RACING TODAY - " + response["dateTimePDT"]);
+                    $("h5#pdt, h5#mdt, h5#cdt, h5#edt").html("");
+                    $("h5#pdt").append(response["pdt"]);
+                    $("h5#mdt").append(response["mdt"]);
+                    $("h5#cdt").append(response["cdt"]);
+                    $("h5#edt").append(response["edt"]);
+                },
+                error : function(xhr,status,err){
+                    console.log(err);
+                }
+            });
+        }
+    });
 </script>
