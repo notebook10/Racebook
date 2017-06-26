@@ -127,4 +127,34 @@ class HomeController extends Controller
         ];
         return $dateArray;
     }
+    public function getUpcomingRaces(Request $request){
+        $tracksModel = new Tracks();
+        $horsesModel = new Horses();
+        $date = $request->input("date");
+        $tracksToday = $tracksModel->getAllTracks($date);
+        $pdt = $request->input("pdt");
+        $mdt = $request->input("mdt");
+        $cdt = $request->input("cdt");
+        $edt = $request->input("edt");
+        $pdtStart = date('h:i A', strtotime($pdt));
+        $pdtEnd = strtotime("+30 minutes",strtotime($pdt));
+        $mdtEnd = strtotime("+30 minutes",strtotime($mdt));
+        $cdtEnd = strtotime("+30 minutes",strtotime($cdt));
+        $edtEnd = strtotime("+30 minutes",strtotime($edt));
+        $pdtEndCvt = gmdate(" " . "h:i A" . " ", $pdtEnd);
+        $pdtResults = $horsesModel->getUpcomingRaces($date,$pdtStart,$pdtEnd);
+        $resultArr = [
+            'pdtRes' => $pdtResults
+        ];
+        return $resultArr;
+    }
+    public function appendUpcomingRaces(Request $request){
+        $pacificTime = $request->input("pacific");
+        $mtp = strtotime('',$request->input("raceTime"));
+        $datetime1 = strtotime("2011-10-10 10:00:00");
+        $datetime2 = strtotime("2011-10-10 10:45:00");
+        $interval  = abs($datetime2 - $datetime1);
+        $minutes   = round($interval / 60);
+        return "Asdad";
+    }
 }

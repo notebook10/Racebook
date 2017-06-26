@@ -82,7 +82,7 @@ use App\Horses;
     #betAmount, #submitBetButton {
         display: inline;
     }
-    /*.clock{display: none;}*/
+    .clock, #raceDiv{display: none;}
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -122,7 +122,7 @@ use App\Horses;
         </div>
         <div class="col-md-8">
             <!-- Upcoming Races -->
-            <div>
+            <div id="upcomingRacesDiv">
                 <h1>Upcoming Races</h1>
                 <table class="table table-bordered table-striped">
                     <thead>
@@ -146,32 +146,34 @@ use App\Horses;
                     </tbody>
                 </table>
             </div>
-            <!-- Race Info -->
-            <div id="board">
-                <div id="raceTrackName"></div>
-                <div id="raceNumberAndPostTime"></div>
-            </div>
-            <!-- Wager -->
-            <div>
-                <label class="s-wager">Select Wager Type: </label>
-                <select id="selectWager" class="form-control">
-                    <option value="wps">Win/Place/Show</option>
-                    <option value="dailydouble">Daily Double</option>
-                    <option value="superfecta">Superfecta</option>
-                    <option value="exacta">Exacta</option>
-                    <option value="exactabox">Exacta Box</option>
-                    <option value="trifecta">Trifecta</option>
-                    <option value="trifectabox">Trifecta Box</option>
-                </select>
-                <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
-                <input type="hidden" id="selectedTrack">
-                <input type="hidden" id="selectedRaceNum">
-                <input type="hidden" id="selectedRacePostTime">
-            </div>
-            <div id="tempRaces"></div>
-            <div id="submitBet" style="display: none">
-                <input type="text" id="betAmount" class="form-control" placeholder="Put your bet">
-                <button id="submitBetButton" class="btn btn-success">SUBMIT BET</button>
+            <div id="raceDiv">
+                <!-- Race Info -->
+                <div id="board">
+                    <div id="raceTrackName"></div>
+                    <div id="raceNumberAndPostTime"></div>
+                </div>
+                <!-- Wager -->
+                <div>
+                    <label class="s-wager">Select Wager Type: </label>
+                    <select id="selectWager" class="form-control">
+                        <option value="wps">Win/Place/Show</option>
+                        <option value="dailydouble">Daily Double</option>
+                        <option value="superfecta">Superfecta</option>
+                        <option value="exacta">Exacta</option>
+                        <option value="exactabox">Exacta Box</option>
+                        <option value="trifecta">Trifecta</option>
+                        <option value="trifectabox">Trifecta Box</option>
+                    </select>
+                    <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
+                    <input type="hidden" id="selectedTrack">
+                    <input type="hidden" id="selectedRaceNum">
+                    <input type="hidden" id="selectedRacePostTime">
+                </div>
+                <div id="tempRaces"></div>
+                <div id="submitBet" style="display: none">
+                    <input type="text" id="betAmount" class="form-control" placeholder="Put your bet">
+                    <button id="submitBetButton" class="btn btn-success">SUBMIT BET</button>
+                </div>
             </div>
             <div id="betTicket">
                 <!-- Confirm Bet -->
@@ -392,6 +394,8 @@ use App\Horses;
                         else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
                         else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
                     });
+                    $("#raceDiv").css("display","block");
+                    $("#upcomingRacesDiv").css("display","none");
                 },
                 error : function(){
                     alert("Error");
@@ -641,6 +645,7 @@ use App\Horses;
         $('.panel-group').on('shown.bs.collapse', toggleIcon);
 
         setInterval(getServerTime, 1000);
+        setInterval(getUpcomingRaces,20000);
         function getServerTime(){
             $.ajax({
                 "url" : BASE_URL + "/dashboard/getServerTime",
@@ -659,6 +664,62 @@ use App\Horses;
                 },
                 error : function(xhr,status,err){
                     console.log(err);
+                }
+            });
+        }
+        function getUpcomingRaces(){
+            $.ajax({
+                "url" : BASE_URL + "/dashboard/getUpcomingRaces",
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    date : CURRENT_DATE,
+                    pdt : $("h5#pdt").text(),
+                    mdt : $("h5#mdt").text(),
+                    cdt : $("h5#cdt").text(),
+                    edt : $("h5#edt").text(),
+                },
+                success : function(response){
+                    // PDT muna
+                    var pdtArr = [];
+                    var test = ["weqe","qweqwe"];
+                    $.each(response["pdtRes"], function(index, value){
+                        if(pdtArr.indexOf(response["pdtRes"][index].race_track + "&" + jQuery.trim(response["pdtRes"][index].race_number) + "@" + jQuery.trim(response["pdtRes"][index].race_time)) > -1){
+
+                        }else{
+                            pdtArr.push(response["pdtRes"][index].race_track + "&" + jQuery.trim(response["pdtRes"][index].race_number) + "@" + jQuery.trim(response["pdtRes"][index].race_time));
+                        }
+                    });
+                    // Dito yung ARRAY MERGE <---------------------------------------------------------------
+                    var upcomingRacesArr = $.merge(pdtArr,test);
+                    console.log(upcomingRacesArr);
+                    // Pagkatapos ng merge kunin si MTP per track
+
+                    //
+                    $.each(upcomingRacesArr, function(key, val){
+                        var time = upcomingRacesArr[key].substr(upcomingRacesArr[key].indexOf("@") + 1);
+                        var track = upcomingRacesArr[key].substr(0, upcomingRacesArr[key].indexOf('&'));
+                        var start_pos = upcomingRacesArr[key].indexOf('&') + 1;
+                        var racenumber =  upcomingRacesArr[key].substring(start_pos,upcomingRacesArr[key].indexOf('@',start_pos));
+                        $.ajax({
+                            "url " : BASE_URL + "/dashboard/appendUpcomingRaces",
+                            type : "GET",
+                            data : {
+                                _token : $('[name="_token"]').val(),
+                                raceTime : time,
+                                raceTrk : track,
+                                raceNum : racenumber,
+                                pacific : $("h5#pdt").text()
+                            },
+                            success : function(data){
+                                console.log(data);
+                            },
+                            error : function(xhr,status,err){console.log(err);}
+                        });
+                    });
+                },
+                error : function(xhr, status, err){
+
                 }
             });
         }
