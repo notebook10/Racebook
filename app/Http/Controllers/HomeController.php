@@ -108,4 +108,23 @@ class HomeController extends Controller
         $foo = $model->getTrackName($request->input("trk"));
         return $foo->name;
     }
+    public function getServerTime(){
+        date_default_timezone_set('America/Los_Angeles'); // Pacific
+        $pdtDate = date('F d, Y h:i:s', time());
+        $pdt = date('h:i:s', time());
+        date_default_timezone_set('America/Denver'); // Mountain
+        $mdt = date('h:i:s', time());
+        date_default_timezone_set('America/Chicago'); // Central
+        $cdt = date('h:i:s', time());
+        date_default_timezone_set('America/New_York'); // Eastern
+        $edt = date('h:i:s', time());
+        $dateArray = [
+            "dateTimePDT" => $pdtDate,
+            "pdt" => $pdt,
+            "mdt" => $mdt,
+            "cdt" => $cdt,
+            "edt" => $edt
+        ];
+        return $dateArray;
+    }
 }

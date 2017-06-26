@@ -15,6 +15,7 @@ Route::group(['middleware' => ['auth']],function(){
     Route::post('dashboard/getRaceTimeNew','HomeController@getRaceTimeNew');
     Route::post('dashboard/saveBet','HomeController@saveBet');
     Route::post('dashboard/getTrackName','HomeController@getTrackName');
+    Route::post('dashboard/getServerTime','HomeController@getServerTime');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');
