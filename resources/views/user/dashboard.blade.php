@@ -159,18 +159,7 @@ use App\Horses;
                             <th>MTP</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td>Camamiro</td>
-                            <td>2</td>
-                            <td>5</td>
-                        </tr>
-                        <tr>
-                            <td>Arlington</td>
-                            <td>2</td>
-                            <td>5</td>
-                        </tr>
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
             <div id="raceDiv">
@@ -214,6 +203,7 @@ use App\Horses;
     $("document").ready(function(){
         var BASE_URL = $("#hiddenURL").val();
         var CURRENT_DATE = $("#date").data("date");
+        getUpcomingRaces();
         $(".trkName").on("click",function(){
             if($(this).hasClass("collapsed")){
                 //                $(".trkName > div.panel").css("color","red");
