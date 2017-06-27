@@ -82,7 +82,7 @@ use App\Horses;
     #betAmount, #submitBetButton {
         display: inline;
     }
-    .clock, #raceDiv{display: none;}
+    .clock, #raceDiv, #betTicket{display: none;}
     div#raceNumberAndPostTime {
         margin: 20px;
         text-align: center;
@@ -193,7 +193,26 @@ use App\Horses;
             </div>
             <div id="betTicket">
                 <!-- Confirm Bet -->
-                <div id="ticket"></div>
+                <div id="ticket">
+                    <table id="ticketTbl" class="table table-bordered table-striped ">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Dummy Lorem ipsum dolor siist</td>
+                                <td>400.00</td>
+                            </tr>
+                            <tr>
+                                <td>Total Wager</td>
+                                <td>400.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -253,6 +272,8 @@ use App\Horses;
         });
         $("body").delegate(".raceNum","click",function(){
             $("#tempRaces table").remove();
+            $("#betTicket").css("display","none");
+            $("#betAmount").val("");
             var wager = $("#selectWager").val();
             var trk = $(this).data("track");
             var num = $(this).data("number");
@@ -624,33 +645,37 @@ use App\Horses;
             var racePostTime = $("#selectedRacePostTime").val();
             var amount = $("#betAmount").val();
             var betArray = [];
-            $("input[type=checkbox]").each(function(){
-                if(this.checked){
-                    betArray.push($(this).data("id"));
-                }else{
+            if($("#betAmount").val() != ""){
+                $("#raceDiv").css("display","none");
+                $("#betTicket").css("display","block");
+                $("input[type=checkbox]").each(function(){
+                    if(this.checked){
+                        betArray.push($(this).data("id"));
+                    }else{
 
-                }
-            });
-            console.log(betArray);
-            $.ajax({
-                "url" : BASE_URL + '/dashboard/saveBet',
-                type : "POST",
-                data : {
-                    _token : $('[name="_token"]').val(),
-                    bettype : betType,
-                    track : trk,
-                    raceNum : raceNumber,
-                    racePost : racePostTime,
-                    betamount : amount,
-                    bet : betArray
-                },
-                success : function(response){
-                    alert(response);
-                },
-                error : function(){
-                    alert("error123");
-                }
-            });
+                    }
+                });
+                console.log(betArray);
+                $.ajax({
+                    "url" : BASE_URL + '/dashboard/saveBet',
+                    type : "POST",
+                    data : {
+                        _token : $('[name="_token"]').val(),
+                        bettype : betType,
+                        track : trk,
+                        raceNum : raceNumber,
+                        racePost : racePostTime,
+                        betamount : amount,
+                        bet : betArray
+                    },
+                    success : function(response){
+                        alert(response);
+                    },
+                    error : function(){
+                        alert("error123");
+                    }
+                });
+            }
         });
         function toggleIcon(e) {
             $(e.target)

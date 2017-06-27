@@ -11,7 +11,7 @@
 
         <title>@get('title')</title>
 
-        @styles()
+        {{--@styles()--}}
 
     </head>
 
@@ -22,7 +22,7 @@
 
         @partial('footer')
 
-        @scripts()
+        {{--@scripts()--}}
     </body>
 
 </html>
