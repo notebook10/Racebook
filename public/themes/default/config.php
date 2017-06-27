@@ -38,22 +38,25 @@ return array(
 
 		'asset' => function($asset)
 		{
+            $asset->add([
+                ['bootstrap-css', 'css/bootstrap/bootstrap.min.css'],
+                ['jquery', 'js/jquery-3.2.1.min.js'],
+                ['bootstrap-js', 'js/bootstrap/bootstrap.min.js']
+            ]);
+
 			$asset->themePath()->add([
-										['style', 'css/style.css'],
-										['script', 'js/script.js']
-									 ]);
+                ['style', 'css/style.css'],
+                ['script', 'js/script.js']
+             ]);
 
 			// You may use elixir to concat styles and scripts.
-			/*
-			$asset->themePath()->add([
-										['styles', 'dist/css/styles.css'],
-										['scripts', 'dist/js/scripts.js']
-									 ]);
-			*/
+
+
+
 
 			// Or you may use this event to set up your assets.
 			/*
-			$asset->themePath()->add('core', 'core.js');			
+			$asset->themePath()->add('core', 'core.js');
 			$asset->add([
 							['jquery', 'vendor/jquery/jquery.min.js'],
 							['jquery-ui', 'vendor/jqueryui/jquery-ui.min.js', ['jquery']]
@@ -64,7 +67,8 @@ return array(
 
 		'beforeRenderTheme' => function($theme)
 		{
-            $theme->asset()->add('css-bootstrap-min', 'css/bootstrap/bootstrap.min.css');
+//            $theme->asset()->add('css-bootstrap-min', 'css/bootstrap/bootstrap.min.css');
+//            $theme->asset()->themePath()->add('css-style', 'css/style.css');
 			// To render partial composer
 			/*
 	        $theme->partialComposer('header', function($view){
@@ -74,7 +78,8 @@ return array(
 //            $theme->asset()->add('css-bootstrap-min', 'css/bootstrap/bootstrap.min.css');
 
 //            $theme->asset()->add('js-jquery-3.2.1', 'js/jquery-3.2.1.min.js');
-            $theme->asset()->add('js-bootstrap-min', 'js/bootstrap/bootstrap.min.js');
+//            $theme->asset()->add('js-bootstrap-min', 'js/bootstrap/bootstrap.min.js');
+//            $theme->asset()->themePath()->add('js-script', 'js/script.js');
 		},
 
 		'beforeRenderLayout' => array(
