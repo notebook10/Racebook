@@ -201,17 +201,12 @@ use App\Horses;
                                 <th>Amount</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <tr>
-                                <td>Dummy Lorem ipsum dolor siist</td>
-                                <td>400.00</td>
-                            </tr>
-                            <tr>
-                                <td>Total Wager</td>
-                                <td>400.00</td>
-                            </tr>
-                        </tbody>
+                        <tbody></tbody>
                     </table>
+                    <div>
+                        <a href="{{ URL::to('/') }}" class="btn btn-danger">ABORT</a>
+                        <button class="btn btn-success" id="confirmBet">CONFIRM BET</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -645,18 +640,50 @@ use App\Horses;
             var racePostTime = $("#selectedRacePostTime").val();
             var amount = $("#betAmount").val();
             var betArray = [];
+            var ppArray = [];
+            $("table#ticketTbl tbody tr").remove();
             if($("#betAmount").val() != ""){
                 $("#raceDiv").css("display","none");
                 $("#betTicket").css("display","block");
                 $("input[type=checkbox]").each(function(){
                     if(this.checked){
                         betArray.push($(this).data("id"));
+                        ppArray.push({
+                            'pp' : $(this).data("pp"),
+                            'val' : $(this).data("val")
+                        });
                     }else{
 
                     }
                 });
-                console.log(betArray);
-                $.ajax({
+                var betString = "";
+                $.each(ppArray, function(index, value){
+                    betString += ppArray[index]["val"] + " : " + ppArray[index]["pp"] + ", "
+                });
+                $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
+                    betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Amount:</td><td>"+ amount +"</td></tr>");
+            }
+        });
+        $("#confirmBet").on("click",function(){
+            var betType = $("#selectWager").val();
+            var trk = $("#selectedTrack").val();
+            var raceNumber = $("#selectedRaceNum").val();
+            var racePostTime = $("#selectedRacePostTime").val();
+            var amount = $("#betAmount").val();
+            var betArray = [];
+            var ppArray = [];
+            $("input[type=checkbox]").each(function(){
+                if(this.checked){
+                    betArray.push($(this).data("id"));
+                    ppArray.push({
+                        'pp' : $(this).data("pp"),
+                        'val' : $(this).data("val")
+                    });
+                }else{
+
+                }
+            });
+            $.ajax({
                     "url" : BASE_URL + '/dashboard/saveBet',
                     type : "POST",
                     data : {
@@ -666,16 +693,17 @@ use App\Horses;
                         raceNum : raceNumber,
                         racePost : racePostTime,
                         betamount : amount,
-                        bet : betArray
+                        bet : betArray,
+                        pp : ppArray
                     },
                     success : function(response){
-                        alert(response);
+                        alert("Success");
+                        console.log(ppArray);
                     },
                     error : function(){
                         alert("error123");
                     }
                 });
-            }
         });
         function toggleIcon(e) {
             $(e.target)
