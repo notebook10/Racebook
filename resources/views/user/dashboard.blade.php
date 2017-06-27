@@ -663,7 +663,7 @@ use App\Horses;
                     betString += ppArray[index]["pp"] + ", "
                 });
                 $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
-                    betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Amount:</td><td>"+ amount +"</td></tr>");
+                    betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Wager:</td><td>"+ amount +"</td></tr>");
             }
         });
         $("#confirmBet").on("click",function(){
