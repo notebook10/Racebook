@@ -217,7 +217,8 @@ use App\Horses;
 <script>
     $("document").ready(function(){
         var BASE_URL = $("#hiddenURL").val();
-        var CURRENT_DATE = $("#date").data("date");;setTimeout(getUpcomingRaces,1500);
+        var CURRENT_DATE = $("#date").data("date");
+        setTimeout(getUpcomingRaces,1500);
         $(".trkName").on("click",function(){
             if($(this).hasClass("collapsed")){
                 //                $(".trkName > div.panel").css("color","red");
@@ -699,6 +700,7 @@ use App\Horses;
                     },
                     success : function(response){
                         alert("Success");
+                        location.reload();
                         console.log(ppArray);
                     },
                     error : function(){
