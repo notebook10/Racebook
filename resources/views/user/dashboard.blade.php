@@ -1,7 +1,6 @@
-{{--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">--}}
-{{--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>--}}
-{{--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>--}}
-{{--<script src="{{ asset('js/date.js') }}"></script>--}}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <?php
 date_default_timezone_set('America/Los_Angeles');
 use App\Horses;
@@ -709,10 +708,12 @@ use App\Horses;
                 },
                 success : function(response){
                     var trackName,raceNumber,mtp = "";
+                    $("table#tblUpcomingRace tbody tr").remove();
                     $.each(response, function(index, value){
                         trackName = response[index].substring(response[index].lastIndexOf("|")+1,response[index].lastIndexOf("@"));
+                        raceNumber = response[index].substr(response[index].indexOf("&") + 1);
                         mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
-                        $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td></td><td>"+ mtp +"</td></tr>");
+                        $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
                     });
                 },
                 error : function(xhr, status, err){
