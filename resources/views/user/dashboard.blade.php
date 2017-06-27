@@ -759,7 +759,7 @@ use App\Horses;
                         trackName = response[index].substring(response[index].lastIndexOf("|")+1,response[index].lastIndexOf("@"));
                         raceNumber = response[index].substr(response[index].indexOf("&") + 1);
                         mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
-                        $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
+                        $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ "#" +"</td></tr>");
                     });
                     console.log(response);
                 },
