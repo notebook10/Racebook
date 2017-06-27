@@ -37,7 +37,7 @@ class Horses extends Model
     public function getUpcomingRaces($date , $start, $end){
         return DB::table($this->table)
             ->where('race_date',$date)
-            ->whereBetween('race_time',[" 1:20 PM "," 1:30 PM "])
+            ->whereBetween('race_time',[" 1:20 PM "," 1:30 PM "]) // -------------------------
             ->get();
     }
 }

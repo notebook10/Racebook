@@ -152,7 +152,7 @@ use App\Horses;
             <!-- Upcoming Races -->
             <div id="upcomingRacesDiv">
                 <h1>Upcoming Races</h1>
-                <table class="table table-bordered table-striped">
+                <table class="table table-bordered table-striped" id="tblUpcomingRace">
                     <thead>
                         <tr>
                             <th>Track</th>
@@ -708,42 +708,11 @@ use App\Horses;
                     edt : $("h5#edt").text(),
                 },
                 success : function(response){
-                    // PDT muna
-                    var pdtArr = [];
-                    var test = ["weqe","qweqwe"];
-                    $.each(response["pdtRes"], function(index, value){
-                        if(pdtArr.indexOf(response["pdtRes"][index].race_track + "&" + jQuery.trim(response["pdtRes"][index].race_number) + "@" + jQuery.trim(response["pdtRes"][index].race_time)) > -1){
-
-                        }else{
-                            pdtArr.push(response["pdtRes"][index].race_track + "&" + jQuery.trim(response["pdtRes"][index].race_number) + "@" + jQuery.trim(response["pdtRes"][index].race_time));
-                        }
-                    });
-                    // Dito yung ARRAY MERGE <---------------------------------------------------------------
-                    var upcomingRacesArr = $.merge(pdtArr,test);
-                    console.log(upcomingRacesArr);
-                    // Pagkatapos ng merge kunin si MTP per track
-
-                    //
-                    $.each(upcomingRacesArr, function(key, val){
-                        var time = upcomingRacesArr[key].substr(upcomingRacesArr[key].indexOf("@") + 1);
-                        var track = upcomingRacesArr[key].substr(0, upcomingRacesArr[key].indexOf('&'));
-                        var start_pos = upcomingRacesArr[key].indexOf('&') + 1;
-                        var racenumber =  upcomingRacesArr[key].substring(start_pos,upcomingRacesArr[key].indexOf('@',start_pos));
-                        $.ajax({
-                            "url " : BASE_URL + "/dashboard/appendUpcomingRaces",
-                            type : "GET",
-                            data : {
-                                _token : $('[name="_token"]').val(),
-                                raceTime : time,
-                                raceTrk : track,
-                                raceNum : racenumber,
-                                pacific : $("h5#pdt").text()
-                            },
-                            success : function(data){
-                                console.log(data);
-                            },
-                            error : function(xhr,status,err){console.log(err);}
-                        });
+                    var trackName,raceNumber,mtp = "";
+                    $.each(response, function(index, value){
+                        trackName = response[index].substring(response[index].lastIndexOf("|")+1,response[index].lastIndexOf("@"));
+                        mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
+                        $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td></td><td>"+ mtp +"</td></tr>");
                     });
                 },
                 error : function(xhr, status, err){

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Bets;
 use App\Horses;
+use App\Timezone;
 use Illuminate\Http\Request;
 use App\User;
 use App\Tracks;
@@ -143,18 +144,55 @@ class HomeController extends Controller
         $edtEnd = strtotime("+30 minutes",strtotime($edt));
         $pdtEndCvt = gmdate(" " . "h:i A" . " ", $pdtEnd);
         $pdtResults = $horsesModel->getUpcomingRaces($date,$pdtStart,$pdtEnd);
-        $resultArr = [
-            'pdtRes' => $pdtResults
-        ];
-        return $resultArr;
+        $pdtArr = [];
+//        $resultArr = [
+//            'pdtRes' => $pdtResults
+//        ];
+        foreach ($pdtResults as $key => $val){
+            $timezone = HomeController::getTimezone($val->race_track);
+            $trackname = HomeController::getTrack($val->race_track);
+            $to = "";
+            switch ($timezone){
+                case "PDT":
+                    $to = strtotime($pdt);
+                    break;
+                case "MDT":
+                    $to = strtotime($mdt);
+                    break;
+                case "CDT":
+                    $to = strtotime($cdt);
+                    break;
+                case "EDT":
+                    $to = strtotime($edt);
+                    break;
+                default:break;
+            }
+            $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
+            if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $pdtArr, TRUE)){
+            }else{
+                array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
+            }
+        }
+        // Array merge here
+        return $pdtArr;
     }
-    public function appendUpcomingRaces(Request $request){
-        $pacificTime = $request->input("pacific");
-        $mtp = strtotime('',$request->input("raceTime"));
-        $datetime1 = strtotime("2011-10-10 10:00:00");
-        $datetime2 = strtotime("2011-10-10 10:45:00");
-        $interval  = abs($datetime2 - $datetime1);
-        $minutes   = round($interval / 60);
-        return "Asdad";
+//    public function appendUpcomingRaces(Request $request){
+//        $pacificTime = $request->input("pacific");
+//        $mtp = strtotime('',$request->input("raceTime"));
+//        $datetime1 = strtotime("2011-10-10 10:00:00");
+//        $datetime2 = strtotime("2011-10-10 10:45:00");
+//        $interval  = abs($datetime2 - $datetime1);
+//        $minutes   = round($interval / 60);
+//        return "Asdad";
+//    }
+    public static function getTimezone($trackCode){
+        $model = new Timezone();
+        $foo = $model->getTimezoneByCode($trackCode);
+        return $foo->time_zone;
+    }
+    public static function getTrack($trackCode){
+        $model = new Timezone();
+        $foo = $model->getTimezoneByCode($trackCode);
+        return $foo->track_name;
     }
 }
