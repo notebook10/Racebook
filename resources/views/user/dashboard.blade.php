@@ -96,7 +96,7 @@ use App\Horses;
         border: 1px solid #dcdcdc;
     }
     .pp-class,.tdPP  {
-        width: 100px;
+        width: 50px;
         text-align: center;
     }
     .col-tracks {
@@ -111,6 +111,9 @@ use App\Horses;
         overflow-y: scroll;
     }
     #betActions{text-align: center;}
+    div#tempRaces {
+        font-size: 16px;
+    }
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -318,7 +321,7 @@ use App\Horses;
                         switch(wager){
                             case "wps":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -331,7 +334,7 @@ use App\Horses;
                                 break;
                             case "superfecta":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -345,7 +348,7 @@ use App\Horses;
                                 break;
                             case "exacta":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -357,7 +360,7 @@ use App\Horses;
                                 break;
                             case "exactabox":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -368,7 +371,7 @@ use App\Horses;
                                 break;
                             case "trifecta":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -381,7 +384,7 @@ use App\Horses;
                                 break;
                             case "trifectabox":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -392,7 +395,7 @@ use App\Horses;
                                 break;
                             case "dailydouble":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -518,7 +521,7 @@ use App\Horses;
                         switch(selectedWager){
                             case "wps":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -531,7 +534,7 @@ use App\Horses;
                                 break;
                             case "superfecta":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -545,7 +548,7 @@ use App\Horses;
                                 break;
                             case "exacta":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -557,7 +560,7 @@ use App\Horses;
                                 break;
                             case "exactabox":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -568,7 +571,7 @@ use App\Horses;
                                 break;
                             case "trifecta":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -581,7 +584,7 @@ use App\Horses;
                                 break;
                             case "trifectabox":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
@@ -592,7 +595,7 @@ use App\Horses;
                                 break;
                             case "dailydouble":
                                 if(obj[index].pp === "SCRATCHED"){
-                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                                 }else if(obj[index].pp === "Foo"){
 
                                 }else{
