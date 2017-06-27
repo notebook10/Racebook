@@ -110,6 +110,7 @@ use App\Horses;
         background: #F5F5F5;
         overflow-y: scroll;
     }
+    #betActions{text-align: center;}
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -203,7 +204,7 @@ use App\Horses;
                         </thead>
                         <tbody></tbody>
                     </table>
-                    <div>
+                    <div id="betActions">
                         <a href="{{ URL::to('/') }}" class="btn btn-danger">ABORT</a>
                         <button class="btn btn-success" id="confirmBet">CONFIRM BET</button>
                     </div>
@@ -216,8 +217,7 @@ use App\Horses;
 <script>
     $("document").ready(function(){
         var BASE_URL = $("#hiddenURL").val();
-        var CURRENT_DATE = $("#date").data("date");
-        getUpcomingRaces();
+        var CURRENT_DATE = $("#date").data("date");;setTimeout(getUpcomingRaces,1500);
         $(".trkName").on("click",function(){
             if($(this).hasClass("collapsed")){
                 //                $(".trkName > div.panel").css("color","red");
@@ -658,7 +658,8 @@ use App\Horses;
                 });
                 var betString = "";
                 $.each(ppArray, function(index, value){
-                    betString += ppArray[index]["val"] + " : " + ppArray[index]["pp"] + ", "
+//                    betString += ppArray[index]["val"] + " : " + ppArray[index]["pp"] + ", "
+                    betString += ppArray[index]["pp"] + ", "
                 });
                 $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
                     betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Amount:</td><td>"+ amount +"</td></tr>");
@@ -747,7 +748,7 @@ use App\Horses;
                     pdt : $("h5#pdt").text(),
                     mdt : $("h5#mdt").text(),
                     cdt : $("h5#cdt").text(),
-                    edt : $("h5#edt").text(),
+                    edt : $("h5#edt").text()
                 },
                 success : function(response){
                     var trackName,raceNumber,mtp = "";
@@ -758,6 +759,7 @@ use App\Horses;
                         mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
                         $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
                     });
+                    console.log(response);
                 },
                 error : function(xhr, status, err){
 

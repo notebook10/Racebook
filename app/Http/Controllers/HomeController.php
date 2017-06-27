@@ -138,6 +138,7 @@ class HomeController extends Controller
         $cdt = $request->input("cdt");
         $edt = $request->input("edt");
         $pdtStart = date('h:i A', strtotime($pdt));
+        $mdtStart = date('h:i A', strtotime($mdt));
         $pdtEnd = strtotime("+30 minutes",strtotime($pdt));
         $mdtEnd = strtotime("+30 minutes",strtotime($mdt));
         $cdtEnd = strtotime("+30 minutes",strtotime($cdt));
