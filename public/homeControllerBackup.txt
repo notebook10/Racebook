@@ -137,44 +137,48 @@ class HomeController extends Controller
         $mdt = $request->input("mdt");
         $cdt = $request->input("cdt");
         $edt = $request->input("edt");
-        $pdtStart = date('h:i A', strtotime($pdt));
-        $mdtStart = date('h:i A', strtotime($mdt));
-        $pdtEnd = strtotime("+30 minutes",strtotime($pdt));
-        $mdtEnd = strtotime("+30 minutes",strtotime($mdt));
-        $cdtEnd = strtotime("+30 minutes",strtotime($cdt));
-        $edtEnd = strtotime("+30 minutes",strtotime($edt));
-        $pdtEndCvt = gmdate(" " . "h:i A" . " ", $pdtEnd);
+        $pdtStart = date('H:i A', strtotime($pdt));
+        $mdtStart = date('H:i A', strtotime($mdt));
+        $cdtStart = date('H:i A', strtotime($cdt));
+        $edtStart = date('H:i A', strtotime($edt));
+        $pdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($pdt)))));
+        $mdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($mdt)))));
+        $cdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($cdt)))));
+        $edtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($edt)))));
         $pdtResults = $horsesModel->getUpcomingRaces($date,$pdtStart,$pdtEnd);
+//        $mdtResults = $horsesModel->getUpcomingRaces($date,$mdtStart,$mdtEnd);
+//        $cdtResults = $horsesModel->getUpcomingRaces($date,$cdtStart,$cdtEnd);
+//        $edtResults = $horsesModel->getUpcomingRaces($date,$edtStart,$edtEnd);
         $pdtArr = [];
-//        $resultArr = [
-//            'pdtRes' => $pdtResults
-//        ];
         foreach ($pdtResults as $key => $val){
             $timezone = HomeController::getTimezone($val->race_track);
             $trackname = HomeController::getTrack($val->race_track);
             $to = "";
-            switch ($timezone){
-                case "PDT":
-                    $to = strtotime($pdt);
-                    break;
-                case "MDT":
-                    $to = strtotime($mdt);
-                    break;
-                case "CDT":
-                    $to = strtotime($cdt);
-                    break;
-                case "EDT":
-                    $to = strtotime($edt);
-                    break;
-                default:break;
-            }
-            $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
-            if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $pdtArr, TRUE)){
-            }else{
-                array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
-            }
+//            if($timezone === "EDT"){
+                switch ($timezone){
+                    case "PDT":
+                        $to = strtotime($pdt);
+                        break;
+                    case "MDT":
+                        $to = strtotime($mdt);
+                        break;
+                    case "CDT":
+                        $to = strtotime($cdt);
+                        break;
+                    case "EDT":
+                        $to = strtotime($edt);
+                        break;
+                    default:break;
+                }
+                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
+                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $pdtArr, TRUE)){
+                }else{
+                    array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
+                }
+//            }
         }
         // Array merge here
+
         return $pdtArr;
     }
 //    public function appendUpcomingRaces(Request $request){

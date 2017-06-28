@@ -211,6 +211,7 @@ class HomeController extends Controller
         }
         // Array merge here
         $mergedArray = array_merge($pdtArr,$edtArr,$mdtArr, $cdtArr);
+        dd($mergedArray);
         return $mergedArray;
     }
 //    public function appendUpcomingRaces(Request $request){

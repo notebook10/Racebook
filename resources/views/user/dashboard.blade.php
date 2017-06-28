@@ -96,7 +96,7 @@ use App\Horses;
         border: 1px solid #dcdcdc;
     }
     .pp-class,.tdPP  {
-        width: 50px;
+        width: 100px;
         text-align: center;
     }
     .col-tracks {
@@ -111,9 +111,7 @@ use App\Horses;
         overflow-y: scroll;
     }
     #betActions{text-align: center;}
-    div#tempRaces {
-        font-size: 16px;
-    }
+    #confirmBet{margin-right:40px;}
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -208,8 +206,8 @@ use App\Horses;
                         <tbody></tbody>
                     </table>
                     <div id="betActions">
-                        <a href="{{ URL::to('/') }}" class="btn btn-danger">ABORT</a>
                         <button class="btn btn-success" id="confirmBet">CONFIRM BET</button>
+                        <a href="{{ URL::to('/') }}" class="btn btn-danger">ABORT BET</a>
                     </div>
                 </div>
             </div>
@@ -662,11 +660,47 @@ use App\Horses;
                 });
                 var betString = "";
                 $.each(ppArray, function(index, value){
-//                    betString += ppArray[index]["val"] + " : " + ppArray[index]["pp"] + ", "
-                    betString += ppArray[index]["pp"] + ", "
+                    betString += ppArray[index]["pp"] + ", ";
                 });
-                $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
-                    betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Wager:</td><td>"+ amount +"</td></tr>");
+                if(betType === "wps"){
+                    console.log(ppArray);
+                    var w = [];
+                    var p = [];
+                    var s = [];
+                    var wString = "(";
+                    var pString = "(";
+                    var sString = "(";
+                    var wpsTotal = "";
+                    $.each(ppArray, function(index, value){
+                        if(ppArray[index]["val"] == "W"){
+                            w.push(ppArray[index]["pp"]);
+                            wString += ppArray[index]["pp"] + ",";
+                        }else if(ppArray[index]["val"] == "P"){
+                            p.push(ppArray[index]["pp"]);
+                            pString += ppArray[index]["pp"] + ",";
+                        }else if(ppArray[index]["val"] == "S"){
+                            s.push(ppArray[index]["pp"]);
+                            sString += ppArray[index]["pp"] + ",";
+                        }
+                    });
+                    wpsTotal = (w.length + p.length + s.length) * amount;
+                    if(w.length != 0){
+                        $("table#ticketTbl tbody").append("<tr><td>" + "Race " + raceNumber + " " + betType + " " + trk + " " + amount + " WIN:" + wString.substring(0,wString.length - 1) +")</td>" +
+                            "<td>"+ amount * w.length +"</td></tr>");
+                    }
+                    if(p.length != 0){
+                        $("table#ticketTbl tbody").append("<tr><td>" + "Race " + raceNumber + " " + betType + " " + trk + " " + amount + " PLACE:" + pString.substring(0,pString.length - 1) +")</td>" +
+                            "<td>"+ amount * p.length +"</td></tr>");
+                    }
+                    if(s.length != 0){
+                        $("table#ticketTbl tbody").append("<tr><td>" + "Race " + raceNumber + " " + betType + " " + trk + " " + amount + " SHOW:" + pString.substring(0,sString.length - 1) +")</td>" +
+                            "<td>"+ amount * s.length +"</td></tr>");
+                    }
+                    $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>" + wpsTotal + "</td></tr>");
+                }else{
+                    $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
+                        betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Wager:</td><td>"+ amount +"</td></tr>");
+                }
             }
         });
         $("#confirmBet").on("click",function(){
@@ -762,7 +796,7 @@ use App\Horses;
                         trackName = response[index].substring(response[index].lastIndexOf("|")+1,response[index].lastIndexOf("@"));
                         raceNumber = response[index].substr(response[index].indexOf("&") + 1);
                         mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
-                        $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ "#" +"</td></tr>");
+                        $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
                     });
                     console.log(response);
                 },
