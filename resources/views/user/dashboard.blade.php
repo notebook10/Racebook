@@ -114,6 +114,7 @@ use App\Horses;
     }
     #betActions{text-align: center;}
     #confirmBet{margin-right:40px;}
+    #ddBoard{margin:20px;text-align:center;font-size:18px;}
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -314,6 +315,7 @@ use App\Horses;
                     number : num
                 },
                 success : function(response){
+                    $("#tempRaces div#ddBoard").html("");
                     var od = JSON.stringify(response);
                     var obj = JSON.parse(od);
                     console.log(obj);
@@ -479,6 +481,7 @@ use App\Horses;
             var selectedWager = $(this).val();
             var selectedTrack = $("#selectedTrack").val();
             var selectedRaceNum = $("#selectedRaceNum").val();
+            var ddselectedRaceNum = parseInt($("#selectedRaceNum").val()) + parseInt(1);
             $.ajax({
                 "url" : BASE_URL + '/dashboard/getHorsesPerRace',
                 type : "POST",
@@ -490,6 +493,7 @@ use App\Horses;
                 },
                 success : function(response){
                     $("#tempRaces table").remove();
+                    $("#tempRaces div#ddBoard").html("");
                     switch(selectedWager){
                         case "wps":
                             $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
@@ -511,6 +515,8 @@ use App\Horses;
                             break;
                         case "dailydouble":
                             $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ selectedTrack + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            ajaxGetHorsesPerRace(BASE_URL,selectedTrack,CURRENT_DATE, ddselectedRaceNum);
                             break;
                         default:
                             break;
@@ -833,6 +839,99 @@ use App\Horses;
                         }
                     }
                 }
+                else if(betType === "trifecta"){
+                    var firstArr = [];
+                    var secondArr = [];
+                    var thirdArr = [];
+                    var trifectaArray = [];
+                    $.each(ppArray, function(index, value){
+                        if(ppArray[index]["val"] == 1){
+                            firstArr.push(ppArray[index]["pp"]);
+                        }else if(ppArray[index]["val"] == 2){
+                            secondArr.push(ppArray[index]["pp"]);
+                        }else if(ppArray[index]["val"] == 3){
+                            thirdArr.push(ppArray[index]["pp"]);
+                        }
+                    });
+                    $.each(firstArr, function(firstKey, firstVal){
+                        $.each(secondArr, function(secondKey,secondVal){
+                            if(firstVal === secondVal){
+
+                            }else{
+                                $.each(thirdArr, function(thirdKey, thirdVal){
+                                    if(secondVal === thirdVal){
+
+                                    }else{
+                                        if(thirdVal === firstVal){
+
+                                        }else{
+                                            trifectaArray.push(firstVal + "," + secondVal + "," + thirdVal);
+                                            console.log(firstVal + "," + secondVal + "," + thirdVal);
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    });
+                    if(trifectaArray.length <= 0){
+                        swal("There was a problem!","Please select three horses","error");
+                    }else{
+                        $.each(trifectaArray, function(index, value){
+                            $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ trifectaArray[index] + ")</td><td>"+ amount +"</td></tr>");
+                        });
+                        var trifectaTotalAmount = trifectaArray.length * amount;
+                        $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>"+ trifectaTotalAmount +"</td></tr>");
+                        displayConfirmationDiv();
+                    }
+                }
+                else if(betType === "dailydouble"){
+                    var firstTblArray = [];
+                    var ddArray = [];
+                    $("table:not(.dailydouble) input[type=checkbox]").each(function(){
+                        if(this.checked){
+                            firstTblArray.push({
+                                'pp' : $(this).data("pp"),
+                                'val' : $(this).data("val")
+                            });
+                        }
+                    });
+                    $("table.dailydouble input[type=checkbox]").each(function(){
+                        if(this.checked){
+                            ddArray.push({
+                                'pp' : $(this).data("pp"),
+                                'val' : $(this).data("val")
+                            });
+                        }
+                    });
+                    if(ppArray.length <= 0 || ddArray.length <= 0){
+                        swal("There was a problem!","Please select your first horse and second horse","error");
+                    }else{
+                        var firstDD = [];
+                        var secondDD = [];
+                        var ddBets = [];
+                        $.each(firstTblArray, function(index, value){
+                            if(firstTblArray[index]["val"] == 1){
+                                firstDD.push(firstTblArray[index]["pp"]);
+                            }
+                        });
+                        $.each(ddArray, function(index, value){
+                            if(ddArray[index]["val"] == 1){
+                                secondDD.push(ddArray[index]["pp"]);
+                            }
+                        });
+                        $.each(firstDD, function(firstDDKey, firstDDVal){
+                            $.each(secondDD, function(secondDDKey, secondDDVal){
+                                ddBets.push(firstDDVal + "," + secondDDVal);
+                            });
+                        });
+                        var ddTotalBets = ddBets.length * amount;
+                        $.each(ddBets,function(index, value){
+                            $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ ddBets[index] + ")</td><td>"+ amount +"</td></tr>");
+                        });
+                        $("table#ticketTbl tbody").append("<tr><td>Total Wagers</td><td>"+ ddTotalBets +"</td></tr>");
+                        displayConfirmationDiv();
+                    }
+                }
                 else{
                     $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
                         betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Wager:</td><td>"+ amount +"</td></tr>");
@@ -947,5 +1046,57 @@ use App\Horses;
     function displayConfirmationDiv(){
         $("#raceDiv").css("display","none");
         $("#betTicket").css("display","block");
+    }
+    function ajaxGetHorsesPerRace($url,trk,currentDate, num){
+        $.ajax({
+            "url" : $url + "/dashboard/getHorsesPerRace",
+            type : "POST",
+            data : {
+                _token : $('[name="_token"]').val(),
+                code : trk,
+                date : currentDate,
+                number : num
+            },
+            success : function(response){
+                var od = JSON.stringify(response);
+                var obj = JSON.parse(od);
+                $.each(obj, function(index, value){
+                    if(obj[index].pp === "SCRATCHED"){
+                        $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                    }else if(obj[index].pp === "Foo"){
+
+                    }else{
+                        $("table."+ trk + num +" tbody").append("<tr>" +
+                            "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
+                            "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                    }
+                });
+                $(".tdPP").each(function(key,val){
+                    if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
+                    else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
+                    else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
+                    else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
+                    else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
+                    else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                    else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
+                    else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
+                    else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
+                    else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
+                    else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
+                    else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
+                    else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
+                    else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
+                    else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
+                    else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
+                    else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
+                    else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
+                    else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
+                    else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
+                });
+            },
+            error:function(){
+                alert("Error");
+            }
+        });
     }
 </script>
