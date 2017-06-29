@@ -278,6 +278,7 @@ use App\Horses;
             var trk = $(this).data("track");
             var num = $(this).data("number");
             var post = $(this).data("post");
+            var ddselectedRaceNum = parseInt(num) + parseInt(1);
 //            $("#tempRaces").append("<ul class='"+ trk + num +"'></ul>");
             switch(wager){
                 case "wps":
@@ -299,7 +300,10 @@ use App\Horses;
                     $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                     break;
                 case "dailydouble":
+                    $("#tempRaces div#ddBoard").html("");
                     $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                    ajaxGetHorsesPerRace(BASE_URL,trk,CURRENT_DATE, ddselectedRaceNum);
                     break;
                 default:
                     break;
@@ -315,7 +319,6 @@ use App\Horses;
                     number : num
                 },
                 success : function(response){
-                    $("#tempRaces div#ddBoard").html("");
                     var od = JSON.stringify(response);
                     var obj = JSON.parse(od);
                     console.log(obj);
@@ -514,6 +517,7 @@ use App\Horses;
                             $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             break;
                         case "dailydouble":
+                            $("#tempRaces div#ddBoard").html("");
                             $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ selectedTrack + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                             ajaxGetHorsesPerRace(BASE_URL,selectedTrack,CURRENT_DATE, ddselectedRaceNum);
