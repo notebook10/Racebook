@@ -1,6 +1,8 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" href="{{ asset('css/sweetalert.css') }}">
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="{{ asset('js/sweetalert.min.js') }}"></script>
 <?php
 date_default_timezone_set('America/Los_Angeles');
 use App\Horses;
@@ -219,7 +221,7 @@ use App\Horses;
     $("document").ready(function(){
         var BASE_URL = $("#hiddenURL").val();
         var CURRENT_DATE = $("#date").data("date");
-        setTimeout(getUpcomingRaces,1500);
+        setTimeout(getUpcomingRaces,3000);
         $(".trkName").on("click",function(){
             if($(this).hasClass("collapsed")){
                 //                $(".trkName > div.panel").css("color","red");
@@ -645,8 +647,8 @@ use App\Horses;
             var ppArray = [];
             $("table#ticketTbl tbody tr").remove();
             if($("#betAmount").val() != ""){
-                $("#raceDiv").css("display","none");
-                $("#betTicket").css("display","block");
+//                $("#raceDiv").css("display","none");
+//                $("#betTicket").css("display","block");
                 $("input[type=checkbox]").each(function(){
                     if(this.checked){
                         betArray.push($(this).data("id"));
@@ -664,43 +666,179 @@ use App\Horses;
                 });
                 if(betType === "wps"){
                     console.log(ppArray);
-                    var w = [];
-                    var p = [];
-                    var s = [];
-                    var wString = "(";
-                    var pString = "(";
-                    var sString = "(";
-                    var wpsTotal = "";
-                    $.each(ppArray, function(index, value){
-                        if(ppArray[index]["val"] == "W"){
-                            w.push(ppArray[index]["pp"]);
-                            wString += ppArray[index]["pp"] + ",";
-                        }else if(ppArray[index]["val"] == "P"){
-                            p.push(ppArray[index]["pp"]);
-                            pString += ppArray[index]["pp"] + ",";
-                        }else if(ppArray[index]["val"] == "S"){
-                            s.push(ppArray[index]["pp"]);
-                            sString += ppArray[index]["pp"] + ",";
+                    if(ppArray.length < 1){
+                        swal("There was a problem!","An Win/Place/Show requires atleast one selection.","error");
+                    }else{
+                        var w = [];
+                        var p = [];
+                        var s = [];
+                        var wString = "(";
+                        var pString = "(";
+                        var sString = "(";
+                        var wpsTotal = "";
+                        $.each(ppArray, function(index, value){
+                            if(ppArray[index]["val"] == "W"){
+                                w.push(ppArray[index]["pp"]);
+                                wString += ppArray[index]["pp"] + ",";
+                            }else if(ppArray[index]["val"] == "P"){
+                                p.push(ppArray[index]["pp"]);
+                                pString += ppArray[index]["pp"] + ",";
+                            }else if(ppArray[index]["val"] == "S"){
+                                s.push(ppArray[index]["pp"]);
+                                sString += ppArray[index]["pp"] + ",";
+                            }
+                        });
+                        wpsTotal = (w.length + p.length + s.length) * amount;
+                        if(w.length != 0){
+                            $("table#ticketTbl tbody").append("<tr><td>" + "Race: " + raceNumber + " BetType: " + betType + " Track: " + trk + " Amount: " + amount + " WIN:" + wString.substring(0,wString.length - 1) +")</td>" +
+                                "<td>"+ amount * w.length +"</td></tr>");
                         }
-                    });
-                    wpsTotal = (w.length + p.length + s.length) * amount;
-                    if(w.length != 0){
-                        $("table#ticketTbl tbody").append("<tr><td>" + "Race " + raceNumber + " " + betType + " " + trk + " " + amount + " WIN:" + wString.substring(0,wString.length - 1) +")</td>" +
-                            "<td>"+ amount * w.length +"</td></tr>");
+                        if(p.length != 0){
+                            $("table#ticketTbl tbody").append("<tr><td>" + "Race: " + raceNumber + " BetType: " + betType + " Track: " + trk + " Amount: " + amount + " PLACE:" + pString.substring(0,pString.length - 1) +")</td>" +
+                                "<td>"+ amount * p.length +"</td></tr>");
+                        }
+                        if(s.length != 0){
+                            $("table#ticketTbl tbody").append("<tr><td>" + "Race: " + raceNumber + " BetType: " + betType + " Track: " + trk + " Amount: " + amount + " SHOW:" + sString.substring(0,sString.length - 1) +")</td>" +
+                                "<td>"+ amount * s.length +"</td></tr>");
+                        }
+                        $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>" + wpsTotal + "</td></tr>");
+                        displayConfirmationDiv();
                     }
-                    if(p.length != 0){
-                        $("table#ticketTbl tbody").append("<tr><td>" + "Race " + raceNumber + " " + betType + " " + trk + " " + amount + " PLACE:" + pString.substring(0,pString.length - 1) +")</td>" +
-                            "<td>"+ amount * p.length +"</td></tr>");
+                }
+                else if(betType === "exacta"){
+                    console.log(ppArray);
+                    if(ppArray.length <= 1){
+                        swal("There was a problem!","An Exacta requires two selection.","error");
+                    }else{
+                        var first = [];
+                        var second = [];
+                        $.each(ppArray,function(index, value){
+                            if(ppArray[index]["val"] == 1){
+                                first.push(ppArray[index]["pp"]);
+                            }else if(ppArray[index]["val"] == 2){
+                                second.push(ppArray[index]["pp"]);
+                            }
+                        });
+                        if(second.length <= 0 || first.length <= 0){
+                            swal("There was a problem!","There must be atleast one selection to finish first and atleast one selection to finish second!","error");
+                        }else{
+                            if(first.length == 1 && second.length == 1){
+                                if(first[0] == second[0]){
+                                    swal("Invalid selections"," Please check that your selections include at least one different runner per leg","error");
+                                }else{
+                                    var exactaBets = [];
+                                    var totalBetAmount = "";
+                                    $.each(first,function(index, value){
+                                        $.each(second, function(key, val){
+                                            if(value == val){
+
+                                            }else{
+                                                exactaBets.push(value + "/" +val);
+                                            }
+                                        });
+                                    });
+                                    console.log(exactaBets);
+                                    $.each(exactaBets,function(i,v){
+                                        $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " (" + v +")</td><td>"+ amount +"</td></tr>");
+                                    });
+                                    totalBetAmount = exactaBets.length * amount;
+                                    $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>" + totalBetAmount + "</td></tr>");
+                                    displayConfirmationDiv();
+                                }
+                            }else{
+                                var exactaBets = [];
+                                var totalBetAmount = "";
+                                $.each(first,function(index, value){
+                                    $.each(second, function(key, val){
+                                        if(value == val){
+
+                                        }else{
+                                            exactaBets.push(value + "/" +val);
+                                        }
+                                    });
+                                });
+                                console.log(exactaBets);
+                                $.each(exactaBets,function(i,v){
+                                    $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " (" + v +")</td><td>"+ amount +"</td></tr>");
+                                });
+                                totalBetAmount = exactaBets.length * amount;
+                                $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>" + totalBetAmount + "</td></tr>");
+                                displayConfirmationDiv();
+                            }
+                        }
                     }
-                    if(s.length != 0){
-                        $("table#ticketTbl tbody").append("<tr><td>" + "Race " + raceNumber + " " + betType + " " + trk + " " + amount + " SHOW:" + pString.substring(0,sString.length - 1) +")</td>" +
-                            "<td>"+ amount * s.length +"</td></tr>");
+                }
+                else if(betType === "superfecta"){
+                    if(ppArray.length <= 1){
+                        swal("There was a problem!","Ticket has no selection.","error");
+                    }else{
+                        var firstArr = [];
+                        var secondArr = [];
+                        var thirdArr = [];
+                        var fourthArr = [];
+                        var superfectaArray = [];
+                        $.each(ppArray, function(index, value){
+                            if(ppArray[index]["val"] == 1){
+                                firstArr.push(ppArray[index]["pp"]);
+                            }else if(ppArray[index]["val"] == 2){
+                                secondArr.push(ppArray[index]["pp"]);
+                            }else if(ppArray[index]["val"] == 3){
+                                thirdArr.push(ppArray[index]["pp"]);
+                            }else if(ppArray[index]["val"] == 4){
+                                fourthArr.push(ppArray[index]["pp"]);
+                            }
+                        });
+                        // Cool loop
+                        $.each(firstArr, function(firstKey, firstVal){
+                            $.each(secondArr, function(secondKey,secondVal){
+                                if(firstVal === secondVal){
+
+                                }else{
+                                    $.each(thirdArr, function(thirdKey, thirdVal){
+                                        if(secondVal === thirdVal){
+
+                                        }else{
+                                            if(thirdVal === firstVal){
+
+                                            }else{
+                                                $.each(fourthArr, function(fourthKey, fourthVal){
+                                                    if(thirdVal === fourthVal){
+
+                                                    }else{
+                                                        if(fourthVal === secondVal || fourthVal === firstVal){
+
+                                                        }else{
+                                                            superfectaArray.push(firstVal + "," + secondVal + "," + thirdVal + "," + fourthVal);
+                                                            console.log(firstVal + "," + secondVal + "," + thirdVal + "," + fourthVal);
+                                                        }
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                        // Error trap for empty || invalid selection
+                        if(superfectaArray.length <= 0){
+                            swal("There was a problem!","Invalid Combination","error");
+                        }else{
+                            var superfectaTotalAmount = superfectaArray.length * amount;
+                            $.each(superfectaArray, function(index, value){
+                                $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ superfectaArray[index] + ")</td><td>"+ amount +"</td></tr>");
+                            });
+                            $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>"+ superfectaTotalAmount +"</td></tr>");
+                            displayConfirmationDiv();
+
+                        }
                     }
-                    $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>" + wpsTotal + "</td></tr>");
-                }else{
+                }
+                else{
                     $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
                         betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Wager:</td><td>"+ amount +"</td></tr>");
                 }
+            }else{
+                swal("Empty Wager","Please enter a wager amount.","error");
             }
         });
         $("#confirmBet").on("click",function(){
@@ -806,4 +944,8 @@ use App\Horses;
             });
         }
     });
+    function displayConfirmationDiv(){
+        $("#raceDiv").css("display","none");
+        $("#betTicket").css("display","block");
+    }
 </script>

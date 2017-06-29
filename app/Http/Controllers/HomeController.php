@@ -112,13 +112,13 @@ class HomeController extends Controller
     public function getServerTime(){
         date_default_timezone_set('America/Los_Angeles'); // Pacific
         $pdtDate = date('F d, Y h:i:s', time());
-        $pdt = date('H:i:s A', time());
+        $pdt = date('H:i:s', time());
         date_default_timezone_set('America/Denver'); // Mountain
-        $mdt = date('H:i:s A', time());
+        $mdt = date('H:i:s', time());
         date_default_timezone_set('America/Chicago'); // Central
-        $cdt = date('H:i:s A', time());
+        $cdt = date('H:i:s', time());
         date_default_timezone_set('America/New_York'); // Eastern
-        $edt = date('H:i:s A', time());
+        $edt = date('H:i:s', time());
         $dateArray = [
             "dateTimePDT" => $pdtDate,
             "pdt" => $pdt,
@@ -137,18 +137,34 @@ class HomeController extends Controller
         $mdt = $request->input("mdt");
         $cdt = $request->input("cdt");
         $edt = $request->input("edt");
-        $pdtStart = date('h:i A', strtotime($pdt));
-        $mdtStart = date('h:i A', strtotime($mdt));
-        $cdtStart = date('h:i A', strtotime($cdt));
-        $edtStart = date('h:i A', strtotime($edt));
-        $pdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($pdt)))));
-        $mdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($mdt)))));
-        $cdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($cdt)))));
-        $edtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($edt)))));
+        $array = [
+            'pdt' => date('h:i A',strtotime($pdt)),
+            'mdt' => $mdt,
+            'cdt' => $cdt,
+            'edt' => $edt
+        ];
+//        dd($array);
+        $pdtStart = date('g:i A', strtotime($pdt));
+        $mdtStart = date('g:i A', strtotime($mdt));
+        $cdtStart = date('g:i A', strtotime($cdt));
+        $edtStart = date('g:i A', strtotime($edt));
+        $arrayStart = [
+            'pdtS' => $pdtStart,
+            'mdtS' => $mdtStart,
+            'cdtS' => $cdtStart,
+            'edtS' => $edtStart
+        ];
+//        dd($arrayStart);
+        $pdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($pdt)))));
+        $mdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($mdt)))));
+        $cdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($cdt)))));
+        $edtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($edt)))));
+//        dd($pdtEnd);
         $pdtResults = $horsesModel->getUpcomingRaces($date,$pdtStart,$pdtEnd);
         $mdtResults = $horsesModel->getUpcomingRaces($date,$mdtStart,$mdtEnd);
         $cdtResults = $horsesModel->getUpcomingRaces($date,$cdtStart,$cdtEnd);
         $edtResults = $horsesModel->getUpcomingRaces($date,$edtStart,$edtEnd);
+//        echo $pdt . " " . $pdtStart . " " . $pdtEnd;
         $pdtArr = [];
         $mdtArr = [];
         $cdtArr = [];
