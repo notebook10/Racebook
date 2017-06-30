@@ -18,6 +18,7 @@ Route::group(['middleware' => ['auth']],function(){
     Route::post('dashboard/getServerTime','HomeController@getServerTime');
     Route::post('dashboard/getUpcomingRaces','HomeController@getUpcomingRaces');
     Route::match(array('GET','POST'),'dashboard/appendUpcomingRaces','HomeController@appendUpcomingRaces');
+    Route::post('dashboard/checkPostTime','HomeController@checkPostTime');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');

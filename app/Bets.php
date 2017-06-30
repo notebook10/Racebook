@@ -15,7 +15,8 @@ class Bets extends Model
         $save->bet_type = $dataArray['bettype'];
         $save->bet_amount = $dataArray['betamount'];
         $save->post_time = $dataArray['racePost'];
-        $save->status = 0;
+        $save->status = '0';
+        $save->type = $dataArray['type'];
         $save->bet = $dataArray['bet'];
         $save->save();
     }

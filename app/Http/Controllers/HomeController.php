@@ -69,7 +69,8 @@ class HomeController extends Controller
     }
     public function dashboard(){
         date_default_timezone_set('America/Los_Angeles');
-        $date = date('mdy',time());
+//        $date = date('mdy',time());
+        $date = "062917";
         $tracks = new Tracks();
         $racingTracks = $tracks->getAllTracks($date);
 //        dd($racingTracks);
@@ -91,16 +92,17 @@ class HomeController extends Controller
         return $horses;
     }
     public function saveBet(Request $request){
+        $model = new Bets();
         $dataArray = [
             'bettype' => $request->input("bettype"),
             'track' => $request->input("track"),
             'raceNum' => $request->input("raceNum"),
             'racePost' => $request->input("racePost"),
             'betamount' => $request->input("betamount"),
-            'bet' => json_encode($request->input("bet")),
+            'bet' => $request->input("value"),
+            'type' => $request->input("wpsType"),
             'user' => Auth::user()->id
         ];
-        $model = new Bets();
         $temp = $model->saveBets($dataArray);
         return $temp;
     }
@@ -247,5 +249,22 @@ class HomeController extends Controller
         $model = new Timezone();
         $foo = $model->getTimezoneByCode($trackCode);
         return $foo->track_name;
+    }
+    public function checkPostTime(Request $request){
+        $postTime = $request->input('postTime');
+        $trackCode = $request->input('trk');
+        $trackTimeZone = HomeController::getTimezone($trackCode);
+        $time = $this->getServerTime();
+        $timeZoneTime = $time[strtolower($trackTimeZone)];
+        $foo = date("g:i A",strtotime($timeZoneTime));
+//        dd(date("h:i A",strtotime($timeZoneTime)));
+//        echo $postTime . " " . $foo . " " . $trackTimeZone . " ";
+        $variable = "";
+        if(strtotime($postTime) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
+            $variable = "lt"; // race finished
+        }else{
+            $variable = "gt"; // ok
+        }
+        return $variable;
     }
 }

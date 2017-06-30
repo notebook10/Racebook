@@ -126,7 +126,7 @@ use App\Horses;
 <div class="container">
     <div class="row">
         <div class="col-md-4 col-tracks">
-            <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
+            <h3 id="date" data-date="<?php echo "062917"; ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
             <h5 id="pdt" class="clock"></h5>
             <h5 id="mdt" class="clock"></h5>
             <h5 id="cdt" class="clock"></h5>
@@ -195,7 +195,7 @@ use App\Horses;
                     <input type="hidden" id="selectedRacePostTime">
                 </div>
                 <div id="tempRaces"></div>
-                <div id="submitBet" style="display: none">
+                <div id="submitBet" style="display: none;text-align: center;">
                     <input type="text" id="betAmount" class="form-control" placeholder="Put your bet">
                     <button id="submitBetButton" class="btn btn-success">SUBMIT BET</button>
                 </div>
@@ -225,7 +225,12 @@ use App\Horses;
 <script>
     $("document").ready(function(){
         var BASE_URL = $("#hiddenURL").val();
-        var CURRENT_DATE = $("#date").data("date");
+//        var CURRENT_DATE = $("#date").data("date");
+        var CURRENT_DATE = "062917";
+        var submitArray = []; // Array to be submitted to confirmation
+        var wArray = [];
+        var pArray = [];
+        var sArray = [];
         setTimeout(getUpcomingRaces,3000);
         $(".trkName").on("click",function(){
             if($(this).hasClass("collapsed")){
@@ -724,6 +729,9 @@ use App\Horses;
                                 "<td>"+ amount * s.length +"</td></tr>");
                         }
                         $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>" + wpsTotal + "</td></tr>");
+                        wArray = w;
+                        pArray = p;
+                        sArray = s;
                         displayConfirmationDiv();
                     }
                 }
@@ -785,6 +793,7 @@ use App\Horses;
                                 });
                                 totalBetAmount = exactaBets.length * amount;
                                 $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>" + totalBetAmount + "</td></tr>");
+                                submitArray = exactaBets;
                                 displayConfirmationDiv();
                             }
                         }
@@ -850,6 +859,7 @@ use App\Horses;
                                 $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ superfectaArray[index] + ")</td><td>"+ amount +"</td></tr>");
                             });
                             $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>"+ superfectaTotalAmount +"</td></tr>");
+                            submitArray = superfectaArray;
                             displayConfirmationDiv();
 
                         }
@@ -897,6 +907,7 @@ use App\Horses;
                         });
                         var trifectaTotalAmount = trifectaArray.length * amount;
                         $("table#ticketTbl tbody").append("<tr><td>Total Wager</td><td>"+ trifectaTotalAmount +"</td></tr>");
+                        submitArray = trifectaArray;
                         displayConfirmationDiv();
                     }
                 }
@@ -945,6 +956,7 @@ use App\Horses;
                             $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ ddBets[index] + ")</td><td>"+ amount +"</td></tr>");
                         });
                         $("table#ticketTbl tbody").append("<tr><td>Total Wagers</td><td>"+ ddTotalBets +"</td></tr>");
+                        submitArray = ddBets;
                         displayConfirmationDiv();
                     }
                 }
@@ -973,6 +985,7 @@ use App\Horses;
                             $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ betArr[index] + ")</td><td>"+ amount +"</td></tr>");
                         });
                         $("table#ticketTbl tbody").append("<tr><td>Total Wagers</td><td>"+ extBoxTotalBet +"</td></tr>");
+                        submitArray = betArr;
                         displayConfirmationDiv();
                     }
                 }
@@ -1017,6 +1030,7 @@ use App\Horses;
                             $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ triBoxArr[index] + ")</td><td>"+ amount +"</td></tr>");
                         });
                         $("table#ticketTbl tbody").append("<tr><td>Total Wagers</td><td>"+ triBoxTotal +"</td></tr>");
+                        submitArray = triBoxArr;
                         displayConfirmationDiv();
                     }
                 }
@@ -1049,27 +1063,75 @@ use App\Horses;
                 }
             });
             $.ajax({
-                    "url" : BASE_URL + '/dashboard/saveBet',
-                    type : "POST",
-                    data : {
-                        _token : $('[name="_token"]').val(),
-                        bettype : betType,
-                        track : trk,
-                        raceNum : raceNumber,
-                        racePost : racePostTime,
-                        betamount : amount,
-                        bet : betArray,
-                        pp : ppArray
-                    },
-                    success : function(response){
-                        alert("Success");
-                        location.reload();
-                        console.log(ppArray);
-                    },
-                    error : function(){
-                        alert("error123");
+                "url" : BASE_URL + '/dashboard/checkPostTime',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    trk : trk,
+                    postTime : racePostTime
+                },
+                success : function(response){
+                    console.log(submitArray); // gt or lt
+                    if(response === "lt"){
+                        swal("Race Closed","Race is closed.","error");
+                    }else if(response === "gt"){
+                        // ##############################################
+                        switch(betType){
+                            case "wps":
+                                var w = wArray;
+                                var p = pArray;
+                                var s = sArray;
+                                $.each(w, function(key,val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'w',val);
+                                });
+                                $.each(p, function(key,val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'p',val);
+                                });
+                                $.each(s, function(key,val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'s',val);
+                                });
+                                break;
+                            case "exacta":
+                                $.each(submitArray, function(key, val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                });
+                                break;
+                            case "superfecta":
+                                $.each(submitArray, function(key, val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                });
+                                break;
+                            case "trifecta":
+                                $.each(submitArray, function(key, val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                });
+                                break;
+                            case "dailydouble":
+                                $.each(submitArray, function(key, val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                });
+                                break;
+                            case "exactabox":
+                                $.each(submitArray, function(key, val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                });
+                                break;
+                            case "trifectabox":
+                                $.each(submitArray, function(key, val){
+                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                });
+                                break;
+                            default:
+                                break;
+                        }
+                        swal("Success","Bet successfully saved!","success");
+                        // ##############################################
                     }
-                });
+                },
+                error : function(){
+                    alert("(postTime) - Error");
+                }
+            });
         });
         function toggleIcon(e) {
             $(e.target)
@@ -1149,6 +1211,7 @@ use App\Horses;
             success : function(response){
                 var od = JSON.stringify(response);
                 var obj = JSON.parse(od);
+                $("table."+ trk + num +" tbody tr").html("");
                 $.each(obj, function(index, value){
                     if(obj[index].pp === "SCRATCHED"){
                         $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
@@ -1184,7 +1247,32 @@ use App\Horses;
                 });
             },
             error:function(){
-                alert("Error");
+                swal("Something went wrong!","Please try again.","error");
+            }
+        });
+    }
+    function ajaxSaveBets(url,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,wpstype,value){
+        $.ajax({
+            "url" : url + '/dashboard/saveBet',
+            type : "POST",
+            data : {
+                _token : $('[name="_token"]').val(),
+                bettype : betType,
+                track : trk,
+                raceNum : raceNumber,
+                racePost : racePostTime,
+                betamount : amount,
+                bet : betArray,
+                pp : ppArray,
+                wpsType : wpstype,
+                value : value
+            },
+            success : function(response){
+                console.log("Saved!");
+            },
+            error : function(xhr,status,err){
+                console.log("Error: " + err);
+                swal("Error in saving!","Something went wrong","error");
             }
         });
     }
