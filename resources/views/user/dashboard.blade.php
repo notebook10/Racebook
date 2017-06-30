@@ -115,6 +115,10 @@ use App\Horses;
     #betActions{text-align: center;}
     #confirmBet{margin-right:40px;}
     #ddBoard{margin:20px;text-align:center;font-size:18px;}
+    #tempRaces table tr,th{text-align: center;}
+    th.pp-class{width:6%;}
+    td.pp-class{font-weight: bold;}
+    table.dailydouble th:nth-child(2){width:6%;}
 </style>
 
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
@@ -270,6 +274,11 @@ use App\Horses;
             }
             $(".panel-body div.raceNum").remove();
         });
+//        $("body").delegate(".raceNum","dblclick", function(evt){
+//            evt.preventDefault();
+//            return false;
+//        });
+        $(".raceNum").unbind("dblclick");
         $("body").delegate(".raceNum","click",function(){
             $("#tempRaces table").remove();
             $("#betTicket").css("display","none");
@@ -322,6 +331,7 @@ use App\Horses;
                     var od = JSON.stringify(response);
                     var obj = JSON.parse(od);
                     console.log(obj);
+                    $("table."+ trk + num +" tbody tr").html("");
                     $.each(obj, function(index, value){
                         switch(wager){
                             case "wps":
@@ -440,7 +450,8 @@ use App\Horses;
                     $("#upcomingRacesDiv").css("display","none");
                 },
                 error : function(){
-                    alert("Error");
+                    swal("Something went wrong!","Please try again.","error");
+                    $("#tempRaces table").remove();
                 }
             });
 //            $("#selectedTrkAndRace").attr("data-trk",trk).attr("data-raceNum",num);
@@ -461,7 +472,8 @@ use App\Horses;
                     $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
                 },
                 error : function(){
-                    alert("Error");
+                    swal("Something went wrong!","Please try again.","error");
+                    $("#tempRaces table").remove();
                 }
             });
         });
@@ -878,7 +890,7 @@ use App\Horses;
                         });
                     });
                     if(trifectaArray.length <= 0){
-                        swal("There was a problem!","Please select three horses","error");
+                        swal("There was a problem!","Please select three horses for first, second and third place.","error");
                     }else{
                         $.each(trifectaArray, function(index, value){
                             $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ trifectaArray[index] + ")</td><td>"+ amount +"</td></tr>");
@@ -936,9 +948,82 @@ use App\Horses;
                         displayConfirmationDiv();
                     }
                 }
+                else if(betType === "exactabox"){
+                    var extBoxArr = [];
+                    var extBoxArr2 = [];
+                    var betArr = [];
+                    $.each(ppArray, function(index, value){
+                        extBoxArr.push(ppArray[index]["pp"]);
+                        extBoxArr2.push(ppArray[index]["pp"]);
+                    });
+                    if(extBoxArr.length <= 1){
+                        swal("There was a problem!","Exacta Box requires atleast two selection","error");
+                    }else{
+                        $.each(extBoxArr, function(index, value){
+                            $.each(extBoxArr2, function(key, val){
+                                if(value === val){
+
+                                }else{
+                                    betArr.push(value +"/" + val);
+                                }
+                            });
+                        });
+                        var extBoxTotalBet = betArr.length * amount;
+                        $.each(betArr,function(index, value){
+                            $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ betArr[index] + ")</td><td>"+ amount +"</td></tr>");
+                        });
+                        $("table#ticketTbl tbody").append("<tr><td>Total Wagers</td><td>"+ extBoxTotalBet +"</td></tr>");
+                        displayConfirmationDiv();
+                    }
+                }
+                else if(betType === "trifectabox"){
+                    var fArr = [];
+                    var sArr = [];
+                    var tArr = [];
+                    var triBoxArr = [];
+                    $.each(ppArray, function(index, value){
+                        if(ppArray[index]["val"] == 1){
+                            fArr.push(ppArray[index]["pp"]);
+                            sArr.push(ppArray[index]["pp"]);
+                            tArr.push(ppArray[index]["pp"]);
+                        }
+                    });
+                    if(fArr.length <= 2){
+                        swal("There was an error!","Trifecta Box requires atleast three selections.","error");
+                    }else{
+                        $.each(fArr, function(fKey, fVal){
+                            $.each(sArr, function(sKey,sVal){
+                                if(fVal === sVal){
+
+                                }else{
+                                    $.each(tArr, function(tKey, tVal){
+                                        if(sVal === tVal){
+
+                                        }else{
+                                            if(tVal === fVal){
+
+                                            }else{
+                                                triBoxArr.push(fVal + "," + sVal + "," + tVal);
+                                                console.log(fVal + "," + sVal + "," + tVal);
+                                            }
+                                        }
+                                    });
+                                }
+                            });
+                        });
+                        var triBoxTotal = "";
+                        triBoxTotal = triBoxArr.length * amount;
+                        $.each(triBoxArr,function(index, value){
+                            $("table#ticketTbl tbody").append("<tr><td> Race: "+ raceNumber +" BetType: " + betType + " Track: " + trk + " Amount: " + amount + " ("+ triBoxArr[index] + ")</td><td>"+ amount +"</td></tr>");
+                        });
+                        $("table#ticketTbl tbody").append("<tr><td>Total Wagers</td><td>"+ triBoxTotal +"</td></tr>");
+                        displayConfirmationDiv();
+                    }
+                }
                 else{
                     $("table#ticketTbl tbody").append("<tr><td>"+ "Race " + raceNumber + " " + betType + " (" +
                         betString.substring(0,betString.length - 2) +")</td><td>"+ amount + "</td></tr><tr><td>Total Wager:</td><td>"+ amount +"</td></tr>");
+                    displayConfirmationDiv();
                 }
             }else{
                 swal("Empty Wager","Please enter a wager amount.","error");
