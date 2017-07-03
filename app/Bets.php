@@ -3,6 +3,7 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use DB;
 
 class Bets extends Model
 {
@@ -19,5 +20,20 @@ class Bets extends Model
         $save->type = $dataArray['type'];
         $save->bet = $dataArray['bet'];
         $save->save();
+    }
+    public function insertBets($dataArray){
+        return DB::table($this->table)
+            ->insert($dataArray);
+    }
+    public function getAllBets($authId){
+        return DB::table($this->table)
+            ->where('player_id',$authId)
+            ->get();
+    }
+    public function getPendingBets($authId){
+        return DB::table($this->table)
+            ->where('player_id',$authId)
+            ->where('status',0)
+            ->get();
     }
 }

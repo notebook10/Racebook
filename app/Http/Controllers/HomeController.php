@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Bets;
@@ -9,6 +8,7 @@ use Illuminate\Http\Request;
 use App\User;
 use App\Tracks;
 use Auth;
+use League\Flysystem\Exception;
 use Validator;
 use Theme;
 use Illuminate\Support\Facades\Redirect;
@@ -69,8 +69,7 @@ class HomeController extends Controller
     }
     public function dashboard(){
         date_default_timezone_set('America/Los_Angeles');
-//        $date = date('mdy',time());
-        $date = "062917";
+        $date = date('mdy',time());
         $tracks = new Tracks();
         $racingTracks = $tracks->getAllTracks($date);
 //        dd($racingTracks);
@@ -101,7 +100,7 @@ class HomeController extends Controller
             'betamount' => $request->input("betamount"),
             'bet' => $request->input("value"),
             'type' => $request->input("wpsType"),
-            'user' => Auth::user()->id
+//            'user' => Auth::user()->id
         ];
         $temp = $model->saveBets($dataArray);
         return $temp;
@@ -266,5 +265,26 @@ class HomeController extends Controller
             $variable = "gt"; // ok
         }
         return $variable;
+    }
+    public function insertBets(Request $request){
+        $betsModel = new Bets();
+        $betsModel->insertBets($request->input("dataArray"));
+        return "0";
+    }
+    public function history(){
+        $betsModel = new Bets();
+        $data = [
+            'history' => $betsModel->getAllBets(Auth::id())
+        ];
+        $theme = Theme::uses('default')->layout('layout')->setTitle('History');
+        return $theme->of('user/history', $data)->render();
+    }
+    public function pending(){
+        $betsModel = new Bets();
+        $data = [
+            'pending' => $betsModel->getPendingBets(Auth::id())
+        ];
+        $theme = Theme::uses('default')->layout('layout')->setTitle('Pending');
+        return $theme->of('user/pending', $data)->render();
     }
 }

@@ -126,7 +126,7 @@ use App\Horses;
 <div class="container">
     <div class="row">
         <div class="col-md-4 col-tracks">
-            <h3 id="date" data-date="<?php echo "062917"; ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
+            <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
             <h5 id="pdt" class="clock"></h5>
             <h5 id="mdt" class="clock"></h5>
             <h5 id="cdt" class="clock"></h5>
@@ -225,12 +225,12 @@ use App\Horses;
 <script>
     $("document").ready(function(){
         var BASE_URL = $("#hiddenURL").val();
-//        var CURRENT_DATE = $("#date").data("date");
-        var CURRENT_DATE = "062917";
+        var CURRENT_DATE = $("#date").data("date");
         var submitArray = []; // Array to be submitted to confirmation
         var wArray = [];
         var pArray = [];
         var sArray = [];
+        var userId = $("#userId").val();
         setTimeout(getUpcomingRaces,3000);
         $(".trkName").on("click",function(){
             if($(this).hasClass("collapsed")){
@@ -1076,60 +1076,133 @@ use App\Horses;
                         swal("Race Closed","Race is closed.","error");
                     }else if(response === "gt"){
                         // ##############################################
+//                        switch(betType){
+//                            case "wps":
+//                                var w = wArray;
+//                                var p = pArray;
+//                                var s = sArray;
+//                                $.each(w, function(key,val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'w',val);
+//                                });
+//                                $.each(p, function(key,val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'p',val);
+//                                });
+//                                $.each(s, function(key,val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'s',val);
+//                                });
+//                                break;
+//                            case "exacta":
+//                                $.each(submitArray, function(key, val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+//                                });
+//                                break;
+//                            case "superfecta":
+//                                $.each(submitArray, function(key, val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+//                                });
+//                                break;
+//                            case "trifecta":
+//                                $.each(submitArray, function(key, val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+//                                });
+//                                break;
+//                            case "dailydouble":
+//                                $.each(submitArray, function(key, val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+//                                });
+//                                break;
+//                            case "exactabox":
+//                                $.each(submitArray, function(key, val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+//                                });
+//                                break;
+//                            case "trifectabox":
+//                                $.each(submitArray, function(key, val){
+//                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+//                                });
+//                                break;
+//                            default:
+//                                break;
+//                        }
+//                        var date;
+//                        date = new Date();
+//                        date = date.getUTCFullYear() + '-' +
+//                            ('00' + (date.getUTCMonth()+1)).slice(-2) + '-' +
+//                            ('00' + date.getUTCDate()).slice(-2) + ' ' +
+//                            ('00' + date.getUTCHours()).slice(-2) + ':' +
+//                            ('00' + date.getUTCMinutes()).slice(-2) + ':' +
+//                            ('00' + date.getUTCSeconds()).slice(-2);
+                        var allBetsArr = [];
                         switch(betType){
                             case "wps":
                                 var w = wArray;
                                 var p = pArray;
                                 var s = sArray;
-                                $.each(w, function(key,val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'w',val);
+                                $.each(w, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'w','bet':value});
                                 });
-                                $.each(p, function(key,val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'p',val);
+                                $.each(p, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'p','bet':value});
                                 });
-                                $.each(s, function(key,val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'s',val);
+                                $.each(s, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'s','bet':value});
                                 });
                                 break;
                             case "exacta":
-                                $.each(submitArray, function(key, val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                $.each(submitArray, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value});
                                 });
                                 break;
                             case "superfecta":
-                                $.each(submitArray, function(key, val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                $.each(submitArray, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value});
                                 });
                                 break;
                             case "trifecta":
-                                $.each(submitArray, function(key, val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                $.each(submitArray, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value});
                                 });
                                 break;
                             case "dailydouble":
-                                $.each(submitArray, function(key, val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                $.each(submitArray, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value});
                                 });
                                 break;
                             case "exactabox":
-                                $.each(submitArray, function(key, val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                $.each(submitArray, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value});
                                 });
                                 break;
                             case "trifectabox":
-                                $.each(submitArray, function(key, val){
-                                    ajaxSaveBets(BASE_URL,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,'x',val);
+                                $.each(submitArray, function(index, value){
+                                    allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value});
                                 });
                                 break;
                             default:
                                 break;
                         }
-                        swal("Success","Bet successfully saved!","success");
+                        console.log(allBetsArr);
+                        $.ajax({
+                            "url" : BASE_URL + '/dashboard/insertBets',
+                            type : "POST",
+                            data : {
+                                _token : $('[name="_token"]').val(),
+                                dataArray : allBetsArr
+                            },
+                            success : function(response){
+                                if(response == 0){
+                                    swal("Success","Bet successfully saved!","success");
+                                }
+                            },
+                            error : function(xhr,status,error){
+                                alert(error);
+                            }
+                        });
                         // ##############################################
                     }
                 },
-                error : function(){
-                    alert("(postTime) - Error");
+                error : function(xhr,status,err){
+                    alert(err);
                 }
             });
         });
@@ -1262,16 +1335,17 @@ use App\Horses;
                 raceNum : raceNumber,
                 racePost : racePostTime,
                 betamount : amount,
-                bet : betArray,
-                pp : ppArray,
+//                bet : betArray,
+//                pp : ppArray,
                 wpsType : wpstype,
                 value : value
             },
             success : function(response){
+                alert(jQuery.type(response));
                 console.log("Saved!");
             },
             error : function(xhr,status,err){
-                console.log("Error: " + err);
+                console.log("Error: " + xhr + status + err);
                 swal("Error in saving!","Something went wrong","error");
             }
         });

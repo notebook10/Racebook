@@ -10,7 +10,7 @@
         <meta name="author" content="@get('author')">
 
         <title>@get('title')</title>
-
+        <input type="hidden" id="userId" value="{{ htmlspecialchars(Auth::id()) }}">
         {{--@styles()--}}
 
     </head>
