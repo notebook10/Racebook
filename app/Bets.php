@@ -22,18 +22,26 @@ class Bets extends Model
         $save->save();
     }
     public function insertBets($dataArray){
+        date_default_timezone_set('America/Los_Angeles');
+        $pacificDate = date('Y-m-d H:i:s', time());
+        foreach ($dataArray as $key => $value){
+            $dataArray[$key]['created_at'] = $pacificDate;
+            $dataArray[$key]['updated_at'] = $pacificDate;
+        }
         return DB::table($this->table)
             ->insert($dataArray);
     }
     public function getAllBets($authId){
         return DB::table($this->table)
             ->where('player_id',$authId)
+            ->orderBy('created_at','desc')
             ->get();
     }
     public function getPendingBets($authId){
         return DB::table($this->table)
             ->where('player_id',$authId)
             ->where('status',0)
+            ->orderBy('created_at','desc')
             ->get();
     }
 }

@@ -8,7 +8,7 @@
                 <span class="icon-bar"></span>
                 <span class="icon-bar"></span>
             </button>
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="dashboard">
                 <img src="http://placehold.it/150x50&text=Logo" alt="">
             </a>
         </div>
@@ -16,7 +16,7 @@
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
             <ul class="nav navbar-nav">
                 <li>
-                    <a href="#">About</a>
+                    <a href="tracks">Tracks</a>
                 </li>
                 <li>
                     <a href="#">Services</a>

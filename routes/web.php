@@ -27,5 +27,6 @@ Route::group(['middleware' => ['auth']],function(){
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');
         Route::get('logout','HomeController@logout');
+        Route::get('tracks','AdminController@tracks');
     });
 });

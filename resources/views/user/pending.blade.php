@@ -23,6 +23,7 @@
                         <th>Amount</th>
                         <th>Post Time</th>
                         <th>Status</th>
+                        <th>Date</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -46,6 +47,7 @@
                                 }
                                 ?>
                             </td>
+                            <td>{{ $value->created_at }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -59,7 +61,9 @@
     $("document").ready(function(){
         loadPendingDataTable();
         function loadPendingDataTable(){
-            $("#tblPending").DataTable();
+            $("#tblPending").DataTable({
+                "aaSorting": []
+            });
         }
     });
 </script>

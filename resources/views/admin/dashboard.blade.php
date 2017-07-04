@@ -4,6 +4,7 @@
             <div class="jumbotron text-center">
                 <h1>Administrator</h1>
             </div>
+
         </div>
     </div>
 </div>
