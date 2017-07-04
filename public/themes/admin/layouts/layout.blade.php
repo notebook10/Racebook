@@ -9,6 +9,7 @@ date_default_timezone_set('America/Los_Angeles');
         <meta name="description" content="@get('description')">
         <meta name="author" content="@get('author')">
         <input type="hidden" id="currentDate" data-date="<?php echo date('mdy',time()); ?>">
+        <input type="hidden" id="hiddenURL" value="{{ URL::to('admin') }}">
         <title>@get('title')</title>
 
         @styles()

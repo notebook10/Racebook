@@ -40,4 +40,14 @@ class Horses extends Model
             ->whereBetween('race_time',[" " . $start," " . $end]) // -------------------------
             ->get();
     }
+    public function getHorsesByDate($date){
+        return DB::table($this->table)
+            ->where('race_date',$date)
+            ->get();
+    }
+    public function scratch($id,$arr){
+        return DB::table($this->table)
+            ->where("id",$id)
+            ->update($arr);
+    }
 }

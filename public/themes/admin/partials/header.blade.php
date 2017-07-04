@@ -19,7 +19,10 @@
                     <a href="tracks">Tracks</a>
                 </li>
                 <li>
-                    <a href="#">Services</a>
+                    <a href="timezones">Timezones</a>
+                </li>
+                <li>
+                    <a href="horses">Horses</a>
                 </li>
                 <li>
                     <a href="logout">Logout</a>

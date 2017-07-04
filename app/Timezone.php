@@ -17,4 +17,18 @@ class Timezone extends Model
             ->where("track_code",$trackCode)
             ->first();
     }
+    public function getTimezoneByID($id){
+        return DB::table($this->table)
+            ->where("id",$id)
+            ->first();
+    }
+    public function updateTimezoneById($id,$array){
+        return DB::table($this->table)
+            ->where("id",$id)
+            ->update($array);
+    }
+    public function saveTimezone($dataArray){
+        return DB::table($this->table)
+            ->insert($dataArray);
+    }
 }

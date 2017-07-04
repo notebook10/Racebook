@@ -17,4 +17,11 @@ class Tracks extends Model
             ->where('code',$trackCode)
             ->first();
     }
+    public function getTrackWithTimeZone($date){
+        return DB::table($this->table)
+            ->where('date',$date)
+            ->join('tracks_timezone','tracks.code','=', 'tracks_timezone.track_code')
+            ->select('tracks_timezone.id','tracks.name','tracks.code','tracks.date','tracks_timezone.time_zone')
+            ->get();
+    }
 }

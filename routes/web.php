@@ -28,5 +28,10 @@ Route::group(['middleware' => ['auth']],function(){
         Route::get('dashboard','AdminController@dashboard');
         Route::get('logout','HomeController@logout');
         Route::get('tracks','AdminController@tracks');
+        Route::get('timezones','AdminController@timezones');
+        Route::post('getTmzValues','AdminController@getTmzValues');
+        Route::post('submitTmz','AdminController@submitTmz');
+        Route::get('horses','AdminController@horses');
+        Route::post('scratch','AdminController@scratch');
     });
 });

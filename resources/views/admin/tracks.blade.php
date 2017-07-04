@@ -1,3 +1,3 @@
 @foreach($tracks as $key => $value)
-    {{ $value->name }}
+    {{ $value->name }} <br/>
 @endforeach

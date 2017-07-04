@@ -10,7 +10,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="jumbotron text-center">
-                <h1>History</h1>
+                <h1>Past Bets</h1>
             </div>
             <div>
                 <table class="table table-responsive table-bordered table-striped" id="tblHistory">
