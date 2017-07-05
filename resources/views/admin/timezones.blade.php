@@ -70,7 +70,8 @@
                     $("#id").val(response["id"]);
                     $("#name").val(response["name"]).attr("readonly",true);
                     $("#code").val(response["code"]).attr("readonly",true);
-                    $("#selectTmz option[value='"+ response["tmz"]+"']").attr("selected","selected");
+//                    $("#selectTmz option[value='"+ response["tmz"]+"']").attr("selected","selected");
+                    $("#selectTmz").val(response["tmz"]);
                     $("#operation").val(1);
                     $("#timezoneModal").modal("show");
                 },
@@ -115,6 +116,7 @@
             $("#timezoneModal").modal("show");
         });
         $("body").delegate(".saveNewTmz","click", function(){
+            clearForm();
             var name = $(this).data("name");
             var code = $(this).data("code");
             $("#selectTmz").val($("#selectTmz option:first").val());
@@ -124,8 +126,12 @@
             $("#timezoneModal").modal("show");
         });
         $('#timezoneModal').on('hidden.bs.modal', function () {
-
+            clearForm();
         });
+        function clearForm(){
+            var frm = $("#frmTmz");
+            frm[0].reset();
+        }
     });
 </script>
 
