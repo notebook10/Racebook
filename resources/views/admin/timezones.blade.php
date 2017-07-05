@@ -21,13 +21,22 @@
                     </tr>
                     </thead>
                     <tbody>
+<!--                    --><?php //dd($tracksAndTimezone); ?>
                     @foreach($tracksAndTimezone as $key => $value)
                         <tr>
                             <td>{{ $value->name }}</td>
-                            <td>{{ $value->code }}</td>
+                            <td><?php echo "<strong>". $value->code . "</strong>"; ?></td>
                             <td>{{ $value->date }}</td>
-                            <td>{{ $value->time_zone === "" ? "#########" : $value->time_zone }}</td>
-                            <td><input type="button" class="btn btn-success editTimezone" value="EDIT" data-id="{{ $value->id }}"></td>
+                            <td>{{ $value->time_zone === null ? "EMPTY" : $value->time_zone }}</td>
+                            <td>
+                                <?php
+                                    if($value->time_zone === null){
+                                        echo '<input type="button" class="btn btn-danger saveNewTmz" value="SAVE" data-name="'. $value->name .'" data-code="'. $value->code .'">';
+                                    }else{
+                                        echo '<input type="button" class="btn btn-success editTimezone" value="EDIT" data-id="' . $value->id .'">';
+                                    }
+                                ?>
+                            </td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -58,17 +67,17 @@
                     id : id
                 },
                 success : function(response){
+                    $("#id").val(response["id"]);
                     $("#name").val(response["name"]).attr("readonly",true);
                     $("#code").val(response["code"]).attr("readonly",true);
                     $("#selectTmz option[value='"+ response["tmz"]+"']").attr("selected","selected");
-                    $("#id").val(response["id"]);
+                    $("#operation").val(1);
+                    $("#timezoneModal").modal("show");
                 },
                 error : function(xhr, status, err){
                     swal("Error",err,"error");
                 }
             });
-            $("#operation").val(1);
-            $("#timezoneModal").modal("show");
         });
         $("#submitTmzForm").on("click",function(){
             $.ajax({
@@ -104,6 +113,18 @@
             $("#name").val("").attr("readonly",false);
             $("#code").val("").attr("readonly",false);
             $("#timezoneModal").modal("show");
+        });
+        $("body").delegate(".saveNewTmz","click", function(){
+            var name = $(this).data("name");
+            var code = $(this).data("code");
+            $("#selectTmz").val($("#selectTmz option:first").val());
+            $("#operation").val("0");
+            $("#name").val(name).attr("readonly",true);
+            $("#code").val(code).attr("readonly",true);
+            $("#timezoneModal").modal("show");
+        });
+        $('#timezoneModal').on('hidden.bs.modal', function () {
+
         });
     });
 </script>

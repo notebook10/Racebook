@@ -13,40 +13,59 @@ $("document").ready(function(){
             //                $(".trkName > div.panel").css("color","red");
             $(this).next("div.panel-body").find("div.raceNum").remove();
             var code = $(this).data("code");
+            // Validate track code if it have a timezone
             $.ajax({
-                "url" : BASE_URL + "/dashboard/getRaces",
+                "url" : BASE_URL + "/dashboard/validateTrackTmz",
                 type : "POST",
                 data : {
                     _token : $('[name="_token"]').val(),
-                    code : code,
-                    date : CURRENT_DATE
+                    code : code
                 },
-                dataType: "json",
                 success : function(response){
-                    var od = JSON.stringify(response);
-                    var obj = JSON.parse(od);
-                    var raceCount = "";
-                    var raceTime = "";
-                    var raceTimeArr = [];
-                    var race = []; //array to get first race number
-                    $.each(obj, function(index, value){
-                        // For race number
-                        if(raceTimeArr.indexOf(obj[index].race_time) > -1){}else{
-                            raceTimeArr.push(obj[index].race_time);
-                        }
-                        // For race number
-                        if(race.indexOf(obj[index].race_number) > -1){}else{
-                            race.push(obj[index].race_number);
-                        }
-                    });
-                    console.log(race);
-                    var firstRace = race[0].replace(/\D/g,'');
-                    for(var i = firstRace; i <= raceTimeArr.length; i++){
-                        $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
+                    if(response == ""){
+                        swal("Unavailable","This Race Track is currently unavailable.","error");
+                        // Timezone field unavailable sa tbl timezone
+                    }else{
+                        $.ajax({
+                            "url" : BASE_URL + "/dashboard/getRaces",
+                            type : "POST",
+                            data : {
+                                _token : $('[name="_token"]').val(),
+                                code : code,
+                                date : CURRENT_DATE
+                            },
+                            dataType: "json",
+                            success : function(response){
+                                var od = JSON.stringify(response);
+                                var obj = JSON.parse(od);
+                                var raceCount = "";
+                                var raceTime = "";
+                                var raceTimeArr = [];
+                                var race = []; //array to get first race number
+                                $.each(obj, function(index, value){
+                                    // For race number
+                                    if(raceTimeArr.indexOf(obj[index].race_time) > -1){}else{
+                                        raceTimeArr.push(obj[index].race_time);
+                                    }
+                                    // For race number
+                                    if(race.indexOf(obj[index].race_number) > -1){}else{
+                                        race.push(obj[index].race_number);
+                                    }
+                                });
+                                console.log(race);
+                                var firstRace = race[0].replace(/\D/g,'');
+                                for(var i = firstRace; i <= raceTimeArr.length; i++){
+                                    $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
+                                }
+                            },
+                            error : function(){
+                                alert("error");
+                            }
+                        });
                     }
                 },
-                error : function(){
-                    alert("error");
+                error : function(xhr, status, err){
+                    alert("Error: " + err);
                 }
             });
 
@@ -436,7 +455,7 @@ $("document").ready(function(){
                 });
             },
             error : function(){
-                alert("error");
+                swal("Something went wrong!","Please try again.","error");
             }
         });
     });

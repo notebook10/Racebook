@@ -7,7 +7,7 @@
                 <h4 class="modal-title">TRACK TIMEZONE</h4>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="frmTmz">
                     <input type="hidden" id="operation" value="0" name="operation">
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="id" id="id" value="">

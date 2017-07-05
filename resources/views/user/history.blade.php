@@ -29,7 +29,15 @@
                     <tbody>
                         @foreach($history as $key => $value)
                             <tr>
-                                <td>{{ $value->bet_type }}</td>
+                                <td>
+                                    <?php
+                                    if($value->bet_type === "wps"){
+                                        echo $value->type;
+                                    }else{
+                                        echo $value->bet_type;
+                                    }
+                                    ?>
+                                </td>
                                 <td>{{ \App\Http\Controllers\HomeController::getTrack($value->race_track) }}</td>
                                 <td>{{ $value->race_number }}</td>
                                 <td>{{ $value->bet }}</td>

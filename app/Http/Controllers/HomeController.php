@@ -271,7 +271,7 @@ class HomeController extends Controller
         $betsModel->insertBets($request->input("dataArray"));
         return "0";
     }
-    public function history(){
+    public function past(){
         $betsModel = new Bets();
         $data = [
             'history' => $betsModel->getAllBets(Auth::id())
@@ -286,5 +286,15 @@ class HomeController extends Controller
         ];
         $theme = Theme::uses('default')->layout('layout')->setTitle('Pending');
         return $theme->of('user/pending', $data)->render();
+    }
+    public function validateTrackTmz(Request $request){
+        $trkCode = $request->input("code");
+        $tmzModel = new Timezone();
+        $result = $tmzModel->getTimezoneByCode($trkCode);
+        if($result == null){
+            return null;
+        }else{
+            echo $result->time_zone;
+        }
     }
 }

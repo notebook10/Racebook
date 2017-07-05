@@ -39,11 +39,10 @@ class AdminController extends Controller
         $id = $request->input("id");
         $tmzModel = new Timezone();
         $resultsRow = $tmzModel->getTimezoneByID($id);
-//        dd($resultsRow);
         $dataArray = [
             'name' => $resultsRow->track_name,
             'code' => $resultsRow->track_code,
-            'tmz' => $resultsRow->time_zone,
+            'tmz' => $resultsRow->time_zone ? $resultsRow->time_zone : "" ,
             'id' => $resultsRow->id
         ];
         return $dataArray;

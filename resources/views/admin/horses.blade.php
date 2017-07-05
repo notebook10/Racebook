@@ -32,7 +32,11 @@
                                 <td>{{ $value->race_track }}</td>
                                 <td>
                                     <button class="btn btn-success" data-id="{{ $value->id }}" disabled>EDIT</button>
-                                    <button class="btn btn-danger btnScratch" data-id="{{ $value->id }}">SCRATCH</button>
+                                    <?php
+                                        if($value->pp != "SCRATCHED"){
+                                            echo '<button class="btn btn-danger btnScratch" data-id="'. $value->id .'">SCRATCH</button>';
+                                        }
+                                    ?>
                                 </td>
                             </tr>
                         @endforeach

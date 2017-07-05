@@ -11,7 +11,7 @@
             <div class="collapse navbar-collapse" id="myNavbar">
                 <ul class="nav navbar-nav">
                     <li><a href="{{ URL::to('dashboard') }}">HOME</a></li>
-                    <li><a href="{{ URL::to('dashboard') }}/history">HISTORY</a></li>
+                    <li><a href="{{ URL::to('dashboard') }}/past">PAST BETS</a></li>
                     <li><a href="{{ URL::to('dashboard') }}/pending">PENDING</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
