@@ -8,11 +8,16 @@ use App\Timezone;
 use App\Tracks;
 use Illuminate\Http\Request;
 use Theme;
+use Auth;
 class AdminController extends Controller
 {
     public function dashboard(){
-        $theme = Theme::uses('admin')->layout('layout')->setTitle('Admin');
-        return $theme->of('admin/dashboard')->render();
+        if(Auth::check()){
+            $theme = Theme::uses('admin')->layout('layout')->setTitle('Admin');
+            return $theme->of('admin/dashboard')->render();
+        }else{
+            return view('default/login');
+        }
     }
     public function tracks(){
         date_default_timezone_set('America/Los_Angeles');

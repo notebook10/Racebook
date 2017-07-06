@@ -31,4 +31,9 @@ class Timezone extends Model
         return DB::table($this->table)
             ->insert($dataArray);
     }
+    public function getTrkCodeByName($trkName){
+        return DB::table($this->table)
+            ->where("track_name"," " . $trkName)
+            ->first();
+    }
 }

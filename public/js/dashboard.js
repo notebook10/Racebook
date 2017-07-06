@@ -1021,7 +1021,7 @@ $("document").ready(function(){
                     trackName = response[index].substring(response[index].lastIndexOf("|")+1,response[index].lastIndexOf("@"));
                     raceNumber = response[index].substr(response[index].indexOf("&") + 1);
                     mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
-                    $("table#tblUpcomingRace tbody").append("<tr><td>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
+                    $("table#tblUpcomingRace tbody").append("<tr><td class='upcomingRace' data-track='"+ trackName +"' data-number='"+ raceNumber +"'>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
                 });
                 console.log(response);
             },
@@ -1030,6 +1030,31 @@ $("document").ready(function(){
             }
         });
     }
+    $("body").delegate(".upcomingRace","click", function(){
+        var trkName = $(this).data("track");
+        var raceNumber = $(this).data("number").replace(/\D/g,'');
+        $.ajax({
+            "url" : BASE_URL + "/dashboard/getTrackCode",
+            type : "POST",
+            data : {
+                _token : $('[name="_token"]').val(),
+                name : trkName,
+                raceNum : raceNumber,
+                date : CURRENT_DATE
+            },
+            success : function(response){
+                $("#selectedTrack").val(response['trkCode']);
+                $("#tempRaces table").remove();
+                $("#betTicket").css("display","none");
+                $("#betAmount").val("");
+                $("#upcomingRacesDiv").css("display","none");
+                $("#raceDiv").css("display","block");
+            },
+            error : function(xhr, status, error){
+                alert(error);
+            }
+        });
+    });
 });
 function displayConfirmationDiv(){
     $("#raceDiv").css("display","none");

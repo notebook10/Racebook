@@ -24,6 +24,7 @@ Route::group(['middleware' => ['auth']],function(){
     Route::get('dashboard/past','HomeController@past');
     Route::get('dashboard/pending','HomeController@pending');
     Route::post('dashboard/validateTrackTmz','HomeController@validateTrackTmz');
+    Route::post('dashboard/getTrackCode','HomeController@getTrackCode');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');

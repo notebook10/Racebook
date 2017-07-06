@@ -14,11 +14,11 @@
         </form>
         <form class="login-form" id="frmLogin" method="post" action="login">
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
-            <input type="text" name="username" placeholder="username"/>
-            <input type="password" name="password" placeholder="password" />
+            <input type="text" name="username" placeholder="username" required />
+            <input type="password" name="password" placeholder="password" required />
             <input type="submit" id="submit" class="submit-button">
 
-            <p class="message">Not registered? <a href="#">Create an account</a></p>
+            {{--<p class="message">Not registered? <a href="#">Create an account</a></p>--}}
             <ul class="errormessage">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>

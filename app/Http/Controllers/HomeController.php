@@ -297,4 +297,17 @@ class HomeController extends Controller
             echo $result->time_zone;
         }
     }
+    public function getTrackCode(Request $request){
+        $trkName = $request->input("name");
+        $raceNum = $request->input("raceNum");
+        $date = $request->input("date");
+        $tmzModel = new Timezone();
+        $horsesModel = new Horses();
+        $trkCode = $tmzModel->getTrkCodeByName($trkName);
+        $dataArray = [
+            'horses' => $horsesModel->getHorsesPerRace($trkCode->track_code,$date,$raceNum),
+            'trkCode' => $trkCode->track_code
+        ];
+        return $dataArray;
+    }
 }
