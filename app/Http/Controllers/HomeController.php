@@ -178,9 +178,9 @@ class HomeController extends Controller
                 $to = strtotime($pdt);
 //                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
                 $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $pdtArr, TRUE)){
+                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $pdtArr, TRUE)){
                 }else{
-                    array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
+                    array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time );
                 }
             }
         }
@@ -192,9 +192,9 @@ class HomeController extends Controller
                 $to = strtotime($mdt);
 //                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
                 $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $mdtArr, TRUE)){
+                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $mdtArr, TRUE)){
                 }else{
-                    array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
+                    array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
                 }
             }
         }
@@ -206,9 +206,9 @@ class HomeController extends Controller
                 $to = strtotime($cdt);
 //                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
                 $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $cdtArr, TRUE)){
+                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $cdtArr, TRUE)){
                 }else{
-                    array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
+                    array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
                 }
             }
         }
@@ -220,9 +220,9 @@ class HomeController extends Controller
                 $to = strtotime($edt);
 //                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
                 $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $edtArr, TRUE)){
+                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $edtArr, TRUE)){
                 }else{
-                    array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
+                    array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
                 }
             }
         }
@@ -303,10 +303,13 @@ class HomeController extends Controller
         $date = $request->input("date");
         $tmzModel = new Timezone();
         $horsesModel = new Horses();
+        // GET RACE POST TIME
         $trkCode = $tmzModel->getTrkCodeByName($trkName);
+        $firstRacePostTime = $horsesModel->getRaceTime($trkCode->track_code,$date,"Race " . $raceNum);
         $dataArray = [
             'horses' => $horsesModel->getHorsesPerRace($trkCode->track_code,$date,$raceNum),
-            'trkCode' => $trkCode->track_code
+            'trkCode' => $trkCode->track_code,
+            'firstRacePostTime' => $firstRacePostTime->race_time
         ];
         return $dataArray;
     }

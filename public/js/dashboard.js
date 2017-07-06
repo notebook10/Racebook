@@ -118,164 +118,34 @@ $("document").ready(function(){
                 break;
         }
 //            $("#tempRaces").append("<table class=' table "+ trk + num +"'><thead><tr><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        $.ajax({
-            "url" : BASE_URL + "/dashboard/getHorsesPerRace",
-            type : "POST",
-            data : {
-                _token : $('[name="_token"]').val(),
-                code : trk,
-                date : CURRENT_DATE,
-                number : num
-            },
-            success : function(response){
-                var od = JSON.stringify(response);
-                var obj = JSON.parse(od);
-                console.log(obj);
-                $("table."+ trk + num +" tbody tr").html("");
-                $.each(obj, function(index, value){
-                    switch(wager){
-                        case "wps":
-                            if(obj[index].pp === "SCRATCHED"){
-                                $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }else if(obj[index].pp === "Foo"){
-
-                            }else{
-                                $("table."+ trk + num +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pp +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
-                                    "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }
-                            break;
-                        case "superfecta":
-                            if(obj[index].pp === "SCRATCHED"){
-                                $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }else if(obj[index].pp === "Foo"){
-
-                            }else{
-                                $("table."+ trk + num +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }
-                            break;
-                        case "exacta":
-                            if(obj[index].pp === "SCRATCHED"){
-                                $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }else if(obj[index].pp === "Foo"){
-
-                            }else{
-                                $("table."+ trk + num +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }
-                            break;
-                        case "exactabox":
-                            if(obj[index].pp === "SCRATCHED"){
-                                $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }else if(obj[index].pp === "Foo"){
-
-                            }else{
-                                $("table."+ trk + num +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='exactabox' data-id='"+ trk + num + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }
-                            break;
-                        case "trifecta":
-                            if(obj[index].pp === "SCRATCHED"){
-                                $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }else if(obj[index].pp === "Foo"){
-
-                            }else{
-                                $("table."+ trk + num +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }
-                            break;
-                        case "trifectabox":
-                            if(obj[index].pp === "SCRATCHED"){
-                                $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }else if(obj[index].pp === "Foo"){
-
-                            }else{
-                                $("table."+ trk + num +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='trifectabox' data-id='"+ trk + num + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }
-                            break;
-                        case "dailydouble":
-                            if(obj[index].pp === "SCRATCHED"){
-                                $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }else if(obj[index].pp === "Foo"){
-
-                            }else{
-                                $("table."+ trk + num +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
-                            }
-                            break;
-                        default:
-                            console.log("Select a Wager");
-                            break;
-                    }
-                });
-                $(".tdPP").each(function(key,val){
-                    if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
-                    else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
-                    else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
-                    else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
-                    else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                    else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
-                    else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
-                    else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
-                    else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
-                    else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
-                    else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
-                    else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
-                    else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
-                    else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
-                    else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
-                    else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
-                    else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
-                    else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
-                    else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
-                    else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
-                });
-                $("#raceDiv").css("display","block");
-                $("#upcomingRacesDiv").css("display","none");
-            },
-            error : function(){
-                swal("Something went wrong!","Please try again.","error");
-                $("#tempRaces table").remove();
-            }
-        });
+        //Marka
+        fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
+        // Marka
 //            $("#selectedTrkAndRace").attr("data-trk",trk).attr("data-raceNum",num);
-        $("#selectedTrack").val(trk);
-        $("#selectedRaceNum").val(num);
-        $("#selectedRacePostTime").val(post);
-        $("#submitBet").css("display","block");
-        $.ajax({
-            'url' : BASE_URL + '/dashboard/getTrackName',
-            type : "POST",
-            data : {
-                _token : $('[name="_token"]').val(),
-                trk : trk
-            },
-            success : function(response){
-                $("#raceTrackName, #raceNumberAndPostTime").html("");
-                $("#raceTrackName").append(response);
-                $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
-            },
-            error : function(){
-                swal("Something went wrong!","Please try again.","error");
-                $("#tempRaces table").remove();
-            }
-        });
+        //Marka 2
+        fooFunction2(BASE_URL,trk,num,post);
+        //Marka 2
+//         $("#selectedTrack").val(trk);
+//         $("#selectedRaceNum").val(num);
+//         $("#selectedRacePostTime").val(post);
+//         $("#submitBet").css("display","block");
+//         $.ajax({
+//             'url' : BASE_URL + '/dashboard/getTrackName',
+//             type : "POST",
+//             data : {
+//                 _token : $('[name="_token"]').val(),
+//                 trk : trk
+//             },
+//             success : function(response){
+//                 $("#raceTrackName, #raceNumberAndPostTime").html("");
+//                 $("#raceTrackName").append(response);
+//                 $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
+//             },
+//             error : function(){
+//                 swal("Something went wrong!","Please try again.","error");
+//                 $("#tempRaces table").remove();
+//             }
+//         });
     });
 
     //ACCORDION
@@ -1019,10 +889,12 @@ $("document").ready(function(){
                 $("table#tblUpcomingRace tbody tr").remove();
                 $.each(response, function(index, value){
                     trackName = response[index].substring(response[index].lastIndexOf("|")+1,response[index].lastIndexOf("@"));
-                    raceNumber = response[index].substr(response[index].indexOf("&") + 1);
+                    // raceNumber = response[index].substr(response[index].indexOf("&") + 1);
+                    raceNumber = response[index].substring(response[index].lastIndexOf("&")+1,response[index].lastIndexOf("/"));
                     mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
                     $("table#tblUpcomingRace tbody").append("<tr><td class='upcomingRace' data-track='"+ trackName +"' data-number='"+ raceNumber +"'>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
                 });
+                console.log("<<<<<<<<<>>>>>>>>>>>>");
                 console.log(response);
             },
             error : function(xhr, status, err){
@@ -1032,23 +904,57 @@ $("document").ready(function(){
     }
     $("body").delegate(".upcomingRace","click", function(){
         var trkName = $(this).data("track");
-        var raceNumber = $(this).data("number").replace(/\D/g,'');
+        var num = $(this).data("number").replace(/\D/g,'');
         $.ajax({
             "url" : BASE_URL + "/dashboard/getTrackCode",
             type : "POST",
             data : {
                 _token : $('[name="_token"]').val(),
                 name : trkName,
-                raceNum : raceNumber,
+                raceNum : num,
                 date : CURRENT_DATE
             },
             success : function(response){
+                var trk = response['trkCode'];
+                var wager = $("#selectWager").val();
+                var firstRacePostTime = response['firstRacePostTime'];
                 $("#selectedTrack").val(response['trkCode']);
                 $("#tempRaces table").remove();
                 $("#betTicket").css("display","none");
                 $("#betAmount").val("");
                 $("#upcomingRacesDiv").css("display","none");
                 $("#raceDiv").css("display","block");
+                var ddselectedRaceNum = parseInt(num) + parseInt(1);
+                switch("wps"){
+                    case "wps":
+                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        break;
+                    case "superfecta":
+                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        break;
+                    case "exacta":
+                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        break;
+                    case "exactabox":
+                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        break;
+                    case "trifecta":
+                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        break;
+                    case "trifectabox":
+                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        break;
+                    case "dailydouble":
+                        $("#tempRaces div#ddBoard").html("");
+                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                        ajaxGetHorsesPerRace(BASE_URL,response['trkCode'],CURRENT_DATE, ddselectedRaceNum);
+                        break;
+                    default:
+                        break;
+                }
+                fooFunction(BASE_URL,response['trkCode'],CURRENT_DATE,num,"wps");
+                fooFunction2(BASE_URL,response['trkCode'],num,firstRacePostTime);
             },
             error : function(xhr, status, error){
                 alert(error);
@@ -1136,6 +1042,168 @@ function ajaxSaveBets(url,betType,trk,raceNumber,racePostTime,amount,betArray,pp
         error : function(xhr,status,err){
             console.log("Error: " + xhr + status + err);
             swal("Error in saving!","Something went wrong","error");
+        }
+    });
+}
+function fooFunction($url,trk,date,num,wager){
+    $.ajax({
+        "url" : $url + "/dashboard/getHorsesPerRace",
+        type : "POST",
+        data : {
+            _token : $('[name="_token"]').val(),
+            code : trk,
+            date : date,
+            number : num
+        },
+        success : function(response){
+            var od = JSON.stringify(response);
+            var obj = JSON.parse(od);
+            console.log(obj);
+            $("table."+ trk + num +" tbody tr").html("");
+            $.each(obj, function(index, value){
+                switch(wager){
+                    case "wps":
+                        if(obj[index].pp === "SCRATCHED"){
+                            $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }else if(obj[index].pp === "Foo"){
+
+                        }else{
+                            $("table."+ trk + num +" tbody").append("<tr>" +
+                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pp +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
+                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }
+                        break;
+                    case "superfecta":
+                        if(obj[index].pp === "SCRATCHED"){
+                            $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }else if(obj[index].pp === "Foo"){
+
+                        }else{
+                            $("table."+ trk + num +" tbody").append("<tr>" +
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }
+                        break;
+                    case "exacta":
+                        if(obj[index].pp === "SCRATCHED"){
+                            $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }else if(obj[index].pp === "Foo"){
+
+                        }else{
+                            $("table."+ trk + num +" tbody").append("<tr>" +
+                                "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }
+                        break;
+                    case "exactabox":
+                        if(obj[index].pp === "SCRATCHED"){
+                            $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }else if(obj[index].pp === "Foo"){
+
+                        }else{
+                            $("table."+ trk + num +" tbody").append("<tr>" +
+                                "<td><input type='checkbox' class='exactabox' data-id='"+ trk + num + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }
+                        break;
+                    case "trifecta":
+                        if(obj[index].pp === "SCRATCHED"){
+                            $("table."+ trk + num +" tbody").append("<tr><td>*</td><td>*</td><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }else if(obj[index].pp === "Foo"){
+
+                        }else{
+                            $("table."+ trk + num +" tbody").append("<tr>" +
+                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }
+                        break;
+                    case "trifectabox":
+                        if(obj[index].pp === "SCRATCHED"){
+                            $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }else if(obj[index].pp === "Foo"){
+
+                        }else{
+                            $("table."+ trk + num +" tbody").append("<tr>" +
+                                "<td><input type='checkbox' class='trifectabox' data-id='"+ trk + num + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }
+                        break;
+                    case "dailydouble":
+                        if(obj[index].pp === "SCRATCHED"){
+                            $("table."+ trk + num +" tbody").append("<tr><td>*</td><td class='tdPP'>"+ " " +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }else if(obj[index].pp === "Foo"){
+
+                        }else{
+                            $("table."+ trk + num +" tbody").append("<tr>" +
+                                "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        }
+                        break;
+                    default:
+                        console.log("Select a Wager");
+                        break;
+                }
+            });
+            $(".tdPP").each(function(key,val){
+                if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
+                else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
+                else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
+                else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
+                else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
+                else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
+                else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
+                else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
+                else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
+                else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
+                else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
+                else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
+                else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
+                else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
+                else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
+                else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
+                else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
+                else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
+                else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
+            });
+            $("#raceDiv").css("display","block");
+            $("#upcomingRacesDiv").css("display","none");
+        },
+        error : function(){
+            swal("Something went wrong!","Please try again.","error");
+            $("#tempRaces table").remove();
+        }
+    });
+}
+
+function fooFunction2(url,trk,num,post){
+    $("#selectedTrack").val(trk);
+    $("#selectedRaceNum").val(num);
+    $("#selectedRacePostTime").val(post);
+    $("#submitBet").css("display","block");
+    $.ajax({
+        'url' : url + '/dashboard/getTrackName',
+        type : "POST",
+        data : {
+            _token : $('[name="_token"]').val(),
+            trk : trk
+        },
+        success : function(response){
+            $("#raceTrackName, #raceNumberAndPostTime").html("");
+            $("#raceTrackName").append(response);
+            $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
+        },
+        error : function(){
+            swal("Something went wrong!","Please try again.","error");
+            $("#tempRaces table").remove();
         }
     });
 }

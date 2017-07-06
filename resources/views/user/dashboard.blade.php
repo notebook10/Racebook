@@ -79,10 +79,10 @@
                         <option value="trifecta">Trifecta</option>
                         <option value="trifectabox">Trifecta Box</option>
                     </select>
-                    <input type="text" id="selectedTrkAndRace" data-trk="" data-raceNum="">
-                    <input type="text" id="selectedTrack">
-                    <input type="text" id="selectedRaceNum">
-                    <input type="text" id="selectedRacePostTime">
+                    <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
+                    <input type="hidden" id="selectedTrack">
+                    <input type="hidden" id="selectedRaceNum">
+                    <input type="hidden" id="selectedRacePostTime">
                 </div>
                 <div id="tempRaces"></div>
                 <div id="submitBet" style="display: none;text-align: center;">
