@@ -25,6 +25,9 @@
                     <a href="horses">Horses</a>
                 </li>
                 <li>
+                    <a href="wager">Wager</a>
+                </li>
+                <li>
                     <a href="logout">Logout</a>
                 </li>
             </ul>

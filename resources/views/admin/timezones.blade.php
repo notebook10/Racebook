@@ -33,7 +33,7 @@
                                     if($value->time_zone === null){
                                         echo '<input type="button" class="btn btn-danger saveNewTmz" value="SAVE" data-name="'. $value->name .'" data-code="'. $value->code .'">';
                                     }else{
-                                        echo '<input type="button" class="btn btn-success editTimezone" value="EDIT" data-id="' . $value->id .'">';
+                                        echo '<input type="button" class="btn btn-success editTimezone" value="EDIT" data-id="' . $value->id .'" data-code="'. $value->time_zone .'">';
                                     }
                                 ?>
                             </td>

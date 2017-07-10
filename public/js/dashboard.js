@@ -7,6 +7,7 @@ $("document").ready(function(){
     var pArray = [];
     var sArray = [];
     var userId = $("#userId").val();
+    var selectedWagerPrev = "";
     setTimeout(getUpcomingRaces,3000);
     $(".trkName").on("click",function(){
         if($(this).hasClass("collapsed")){
@@ -74,78 +75,143 @@ $("document").ready(function(){
         }
         $(".panel-body div.raceNum").remove();
     });
-//        $("body").delegate(".raceNum","dblclick", function(evt){
-//            evt.preventDefault();
-//            return false;
-//        });
     $(".raceNum").unbind("dblclick");
     $("body").delegate(".raceNum","click",function(){
         $("#tempRaces table").remove();
         $("#betTicket").css("display","none");
         $("#betAmount").val("");
-        var wager = $("#selectWager").val();
+        selectedWagerPrev = $("#selectWager option:selected").text();
         var trk = $(this).data("track");
         var num = $(this).data("number");
         var post = $(this).data("post");
         var ddselectedRaceNum = parseInt(num) + parseInt(1);
-//            $("#tempRaces").append("<ul class='"+ trk + num +"'></ul>");
-        switch(wager){
-            case "wps":
-                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                break;
-            case "superfecta":
-                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                break;
-            case "exacta":
-                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                break;
-            case "exactabox":
-                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                break;
-            case "trifecta":
-                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                break;
-            case "trifectabox":
-                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                break;
-            case "dailydouble":
-                $("#tempRaces div#ddBoard").html("");
-                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                ajaxGetHorsesPerRace(BASE_URL,trk,CURRENT_DATE, ddselectedRaceNum);
-                break;
-            default:
-                break;
-        }
-//            $("#tempRaces").append("<table class=' table "+ trk + num +"'><thead><tr><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //Marka
-        fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
-        // Marka
-//            $("#selectedTrkAndRace").attr("data-trk",trk).attr("data-raceNum",num);
-        //Marka 2
+        // GET WAGER
+        // getWagerForRace(BASE_URL, trk, num, CURRENT_DATE);
+        // var wager = $("#selectWager").val();
+        var wager = "";
+        $.ajax({
+            "url" : BASE_URL + "/dashboard/getWagerForRace",
+            type : "POST",
+            data : {
+                _token : $('[name="_token"]').val(),
+                trk : trk,
+                num : num,
+                date : CURRENT_DATE
+            },
+            success : function(response){
+                $("#selectWager").empty();
+                $.each(response, function(index, value){
+                    switch(value){
+                        case "WPS":
+                            $('#selectWager').append($('<option>', {value : 'wps', text : 'Win/Place/Show'}));
+                            break;
+                        case "Exacta":
+                            $('#selectWager').append($('<option>', {value : 'exacta', text : value}));
+                            break;
+                        case "Daily Double":
+                            $('#selectWager').append($('<option>', {value : 'dailydouble', text : value}));
+                            break;
+                        case "Trifecta":
+                            $('#selectWager').append($('<option>', {value : 'trifecta', text : value}));
+                            break;
+                        case "Superfecta":
+                            $('#selectWager').append($('<option>', {value : 'superfecta', text : value}));
+                            break;
+                    }
+                });
+                if($.inArray(selectedWagerPrev, response) > -1){
+                    switch (selectedWagerPrev){
+                        case "Win/Place/Show":
+                            wager = "wps";
+                            $('#selectWager').val("wps");
+                            break;
+                        case "Exacta":
+                            wager = "exacta";
+                            $('#selectWager').val("exacta");
+                            break;
+                        case "Trifecta":
+                            wager = "trifecta";
+                            $('#selectWager').val("trifecta");
+                            break;
+                        case "Superfecta":
+                            wager = "superfecta";
+                            $('#selectWager').val("superfecta");
+                            break;
+                        case "Daily Double":
+                            wager = "dailydouble";
+                            $('#selectWager').val("dailydouble");
+                            break;
+                        default:break;
+                    }
+                }else{
+                    wager = $("#selectWager").val();
+                }
+                switch(wager){
+                        case "wps":
+                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            break;
+                        case "superfecta":
+                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            break;
+                        case "exacta":
+                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            break;
+                        case "exactabox":
+                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            break;
+                        case "trifecta":
+                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            break;
+                        case "trifectabox":
+                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            break;
+                        case "dailydouble":
+                            $("#tempRaces div#ddBoard").html("");
+                            $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                            ajaxGetHorsesPerRace(BASE_URL,trk,CURRENT_DATE, ddselectedRaceNum);
+                            break;
+                        default:
+
+                            break;
+                    }
+                fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
+            },
+            error : function(xhr,status, error){
+                swal("Error","Error: " + error,"error");
+            }
+        });
+        // switch(wager){
+        //     case "wps":
+        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         break;
+        //     case "superfecta":
+        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         break;
+        //     case "exacta":
+        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         break;
+        //     case "exactabox":
+        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         break;
+        //     case "trifecta":
+        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         break;
+        //     case "trifectabox":
+        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         break;
+        //     case "dailydouble":
+        //         $("#tempRaces div#ddBoard").html("");
+        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+        //         ajaxGetHorsesPerRace(BASE_URL,trk,CURRENT_DATE, ddselectedRaceNum);
+        //         break;
+        //     default:
+        //
+        //         break;
+        // }
+        // fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
         fooFunction2(BASE_URL,trk,num,post);
-        //Marka 2
-//         $("#selectedTrack").val(trk);
-//         $("#selectedRaceNum").val(num);
-//         $("#selectedRacePostTime").val(post);
-//         $("#submitBet").css("display","block");
-//         $.ajax({
-//             'url' : BASE_URL + '/dashboard/getTrackName',
-//             type : "POST",
-//             data : {
-//                 _token : $('[name="_token"]').val(),
-//                 trk : trk
-//             },
-//             success : function(response){
-//                 $("#raceTrackName, #raceNumberAndPostTime").html("");
-//                 $("#raceTrackName").append(response);
-//                 $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
-//             },
-//             error : function(){
-//                 swal("Something went wrong!","Please try again.","error");
-//                 $("#tempRaces table").remove();
-//             }
-//         });
     });
 
     //ACCORDION
@@ -167,6 +233,7 @@ $("document").ready(function(){
         var selectedTrack = $("#selectedTrack").val();
         var selectedRaceNum = $("#selectedRaceNum").val();
         var ddselectedRaceNum = parseInt($("#selectedRaceNum").val()) + parseInt(1);
+        selectedWagerPrev = $("#selectWager option:selected").text();
         $.ajax({
             "url" : BASE_URL + '/dashboard/getHorsesPerRace',
             type : "POST",
@@ -718,127 +785,107 @@ $("document").ready(function(){
         var betArray = [];
         var ppArray = [];
 
-        swal({
-                title: "Are you sure?",
-                text: "You will not be able to recover this bet!",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#DD6B55",
-                confirmButtonText: "Yes, save it!",
-                cancelButtonText: "No, cancel please!",
-                closeOnConfirm: false,
-                closeOnCancel: false
-            },
-            function(isConfirm){
-                if (isConfirm) {
-                    $("input[type=checkbox]").each(function(){
-                        if(this.checked){
-                            betArray.push($(this).data("id"));
-                            ppArray.push({
-                                'pp' : $(this).data("pp"),
-                                'val' : $(this).data("val")
-                            });
-                        }else{
+        $("input[type=checkbox]").each(function(){
+            if(this.checked){
+                betArray.push($(this).data("id"));
+                ppArray.push({
+                    'pp' : $(this).data("pp"),
+                    'val' : $(this).data("val")
+                });
+            }else{
 
-                        }
-                    });
+            }
+        });
+        $.ajax({
+            "url" : BASE_URL + '/dashboard/checkPostTime',
+            type : "POST",
+            data : {
+                _token : $('[name="_token"]').val(),
+                trk : trk,
+                postTime : racePostTime
+            },
+            success : function(response){
+                console.log(submitArray); // gt or lt
+                if(response === "lt"){
+                    swal("Race Closed","Race is closed.","error");
+                }else if(response === "gt"){
+                    var allBetsArr = [];
+                    switch(betType){
+                        case "wps":
+                            var w = wArray;
+                            var p = pArray;
+                            var s = sArray;
+                            $.each(w, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'w','bet':value,'created_at':'','updated_at':''});
+                            });
+                            $.each(p, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'p','bet':value,'created_at':'','updated_at':''});
+                            });
+                            $.each(s, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'s','bet':value,'created_at':'','updated_at':''});
+                            });
+                            break;
+                        case "exacta":
+                            $.each(submitArray, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
+                            });
+                            console.log("<<<<<");
+                            console.log(submitArray);
+                            break;
+                        case "superfecta":
+                            $.each(submitArray, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
+                            });
+                            break;
+                        case "trifecta":
+                            $.each(submitArray, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
+                            });
+                            break;
+                        case "dailydouble":
+                            $.each(submitArray, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
+                            });
+                            break;
+                        case "exactabox":
+                            $.each(submitArray, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
+                            });
+                            break;
+                        case "trifectabox":
+                            $.each(submitArray, function(index, value){
+                                allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
+                            });
+                            break;
+                        default:
+                            break;
+                    }
                     $.ajax({
-                        "url" : BASE_URL + '/dashboard/checkPostTime',
+                        "url" : BASE_URL + '/dashboard/insertBets',
                         type : "POST",
                         data : {
                             _token : $('[name="_token"]').val(),
-                            trk : trk,
-                            postTime : racePostTime
+                            dataArray : allBetsArr
                         },
                         success : function(response){
-                            console.log(submitArray); // gt or lt
-                            if(response === "lt"){
-                                swal("Race Closed","Race is closed.","error");
-                            }else if(response === "gt"){
-                                var allBetsArr = [];
-                                switch(betType){
-                                    case "wps":
-                                        var w = wArray;
-                                        var p = pArray;
-                                        var s = sArray;
-                                        $.each(w, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'w','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        $.each(p, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'p','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        $.each(s, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'s','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        break;
-                                    case "exacta":
-                                        $.each(submitArray, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        console.log("<<<<<");
-                                        console.log(submitArray);
-                                        break;
-                                    case "superfecta":
-                                        $.each(submitArray, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        break;
-                                    case "trifecta":
-                                        $.each(submitArray, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        break;
-                                    case "dailydouble":
-                                        $.each(submitArray, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        break;
-                                    case "exactabox":
-                                        $.each(submitArray, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        break;
-                                    case "trifectabox":
-                                        $.each(submitArray, function(index, value){
-                                            allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
-                                        });
-                                        break;
-                                    default:
-                                        break;
-                                }
-                                $.ajax({
-                                    "url" : BASE_URL + '/dashboard/insertBets',
-                                    type : "POST",
-                                    data : {
-                                        _token : $('[name="_token"]').val(),
-                                        dataArray : allBetsArr
-                                    },
-                                    success : function(response){
-                                        if(response == 0){
-                                            swal("Success","Bet successfully saved!","success");
-                                            $("button.confirm").on("click", function(){
-                                                location.reload();
-                                            });
-                                        }
-                                    },
-                                    error : function(xhr,status,error){
-                                        alert(error);
-                                    }
+                            if(response == 0){
+                                swal("Success","Bet successfully saved!","success");
+                                $("button.confirm").on("click", function(){
+                                    location.reload();
                                 });
-                                // ##############################################
                             }
                         },
-                        error : function(xhr,status,err){
-                            alert(err);
+                        error : function(xhr,status,error){
+                            alert(error);
                         }
                     });
-                } else {
-                    swal("Cancelled", "Bet aborted!", "error");
-                    $("button.confirm").on("click",function(){
-                        location.reload();
-                    });
+                    // ##############################################
                 }
-            });
+            },
+            error : function(xhr,status,err){
+                alert(err);
+            }
+        });
     });
     function toggleIcon(e) {
         $(e.target)
@@ -916,7 +963,6 @@ $("document").ready(function(){
             },
             success : function(response){
                 var trk = response['trkCode'];
-                var wager = $("#selectWager").val();
                 var firstRacePostTime = response['firstRacePostTime'];
                 $("#selectedTrack").val(response['trkCode']);
                 $("#tempRaces table").remove();
@@ -925,35 +971,131 @@ $("document").ready(function(){
                 $("#upcomingRacesDiv").css("display","none");
                 $("#raceDiv").css("display","block");
                 var ddselectedRaceNum = parseInt(num) + parseInt(1);
-                switch("wps"){
-                    case "wps":
-                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        break;
-                    case "superfecta":
-                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        break;
-                    case "exacta":
-                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        break;
-                    case "exactabox":
-                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        break;
-                    case "trifecta":
-                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        break;
-                    case "trifectabox":
-                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        break;
-                    case "dailydouble":
-                        $("#tempRaces div#ddBoard").html("");
-                        $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        ajaxGetHorsesPerRace(BASE_URL,response['trkCode'],CURRENT_DATE, ddselectedRaceNum);
-                        break;
-                    default:
-                        break;
-                }
-                fooFunction(BASE_URL,response['trkCode'],CURRENT_DATE,num,"wps");
+                var wager = "";
+                $.ajax({
+                    "url" : BASE_URL + "/dashboard/getWagerForRace",
+                    type : "POST",
+                    data : {
+                        _token : $('[name="_token"]').val(),
+                        trk : trk,
+                        num : num,
+                        date : CURRENT_DATE
+                    },
+                    success : function(response){
+                        $("#selectWager").empty();
+                        $.each(response, function(index, value){
+                            switch(value){
+                                case "WPS":
+                                    $('#selectWager').append($('<option>', {value : 'wps', text : 'Win/Place/Show'}));
+                                    break;
+                                case "Exacta":
+                                    $('#selectWager').append($('<option>', {value : 'exacta', text : value}));
+                                    break;
+                                case "Daily Double":
+                                    $('#selectWager').append($('<option>', {value : 'dailydouble', text : value}));
+                                    break;
+                                case "Trifecta":
+                                    $('#selectWager').append($('<option>', {value : 'trifecta', text : value}));
+                                    break;
+                                case "Superfecta":
+                                    $('#selectWager').append($('<option>', {value : 'superfecta', text : value}));
+                                    break;
+                            }
+                        });
+                        if($.inArray(selectedWagerPrev, response) > -1){
+                            switch (selectedWagerPrev){
+                                case "Win/Place/Show":
+                                    wager = "wps";
+                                    $('#selectWager').val("wps");
+                                    break;
+                                case "Exacta":
+                                    wager = "exacta";
+                                    $('#selectWager').val("exacta");
+                                    break;
+                                case "Trifecta":
+                                    wager = "trifecta";
+                                    $('#selectWager').val("trifecta");
+                                    break;
+                                case "Superfecta":
+                                    wager = "superfecta";
+                                    $('#selectWager').val("superfecta");
+                                    break;
+                                case "Daily Double":
+                                    wager = "dailydouble";
+                                    $('#selectWager').val("dailydouble");
+                                    break;
+                                default:break;
+                            }
+                        }else{
+                            wager = $("#selectWager").val();
+                        }
+                        switch(wager){
+                            case "wps":
+                                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                break;
+                            case "superfecta":
+                                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                break;
+                            case "exacta":
+                                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                break;
+                            case "exactabox":
+                                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                break;
+                            case "trifecta":
+                                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                break;
+                            case "trifectabox":
+                                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                break;
+                            case "dailydouble":
+                                $("#tempRaces div#ddBoard").html("");
+                                $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                                ajaxGetHorsesPerRace(BASE_URL,trk,CURRENT_DATE, ddselectedRaceNum);
+                                break;
+                            default:
+
+                                break;
+                        }
+                        fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
+                    },
+                    error : function(xhr,status, error){
+                        swal("Error","Error: " + error,"error");
+                    }
+                });
+                // var ddselectedRaceNum = parseInt(num) + parseInt(1);
+                // getWagerForRace(BASE_URL,trk,num,CURRENT_DATE);
+                // // var wager = $("#selectWager").val();
+                // switch(wager){
+                //     case "wps":
+                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         break;
+                //     case "superfecta":
+                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         break;
+                //     case "exacta":
+                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         break;
+                //     case "exactabox":
+                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         break;
+                //     case "trifecta":
+                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         break;
+                //     case "trifectabox":
+                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         break;
+                //     case "dailydouble":
+                //         $("#tempRaces div#ddBoard").html("");
+                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
+                //         ajaxGetHorsesPerRace(BASE_URL,response['trkCode'],CURRENT_DATE, ddselectedRaceNum);
+                //         break;
+                //     default:
+                //         break;
+                // }
+                // fooFunction(BASE_URL,response['trkCode'],CURRENT_DATE,num,wager);
                 fooFunction2(BASE_URL,response['trkCode'],num,firstRacePostTime);
             },
             error : function(xhr, status, error){
@@ -1204,6 +1346,43 @@ function fooFunction2(url,trk,num,post){
         error : function(){
             swal("Something went wrong!","Please try again.","error");
             $("#tempRaces table").remove();
+        }
+    });
+}
+function getWagerForRace(url ,trkCode, raceNum, date){
+    $.ajax({
+        "url" : url + "/dashboard/getWagerForRace",
+        type : "POST",
+        data : {
+            _token : $('[name="_token"]').val(),
+            trk : trkCode,
+            num : raceNum,
+            date : date
+        },
+        success : function(response){
+            $("#selectWager").empty();
+            $.each(response, function(index, value){
+                switch(value){
+                    case "WPS":
+                        $('#selectWager').append($('<option>', {value : 'wps', text : 'Win/Place/Show'}));
+                        break;
+                    case "Exacta":
+                        $('#selectWager').append($('<option>', {value : 'exacta', text : value}));
+                        break;
+                    case "Daily Double":
+                        $('#selectWager').append($('<option>', {value : 'dailydouble', text : value}));
+                        break;
+                    case "Trifecta":
+                        $('#selectWager').append($('<option>', {value : 'trifecta', text : value}));
+                        break;
+                    case "Superfecta":
+                        $('#selectWager').append($('<option>', {value : 'superfecta', text : value}));
+                        break;
+                }
+            });
+        },
+        error : function(xhr,status, error){
+            swal("Error","Error: " + error,"error");
         }
     });
 }

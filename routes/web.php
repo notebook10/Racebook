@@ -25,6 +25,7 @@ Route::group(['middleware' => ['auth']],function(){
     Route::get('dashboard/pending','HomeController@pending');
     Route::post('dashboard/validateTrackTmz','HomeController@validateTrackTmz');
     Route::post('dashboard/getTrackCode','HomeController@getTrackCode');
+    Route::post('dashboard/getWagerForRace','HomeController@getWagerForRace');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');
@@ -35,5 +36,6 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('submitTmz','AdminController@submitTmz');
         Route::get('horses','AdminController@horses');
         Route::post('scratch','AdminController@scratch');
+        Route::get('wager','AdminController@wager');
     });
 });

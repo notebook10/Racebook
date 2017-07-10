@@ -71,13 +71,13 @@
                 <div>
                     <label class="s-wager">Select Wager Type: </label>
                     <select id="selectWager" class="form-control">
-                        <option value="wps">Win/Place/Show</option>
-                        <option value="dailydouble">Daily Double</option>
-                        <option value="superfecta">Superfecta</option>
-                        <option value="exacta">Exacta</option>
-                        <option value="exactabox">Exacta Box</option>
-                        <option value="trifecta">Trifecta</option>
-                        <option value="trifectabox">Trifecta Box</option>
+                        {{--<option value="wps">Win/Place/Show</option>--}}
+                        {{--<option value="dailydouble">Daily Double</option>--}}
+                        {{--<option value="superfecta">Superfecta</option>--}}
+                        {{--<option value="exacta">Exacta</option>--}}
+                        {{--<option value="exactabox">Exacta Box</option>--}}
+                        {{--<option value="trifecta">Trifecta</option>--}}
+                        {{--<option value="trifectabox">Trifecta Box</option>--}}
                     </select>
                     <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
                     <input type="hidden" id="selectedTrack">

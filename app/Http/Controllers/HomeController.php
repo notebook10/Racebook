@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 use App\Bets;
 use App\Horses;
 use App\Timezone;
+use App\Wager;
 use Illuminate\Http\Request;
 use App\User;
 use App\Tracks;
@@ -138,107 +139,90 @@ class HomeController extends Controller
         $mdt = $request->input("mdt");
         $cdt = $request->input("cdt");
         $edt = $request->input("edt");
-        $array = [
-            'pdt' => date('h:i A',strtotime($pdt)),
-            'mdt' => $mdt,
-            'cdt' => $cdt,
-            'edt' => $edt
-        ];
-//        dd($array);
         $pdtStart = date('g:i A', strtotime($pdt));
         $mdtStart = date('g:i A', strtotime($mdt));
         $cdtStart = date('g:i A', strtotime($cdt));
         $edtStart = date('g:i A', strtotime($edt));
-        $arrayStart = [
-            'pdtS' => $pdtStart,
-            'mdtS' => $mdtStart,
-            'cdtS' => $cdtStart,
-            'edtS' => $edtStart
-        ];
-//        dd($arrayStart);
         $pdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($pdt)))));
         $mdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($mdt)))));
         $cdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($cdt)))));
         $edtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($edt)))));
-//        dd($pdtEnd);
         $pdtResults = $horsesModel->getUpcomingRaces($date,$pdtStart,$pdtEnd);
         $mdtResults = $horsesModel->getUpcomingRaces($date,$mdtStart,$mdtEnd);
         $cdtResults = $horsesModel->getUpcomingRaces($date,$cdtStart,$cdtEnd);
         $edtResults = $horsesModel->getUpcomingRaces($date,$edtStart,$edtEnd);
-//        echo $pdt . " " . $pdtStart . " " . $pdtEnd;
         $pdtArr = [];
         $mdtArr = [];
         $cdtArr = [];
         $edtArr = [];
         foreach ($pdtResults as $key => $val){
             $timezone = HomeController::getTimezone($val->race_track);
-            $trackname = HomeController::getTrack($val->race_track);
-            $to = "";
-            if($timezone === "PDT"){
-                $to = strtotime($pdt);
-//                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
-                $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $pdtArr, TRUE)){
-                }else{
-                    array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time );
+            if($timezone){
+                $trackname = HomeController::getTrack($val->race_track);
+                if($timezone === "PDT"){
+                    $to = strtotime($pdt);
+                    $mtp = round((strtotime($val->race_time) - $to) / 60);
+                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $pdtArr, TRUE)){
+                    }else{
+                        array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time );
+                    }
                 }
+            }else{
+
             }
         }
         foreach ($mdtResults as $key => $val){
             $timezone = HomeController::getTimezone($val->race_track);
-            $trackname = HomeController::getTrack($val->race_track);
-            $to = "";
-            if($timezone === "MDT"){
-                $to = strtotime($mdt);
-//                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
-                $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $mdtArr, TRUE)){
-                }else{
-                    array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+            if($timezone){
+                $trackname = HomeController::getTrack($val->race_track);
+                if($timezone === "MDT"){
+                    $to = strtotime($mdt);
+                    $mtp = round((strtotime($val->race_time) - $to) / 60);
+                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $mdtArr, TRUE)){
+                    }else{
+                        array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                    }
                 }
+            }else{
+
             }
         }
         foreach ($cdtResults as $key => $val){
             $timezone = HomeController::getTimezone($val->race_track);
-            $trackname = HomeController::getTrack($val->race_track);
-            $to = "";
-            if($timezone === "CDT"){
-                $to = strtotime($cdt);
-//                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
-                $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $cdtArr, TRUE)){
-                }else{
-                    array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+            if($timezone){
+                $trackname = HomeController::getTrack($val->race_track);
+                if($timezone === "CDT"){
+                    $to = strtotime($cdt);
+                    $mtp = round((strtotime($val->race_time) - $to) / 60);
+                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $cdtArr, TRUE)){
+                    }else{
+                        array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                    }
                 }
+            }else{
+
             }
         }
         foreach ($edtResults as $key => $val){
             $timezone = HomeController::getTimezone($val->race_track);
-            $trackname = HomeController::getTrack($val->race_track);
-            $to = "";
-            if($timezone === "EDT"){
-                $to = strtotime($edt);
-//                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
-                $mtp = round((strtotime($val->race_time) - $to) / 60);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $edtArr, TRUE)){
-                }else{
-                    array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+            if($timezone){
+                $trackname = HomeController::getTrack($val->race_track);
+                if($timezone === "EDT"){
+                    $to = strtotime($edt);
+                    $mtp = round((strtotime($val->race_time) - $to) / 60);
+                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $edtArr, TRUE)){
+                    }else{
+                        array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                    }
                 }
+            }else{
+
             }
         }
         // Array merge here
         $mergedArray = array_merge($pdtArr,$edtArr,$mdtArr, $cdtArr);
         return $mergedArray;
     }
-//    public function appendUpcomingRaces(Request $request){
-//        $pacificTime = $request->input("pacific");
-//        $mtp = strtotime('',$request->input("raceTime"));
-//        $datetime1 = strtotime("2011-10-10 10:00:00");
-//        $datetime2 = strtotime("2011-10-10 10:45:00");
-//        $interval  = abs($datetime2 - $datetime1);
-//        $minutes   = round($interval / 60);
-//        return "Asdad";
-//    }
     public static function getTimezone($trackCode){
         $model = new Timezone();
         $foo = $model->getTimezoneByCode($trackCode);
@@ -312,5 +296,10 @@ class HomeController extends Controller
             'firstRacePostTime' => $firstRacePostTime->race_time
         ];
         return $dataArray;
+    }
+    public function getWagerForRace(Request $request){
+        $wagerModel = new Wager();
+        $wager = $wagerModel->getWagerForRace($request->input('trk'),$request->input('num'),$request->input('date'));
+        return unserialize($wager->extracted);
     }
 }

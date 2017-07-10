@@ -6,6 +6,7 @@ use App\Bets;
 use App\Horses;
 use App\Timezone;
 use App\Tracks;
+use App\Wager;
 use Illuminate\Http\Request;
 use Theme;
 use Auth;
@@ -88,5 +89,13 @@ class AdminController extends Controller
         $horsesModel = new Horses();
         $arr = ['pp' => 'SCRATCHED'];
         return $horsesModel->scratch($id,$arr);
+    }
+    public function wager(){
+        $wagerModel = new Wager();
+        $dataArray = [
+            'wager' => $wagerModel->getAllWager()
+        ];
+        $theme = Theme::uses('admin')->layout('layout')->setTitle('WAGER');
+        return $theme->of('admin/wager', $dataArray)->render();
     }
 }
