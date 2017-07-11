@@ -23,12 +23,13 @@
                             <th>Amount</th>
                             <th>Post Time</th>
                             <th>Status</th>
+                            <th>Result</th>
                             <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($history as $key => $value)
-                            <tr>
+                            <tr class="<?php echo $value->result == 0 ? "trRed" : "trGreen" ?>">
                                 <td>
                                     <?php
                                     if($value->bet_type === "wps"){
@@ -55,6 +56,15 @@
                                         }
                                     ?>
                                 </td>
+                                <td>
+                                    <?php
+                                        if($value->result == 0){
+                                            echo "Defeat";
+                                        }else if($value->result == 1){
+                                            echo "Victory";
+                                        }
+                                    ?>
+                                </td>
                                 <td>{{ $value->created_at }}</td>
                             </tr>
                         @endforeach
@@ -73,5 +83,7 @@
                 "aaSorting": []
             });
         }
+        $("tr.trRed").css("color","red");
+        $("tr.trGreen").css("color","green");
     });
 </script>

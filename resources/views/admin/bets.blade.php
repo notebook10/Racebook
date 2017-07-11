@@ -19,9 +19,11 @@ date_default_timezone_set('America/Los_Angeles');
                                 <th>Race Number</th>
                                 <th>Race Track</th>
                                 <th>Bet Type</th>
+                                <th>Bet</th>
                                 <th>Bet Amount</th>
                                 <th>Post Time</th>
                                 <th>Status</th>
+                                <th>Result</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -39,6 +41,7 @@ date_default_timezone_set('America/Los_Angeles');
                                             }
                                         ?>
                                     </td>
+                                    <td>{{ $value->bet }}</td>
                                     <td>{{ $value->bet_amount }}</td>
                                     <td>{{ $value->post_time }}</td>
                                     <td>
@@ -47,6 +50,15 @@ date_default_timezone_set('America/Los_Angeles');
                                                 echo "Pending";
                                             }else{
                                                 echo "Graded";
+                                            }
+                                        ?>
+                                    </td>
+                                    <td>
+                                        <?php
+                                            if($value->result == 0){
+                                                echo "Defeat";
+                                            }else{
+                                                echo "Victory";
                                             }
                                         ?>
                                     </td>
@@ -83,14 +95,17 @@ date_default_timezone_set('America/Los_Angeles');
                     }else{
                         $.each(response, function(index, value){
                             var status = response[index]["status"] == 0 ? "Pending" : "Graded";
+                            var result = response[index]["result"] == 0 ? "Defeat" : "Victory";
                             t.row.add([
                                 response[index]["player_id"],
                                 response[index]["race_number"],
                                 response[index]["race_track"],
                                 response[index]["bet_type"],
+                                response[index]["bet"],
                                 response[index]["bet_amount"],
                                 response[index]["post_time"],
-                                status
+                                status,
+                                result
                             ]).draw(false);
 //                        $("table#tblBets tbody").append("<tr><td>"+ response[index]["player_id"] +"</td><td> Race "+ response[index]["race_number"] +"</td><td>"+ response[index]["race_track"] +"</td>" +
 //                            "<td>"+ response[index]["bet_type"] +"</td><td>"+ response[index]["bet_amount"] +"</td><td>"+ response[index]["post_time"] +"</td>" +
