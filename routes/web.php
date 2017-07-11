@@ -37,5 +37,9 @@ Route::group(['middleware' => ['auth']],function(){
         Route::get('horses','AdminController@horses');
         Route::post('scratch','AdminController@scratch');
         Route::get('wager','AdminController@wager');
+        Route::get('bets','AdminController@bets');
+        Route::get('results','AdminController@results');
+        Route::post('getRaces','HomeController@getRaces');
+        Route::post('getBets','AdminController@getBets');
     });
 });

@@ -98,4 +98,26 @@ class AdminController extends Controller
         $theme = Theme::uses('admin')->layout('layout')->setTitle('WAGER');
         return $theme->of('admin/wager', $dataArray)->render();
     }
+    public function bets(){
+        $betsModel = new Bets();
+        $dataArray = [
+            'betsToday' => $betsModel->getAll()
+        ];
+        $theme = Theme::uses('admin')->layout('layout')->setTitle('BETS');
+        return $theme->of('admin/bets', $dataArray)->render();
+    }
+    public function results(){
+        date_default_timezone_set('America/Los_Angeles');
+        $tracksModel = new Tracks();
+        $dataArray = [
+            'tracks' => $tracksModel->getAllTracks(date('mdy',time()))
+        ];
+        $theme = Theme::uses('admin')->layout('layout')->setTitle('RESULTS');
+        return $theme->of('admin/results', $dataArray)->render();
+    }
+    public function getBets(Request $request){
+        $date = $request->input("date");
+        $betsModel = new Bets();
+        return $betsModel->getBetsByDate($date);
+    }
 }

@@ -24,4 +24,9 @@ class Tracks extends Model
             ->select('tracks_timezone.id','tracks.name','tracks.code','tracks.date','tracks_timezone.time_zone')
             ->get();
     }
+    public static function getTrackNameWithCode($code){
+        return DB::table('tracks')
+            ->where('code',$code)
+            ->first();
+    }
 }

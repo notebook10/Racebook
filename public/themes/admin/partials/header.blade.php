@@ -28,6 +28,12 @@
                     <a href="wager">Wager</a>
                 </li>
                 <li>
+                    <a href="bets">Bets</a>
+                </li>
+                <li>
+                    <a href="results">Results</a>
+                </li>
+                <li>
                     <a href="logout">Logout</a>
                 </li>
             </ul>

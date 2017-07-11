@@ -44,4 +44,17 @@ class Bets extends Model
             ->orderBy('created_at','desc')
             ->get();
     }
+    public function getAll(){
+        date_default_timezone_set('America/Los_Angeles');
+        $currentDate = date("Y-m-d", time());
+        return DB::table($this->table)
+            ->whereBetween('created_at',[$currentDate . ' 00:00:00',$currentDate . ' 23:59:59'])
+            ->get();
+    }
+    public function getBetsByDate($date){
+        $currentDate = $date;
+        return DB::table($this->table)
+            ->whereBetween("created_at",[$currentDate . " 00:00:00", $currentDate . " 23:59:59"])
+            ->get();
+    }
 }
