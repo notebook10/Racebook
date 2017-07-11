@@ -1,5 +1,5 @@
 <?php date_default_timezone_set('America/Los_Angeles'); ?>
-<input type="text" value="<?php echo date('mdy', time()); ?>" id="racedate">
+<input type="text" value="<?php echo date('mdy',time()); ?>" id="racedate">
 <input type="hidden" value="{{ csrf_token() }}" name="_token">
 <div class="container">
     <div class="row">
@@ -7,7 +7,9 @@
             <div class="jumbotron text-center">
                 <h1>Results</h1>
             </div>
-            <form id="frmResults">
+            <form id="frmResults" action="submitResults" method="post">
+                <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="operation" id="operation" value="0">
                 <div class="col-md-5">
                     <div class="form-group">
                         <div class="col-md-12">
@@ -22,7 +24,7 @@
                         <div class="col-md-12">
                             <label>Races</label>
                             <select class="form-control" id="racePerTrack" disabled name="racePerTrack">
-
+                                <option selected disabled>-- Select Race Number --</option>
                             </select>
                         </div>
                     </div>
@@ -67,6 +69,7 @@
                         }
                     });
                     $("#racePerTrack").attr("disabled",false).empty();
+                    $("#racePerTrack").append("<option selected disabled>-- Select Race Number --</option>");
                     for(var i = 1; i <= raceArr.length; i++){
                         $("#racePerTrack").append("<option value='"+ i +"'> Race "+  i +"</option>");
                     }
@@ -89,6 +92,62 @@
         });
         $("#btnSubmitResults").on("click", function(){
             $("#frmResults").submit();
+        });
+        var optionsResults = {
+            success: function(response){
+                alert("success");
+                // SUCCESSFULLY SAVED / UPDATED RESULT
+                $.ajax({
+                    "url" : BASE_URL + "/getLatestResultID",
+                    type : "POST",
+                    data : {
+                        _token : $('[name="_token"]').val()
+                    },
+                    success : function(response){
+                        console.log(response);
+                    },
+                    error : function(xhr,status,error){
+                        swal("Something went wrong!",error,"error");
+                    }
+                });
+            }
+        };
+        $("#frmResults").ajaxForm(optionsResults);
+        $("#racePerTrack").on("change",function(){
+            var trk = $("#tracksToday").val();
+            var date = $("#racedate").val();
+            var num = $(this).val();
+            $.ajax({
+                "url" : BASE_URL + "/checkResults",
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    trkCode : trk,
+                    raceDate : date,
+                    raceNum : num
+                },
+                success : function(response){
+                    if(!$.trim(response)){
+                        $("#operation").val(0);
+                        $("#first").val("");
+                        $("#second").val("");
+                        $("#third").val("");
+                        $("#fourth").val("");
+                        $("#btnSubmitResults").removeClass("btn-success").addClass("btn-primary").val("SAVE");
+                    }else{
+                        var res = response.split(",");
+                        $("#operation").val(1);
+                        $("#first").val(res[0]);
+                        $("#second").val(res[1]);
+                        $("#third").val(res[2]);
+                        $("#fourth").val(res[3]);
+                        $("#btnSubmitResults").removeClass("btn-primary").addClass("btn-success").val("REGRADE");
+                    }
+                },
+                error : function(xhr,status,err){
+                    swal("Something went wrong!",err,"error");
+                }
+            });
         });
     });
 </script>

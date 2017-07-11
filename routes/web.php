@@ -41,5 +41,8 @@ Route::group(['middleware' => ['auth']],function(){
         Route::get('results','AdminController@results');
         Route::post('getRaces','HomeController@getRaces');
         Route::post('getBets','AdminController@getBets');
+        Route::post('submitResults','AdminController@submitResults');
+        Route::post('checkResults','AdminController@checkResults');
+        Route::post('getLatestResultID','AdminController@getLatestResultID');
     });
 });

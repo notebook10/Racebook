@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Bets;
 use App\Horses;
+use App\Results;
 use App\Timezone;
 use App\Tracks;
 use App\Wager;
 use Illuminate\Http\Request;
 use Theme;
 use Auth;
+use DB;
 class AdminController extends Controller
 {
     public function dashboard(){
@@ -119,5 +121,64 @@ class AdminController extends Controller
         $date = $request->input("date");
         $betsModel = new Bets();
         return $betsModel->getBetsByDate($date);
+    }
+    public function submitResults(Request $request){
+        date_default_timezone_set('America/Los_Angeles');
+        $dataArray = [
+            'track_code' => $request->input("tracksToday"),
+            'race_number' => $request->input("racePerTrack"),
+            'first' => $request->input("first"),
+            'second' => $request->input("second"),
+            'third' => $request->input("third"),
+            'fourth' => $request->input("fourth"),
+            'race_date' => date('mdy', time())
+        ];
+        $resultModel = new Results();
+        return $resultModel->insertResult($dataArray,$request->input('operation'));
+    }
+    public function checkResults(Request $request){
+        $resultModel = new Results();
+        $results = $resultModel->checkResults($request->input("trkCode"), $request->input("raceDate"), $request->input("raceNum"));
+        return $results ? $results->race_winners : "";
+    }
+    public function getLatestResultID(){
+        $resultModel = new Results();
+        $betsModel = new Bets();
+        $latestRecord = $resultModel->getLatestResult();
+        $winningCombination = $latestRecord->first()->race_winners;
+        $trkCode = $latestRecord->first()->track_code;
+        $raceNum = $latestRecord->first()->race_number;
+        $raceDate = $latestRecord->first()->race_date;
+        $explode = explode(",",$winningCombination);
+        $exacta = $explode[0] . "," . $explode[1];
+        $trifecta = $explode[0] . "," . $explode[1] . "," . $explode[2];
+        $superfecta = $winningCombination;
+        $execExacta = $betsModel->checkExacta($trkCode,$raceDate,$raceNum,$exacta);
+        foreach ($execExacta as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        AdminController::gradeWrongBets($raceDate,$trkCode,$raceNum);
+    }
+    public static function updateBetStatus($id){
+        $dataArray = [
+            "status" => 1,
+            "result" => 1
+        ];
+        return DB::table("bets")
+            ->where("id", $id)
+            ->update($dataArray);
+    }
+    public static function gradeWrongBets($raceDate,$trackCode, $raceNum){
+        $dataArray = [
+            "status" => 1,
+            "result" => 0
+        ];
+        return DB::table("bets")
+            ->where("race_track",$trackCode)
+            ->where("race_date",$raceDate)
+            ->where("race_number", $raceNum)
+            ->where("status",0)
+            ->update($dataArray);
+
     }
 }

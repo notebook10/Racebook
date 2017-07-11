@@ -24,9 +24,11 @@ class Bets extends Model
     public function insertBets($dataArray){
         date_default_timezone_set('America/Los_Angeles');
         $pacificDate = date('Y-m-d H:i:s', time());
+        $raceDate = date('mdy',time());
         foreach ($dataArray as $key => $value){
             $dataArray[$key]['created_at'] = $pacificDate;
             $dataArray[$key]['updated_at'] = $pacificDate;
+            $dataArray[$key]['race_date'] = $raceDate;
         }
         return DB::table($this->table)
             ->insert($dataArray);
@@ -55,6 +57,15 @@ class Bets extends Model
         $currentDate = $date;
         return DB::table($this->table)
             ->whereBetween("created_at",[$currentDate . " 00:00:00", $currentDate . " 23:59:59"])
+            ->get();
+    }
+    public function checkExacta($trkCode, $raceDate, $raceNum, $combination){
+        return DB::table($this->table)
+            ->where("race_track", $trkCode)
+            ->where("race_number",$raceNum)
+            ->where("race_date",$raceDate)
+            ->where("bet",$combination)
+            ->where("bet_type","exacta")
             ->get();
     }
 }

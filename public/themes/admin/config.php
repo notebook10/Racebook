@@ -81,6 +81,7 @@ return array(
             $theme->asset()->add('js-datatable', 'js/jquery.datatables.js');
             $theme->asset()->add('js-jquery-ui', 'js/jquery-ui.min.js');
             $theme->asset()->add('js-validate', 'js/jquery.validate.min.js');
+            $theme->asset()->add('js-form', 'js/jquery.form.min.js');
 
 		},
 

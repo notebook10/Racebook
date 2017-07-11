@@ -939,8 +939,12 @@ $("document").ready(function(){
                     // raceNumber = response[index].substr(response[index].indexOf("&") + 1);
                     raceNumber = response[index].substring(response[index].lastIndexOf("&")+1,response[index].lastIndexOf("/"));
                     mtp = response[index].substring(response[index].lastIndexOf("@")+1,response[index].lastIndexOf("&"));
-                    $("table#tblUpcomingRace tbody").append("<tr><td class='upcomingRace' data-track='"+ trackName +"' data-number='"+ raceNumber +"'>"+ trackName +"</td><td>"+ raceNumber +"</td><td>"+ mtp +"</td></tr>");
-                });
+                    if(mtp > 30){
+                        // 30 mins
+                    }else {
+                        $("table#tblUpcomingRace tbody").append("<tr><td class='upcomingRace' data-track='" + trackName + "' data-number='" + raceNumber + "'>" + trackName + "</td><td>" + raceNumber + "</td><td>" + mtp + "</td></tr>");
+                    }
+                    });
                 console.log("<<<<<<<<<>>>>>>>>>>>>");
                 console.log(response);
             },
