@@ -22,17 +22,27 @@ class Results extends Model
         }else{
             // Update
             $refactoredArray = [
-//                'track_code' => $dataArray["track_code"],
-//                'race_number' => $dataArray["race_number"],
-//                'race_date' => $dataArray["race_date"],
                 'race_winners' => $dataArray["first"] . "," . $dataArray["second"] . "," . $dataArray["third"] . "," . $dataArray["fourth"]
             ];
-            return DB::table($this->table)
+//            return DB::table($this->table)
+//                ->where("track_code", $dataArray["track_code"])
+//                ->where("race_number",$dataArray["race_number"])
+//                ->where("race_date", $dataArray["race_date"])
+//                ->update($refactoredArray);
+            DB::table($this->table)
                 ->where("track_code", $dataArray["track_code"])
                 ->where("race_number",$dataArray["race_number"])
                 ->where("race_date", $dataArray["race_date"])
-                ->update($refactoredArray);
+                ->delete();
+            $result = new Results();
+            $result->track_code = $dataArray["track_code"];
+            $result->race_number = $dataArray["race_number"];
+            $result->race_date = $dataArray["race_date"];
+            $result->race_winners = $dataArray["first"] . "," . $dataArray["second"] . "," . $dataArray["third"] . "," . $dataArray["fourth"];
+            $result->graded_by = Auth::id();
+            $result->save();
         }
+        return DB::getPdo()->lastInsertId();
     }
     public function checkResults($trkCode, $date, $raceNum){
         return DB::table($this->table)
@@ -41,9 +51,18 @@ class Results extends Model
             ->where("race_number", $raceNum)
             ->first();
     }
-    public function getLatestResult(){
+    public function getLatestResult($id){
         return DB::table($this->table)
-            ->orderBy("updated_at","desc")
+//            ->orderBy("updated_at","desc")
+//            ->orderBy("created_at","desc")
+                ->where("id",$id)
             ->get();
+    }
+    public function getSecondRaceRes($trkCode, $raceNum, $raceDate){
+        return DB::table($this->table)
+            ->where("track_code",$trkCode)
+            ->where("race_date",$raceDate)
+            ->where("race_number", $raceNum + 1)
+            ->first();
     }
 }

@@ -8,12 +8,13 @@ $("document").ready(function(){
     var sArray = [];
     var userId = $("#userId").val();
     var selectedWagerPrev = "";
+    var openRaces2 = [];
     setTimeout(getUpcomingRaces,3000);
     $(".trkName").on("click",function(){
         if($(this).hasClass("collapsed")){
-            //                $(".trkName > div.panel").css("color","red");
             $(this).next("div.panel-body").find("div.raceNum").remove();
             var code = $(this).data("code");
+            var raceDate = $(this).data("date");
             // Validate track code if it have a timezone
             $.ajax({
                 "url" : BASE_URL + "/dashboard/validateTrackTmz",
@@ -53,11 +54,62 @@ $("document").ready(function(){
                                         race.push(obj[index].race_number);
                                     }
                                 });
-                                console.log(race);
+                                // Test run here
                                 var firstRace = race[0].replace(/\D/g,'');
-                                for(var i = firstRace; i <= raceTimeArr.length; i++){
-                                    $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
-                                }
+                                var tempArr = "";
+                                $.ajax({
+                                    "url" : BASE_URL + '/dashboard/checkIfOpen',
+                                    type : "get",
+                                    data : {
+                                        _token : $('[name="_token"]').val(),
+                                        trk : code,
+                                        postTime : raceTimeArr,
+                                        date : raceDate
+                                    },
+                                    success : function(respo){
+                                        console.log(respo);
+                                        for(var i = firstRace; i <= raceTimeArr.length; i++){
+                                            if(respo[i-1] == "lt"){
+                                                // $(".panel-body."+ code).append("<div class='raceNum closed'> Race "+ i +": CLOSED</div>");
+                                            }else if(respo[i-1] == "gt"){
+                                                $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
+                                            }
+                                        }
+                                        if(jQuery.inArray("gt",respo) != -1){
+
+                                        }else{
+                                            // No open race
+                                            $(".panel-body."+ code).append("<div class='raceNum'>No Open Race</div>");
+                                        }
+                                        $(".closed").css("display","none");
+                                    },
+                                    error : function(xhr, status, error){
+                                        alert("Error: " + error);
+                                    }
+                                });
+                                // for(var i = firstRace; i <= raceTimeArr.length; i++){
+                                //     // $.ajax({
+                                //     //     "url" : BASE_URL + '/dashboard/checkPostTime',
+                                //     //     type : "get",
+                                //     //     async: false,
+                                //     //     data : {
+                                //     //         _token : $('[name="_token"]').val(),
+                                //     //         trk : code,
+                                //     //         postTime : raceTimeArr[i-1]
+                                //     //     },
+                                //     //     success : function(data){
+                                //     //         if(data === "gt"){
+                                //     //             $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
+                                //     //         }else{
+                                //     //             $(".panel-body."+ code).append("<div class='raceNum'>RACE "+ i +" : " + " CLOSED</div>");
+                                //     //         }
+                                //     //     },
+                                //     //     error : function(xhr, status, error){
+                                //     //         alert("Error: " + error);
+                                //     //     }
+                                //     // });
+                                //     $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
+                                // }
                             },
                             error : function(){
                                 alert("error");
@@ -76,7 +128,12 @@ $("document").ready(function(){
         $(".panel-body div.raceNum").remove();
     });
     $(".raceNum").unbind("dblclick");
-    $("body").delegate(".raceNum","click",function(){
+    $("body").delegate(".raceNum","click",function(event){
+        if($(this).hasClass("closed")){
+            swal("CLOSED!","Race is closed!","error");
+            event.preventDefault();
+            return false;
+        }
         $("#tempRaces table").remove();
         $("#betTicket").css("display","none");
         $("#betAmount").val("");
@@ -108,11 +165,17 @@ $("document").ready(function(){
                         case "Exacta":
                             $('#selectWager').append($('<option>', {value : 'exacta', text : value}));
                             break;
+                        case "Exacta Box":
+                            $('#selectWager').append($('<option>', {value : 'exactabox', text : value}));
+                            break;
                         case "Daily Double":
                             $('#selectWager').append($('<option>', {value : 'dailydouble', text : value}));
                             break;
                         case "Trifecta":
                             $('#selectWager').append($('<option>', {value : 'trifecta', text : value}));
+                            break;
+                        case "Trifecta Box":
+                            $('#selectWager').append($('<option>', {value : 'trifectabox', text : value}));
                             break;
                         case "Superfecta":
                             $('#selectWager').append($('<option>', {value : 'superfecta', text : value}));
@@ -129,9 +192,17 @@ $("document").ready(function(){
                             wager = "exacta";
                             $('#selectWager').val("exacta");
                             break;
+                        case "Exacta Box":
+                            wager = "exactabox";
+                            $('#selectWager').val("exactabox");
+                            break;
                         case "Trifecta":
                             wager = "trifecta";
                             $('#selectWager').val("trifecta");
+                            break;
+                        case "Trifecta Box":
+                            wager = "trifectabox";
+                            $('#selectWager').val("trifectabox");
                             break;
                         case "Superfecta":
                             wager = "superfecta";
@@ -776,7 +847,9 @@ $("document").ready(function(){
             swal("Empty Wager","Please enter a wager amount.","error");
         }
     });
+    $("#confirmBet").unbind("dblclick");
     $("#confirmBet").on("click",function(){
+        $("#confirmBet").attr("disabled",true);
         var betType = $("#selectWager").val();
         var trk = $("#selectedTrack").val();
         var raceNumber = $("#selectedRaceNum").val();
@@ -798,7 +871,7 @@ $("document").ready(function(){
         });
         $.ajax({
             "url" : BASE_URL + '/dashboard/checkPostTime',
-            type : "POST",
+            type : "get",
             data : {
                 _token : $('[name="_token"]').val(),
                 trk : trk,
@@ -1344,8 +1417,18 @@ function fooFunction2(url,trk,num,post){
         },
         success : function(response){
             $("#raceTrackName, #raceNumberAndPostTime").html("");
-            $("#raceTrackName").append(response);
-            $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post);
+            $("#raceTrackName").append(response[0]);
+            var tmz = response[1];
+            if(tmz === "PDT"){
+                tmz = "Pacific";
+            }else if(tmz === "MDT"){
+                tmz = "Mountain";
+            }else if(tmz === "CDT"){
+                tmz = "Central";
+            }else if(tmz === "EDT"){
+                tmz = "Eastern";
+            }
+            $("#raceNumberAndPostTime").append("Race " + num + " POST TIME: " + post + "("+ tmz +")");
         },
         error : function(){
             swal("Something went wrong!","Please try again.","error");

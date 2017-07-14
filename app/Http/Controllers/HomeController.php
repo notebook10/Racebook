@@ -13,6 +13,7 @@ use League\Flysystem\Exception;
 use Validator;
 use Theme;
 use Illuminate\Support\Facades\Redirect;
+use DateTime;
 class HomeController extends Controller
 {
     public function index(){
@@ -109,20 +110,27 @@ class HomeController extends Controller
     public function getTrackName(Request $request){
         $model = new Tracks();
         $foo = $model->getTrackName($request->input("trk"));
-        return $foo->name;
+        $tmz = HomeController::getTimezone($request->input("trk"));
+        return [$foo->name,$tmz];
     }
     public function getServerTime(){
         date_default_timezone_set('America/Los_Angeles'); // Pacific
         $pdtDate = date('F d, Y h:i:s', time());
         $pdt = date('H:i:s', time());
         date_default_timezone_set('America/Denver'); // Mountain
+        $mdtDate = date('F d, Y h:i:s', time());
         $mdt = date('H:i:s', time());
         date_default_timezone_set('America/Chicago'); // Central
         $cdt = date('H:i:s', time());
+        $cdtDate = date('F d, Y h:i:s', time());
         date_default_timezone_set('America/New_York'); // Eastern
         $edt = date('H:i:s', time());
+        $edtDate = date('F d, Y h:i:s', time());
         $dateArray = [
             "dateTimePDT" => $pdtDate,
+            "dateTimeMDT" => $mdtDate,
+            "dateTimeCDT" => $cdtDate,
+            "dateTimeEDT" => $edtDate,
             "pdt" => $pdt,
             "mdt" => $mdt,
             "cdt" => $cdt,
@@ -240,8 +248,6 @@ class HomeController extends Controller
         $time = $this->getServerTime();
         $timeZoneTime = $time[strtolower($trackTimeZone)];
         $foo = date("g:i A",strtotime($timeZoneTime));
-//        dd(date("h:i A",strtotime($timeZoneTime)));
-//        echo $postTime . " " . $foo . " " . $trackTimeZone . " ";
         $variable = "";
         if(strtotime($postTime) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
             $variable = "lt"; // race finished
@@ -301,5 +307,35 @@ class HomeController extends Controller
         $wagerModel = new Wager();
         $wager = $wagerModel->getWagerForRace($request->input('trk'),$request->input('num'),$request->input('date'));
         return unserialize($wager->extracted);
+    }
+    public function checkIfOpen(Request $request){
+        $date = $request->input("date");
+        $dateTime = DateTime::createFromFormat("mdy",$date);
+        $currentFormattedDate = $dateTime->format("m/d/y");
+        $postTimeArr = $request->input("postTime");
+        $trkCode = $request->input("trk");
+        $trackTimeZone = HomeController::getTimezone($trkCode);
+        $time = $this->getServerTime();
+        dd($time['dateTimeCDT']);
+        $timeZoneTime = $time[strtolower($trackTimeZone)];
+        $resArr = [];
+        $dateSlashed = substr($date,0,2) . "/" . substr($date,2,2) . "/" . substr($date,4,2);
+        $temp = $dateSlashed . " 9:00 PM";
+//        foreach ($postTimeArr as $key => $val){
+//            if(strtotime($postTimeArr[$key]) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
+//                array_push($resArr, "lt"); // close
+//            }else{
+//                array_push($resArr, "gt"); // ok
+//            }
+//        }
+        dd($timeZoneTime);
+        foreach ($postTimeArr as $key => $val){
+            if(strtotime($dateSlashed . " " . $postTimeArr[$key]) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
+                array_push($resArr, "lt"); // close
+            }else{
+                array_push($resArr, "gt"); // ok
+            }
+        }
+//        return $resArr;
     }
 }

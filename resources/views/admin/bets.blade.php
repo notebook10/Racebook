@@ -56,9 +56,11 @@ date_default_timezone_set('America/Los_Angeles');
                                     <td>
                                         <?php
                                             if($value->result == 0){
-                                                echo "Defeat";
-                                            }else{
+                                                echo "Null";
+                                            }else if($value->result == 1){
                                                 echo "Victory";
+                                            }else if($value->result == 2){
+                                                echo "Defeat";
                                             }
                                         ?>
                                     </td>

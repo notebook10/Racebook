@@ -29,7 +29,7 @@
                     </thead>
                     <tbody>
                         @foreach($history as $key => $value)
-                            <tr class="<?php echo $value->result == 0 ? "trRed" : "trGreen" ?>">
+                            <tr>
                                 <td>
                                     <?php
                                     if($value->bet_type === "wps"){
@@ -59,9 +59,11 @@
                                 <td>
                                     <?php
                                         if($value->result == 0){
-                                            echo "Defeat";
+                                            echo "Null";
                                         }else if($value->result == 1){
                                             echo "Victory";
+                                        }else if($value->result == 2){
+                                            echo "Defeat";
                                         }
                                     ?>
                                 </td>

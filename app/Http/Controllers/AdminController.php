@@ -141,28 +141,96 @@ class AdminController extends Controller
         $results = $resultModel->checkResults($request->input("trkCode"), $request->input("raceDate"), $request->input("raceNum"));
         return $results ? $results->race_winners : "";
     }
-    public function getLatestResultID(){
+    public function getLatestResultID(Request $request){
         $resultModel = new Results();
         $betsModel = new Bets();
-        $latestRecord = $resultModel->getLatestResult();
+        $latestRecord = $resultModel->getLatestResult($request->input("lastId"));
         $winningCombination = $latestRecord->first()->race_winners;
         $trkCode = $latestRecord->first()->track_code;
         $raceNum = $latestRecord->first()->race_number;
         $raceDate = $latestRecord->first()->race_date;
+        // Refresh
+        AdminController::refreshResultsForRegrade($raceDate,$trkCode,$raceNum);
         $explode = explode(",",$winningCombination);
         $exacta = $explode[0] . "," . $explode[1];
         $trifecta = $explode[0] . "," . $explode[1] . "," . $explode[2];
         $superfecta = $winningCombination;
-        $execExacta = $betsModel->checkExacta($trkCode,$raceDate,$raceNum,$exacta);
+        $w = $explode[0];
+        $p = [$explode[0],$explode[1]];
+        $execExacta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$exacta,"exacta");
+        $execExactaBox = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$exacta,"exactabox");
+        $execTrifecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifecta");
+        $execTrifectaBox = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifectabox");
+        $execSuperfecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$superfecta,"superfecta");
+        $execW = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$w,"wps","w");
+        $exeP1 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[0],"wps","p");
+        $exeP2 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[1],"wps","p");
+        $exeS1 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[0],"wps","s");
+        $exeS2 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[1],"wps","s");
+        $exeS3 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[2],"wps","s");
+        $ddSecondRaceRes = $resultModel->getSecondRaceRes($trkCode,$raceNum,$raceDate);
+        if(empty($ddSecondRaceRes)){
+
+        }else{
+            $secondRaceWinner = explode(",",$ddSecondRaceRes->race_winners);
+            $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
+            $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
+            foreach ($exeDD as $key => $value){
+                AdminController::updateBetStatus($value->id);
+            }
+        }
+//        if($ddSecondRaceRes == ""){
+//
+//        }else{
+//            $secondRaceWinner = explode(",",$ddSecondRaceRes->race_winners);
+//            $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
+//            $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
+//            foreach ($exeDD as $key => $value){
+//                AdminController::updateBetStatus($value->id);
+//            }
+//        }
+
+        // Set Results -------------------------------------------------------------------------------------------------
         foreach ($execExacta as $key => $value){
             AdminController::updateBetStatus($value->id);
         }
+        foreach ($execExactaBox as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($execTrifecta as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($execTrifectaBox as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($execSuperfecta as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($execW as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($exeP1 as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($exeP2 as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($exeS1 as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($exeS2 as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        foreach ($exeS3 as $key => $value){
+            AdminController::updateBetStatus($value->id);
+        }
+        // Set Defeat
         AdminController::gradeWrongBets($raceDate,$trkCode,$raceNum);
     }
     public static function updateBetStatus($id){
         $dataArray = [
             "status" => 1,
-            "result" => 1
+            "result" => 1 // 1 for win
         ];
         return DB::table("bets")
             ->where("id", $id)
@@ -171,7 +239,7 @@ class AdminController extends Controller
     public static function gradeWrongBets($raceDate,$trackCode, $raceNum){
         $dataArray = [
             "status" => 1,
-            "result" => 0
+            "result" => 2 // 2 for defeat
         ];
         return DB::table("bets")
             ->where("race_track",$trackCode)
@@ -180,5 +248,16 @@ class AdminController extends Controller
             ->where("status",0)
             ->update($dataArray);
 
+    }
+    public static function refreshResultsForRegrade($raceDate,$trackCode, $raceNum){
+        $dataArray = [
+            "status" => 0,
+            "result" => 0
+        ];
+        return DB::table("bets")
+            ->where("race_track",$trackCode)
+            ->where("race_date",$raceDate)
+            ->where("race_number", $raceNum)
+            ->update($dataArray);
     }
 }

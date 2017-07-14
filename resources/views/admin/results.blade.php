@@ -95,13 +95,15 @@
         });
         var optionsResults = {
             success: function(response){
-                alert("success");
+                var lastId = response;
+                alert("success: " + lastId);
                 // SUCCESSFULLY SAVED / UPDATED RESULT
                 $.ajax({
                     "url" : BASE_URL + "/getLatestResultID",
                     type : "POST",
                     data : {
-                        _token : $('[name="_token"]').val()
+                        _token : $('[name="_token"]').val(),
+                        lastId : lastId
                     },
                     success : function(response){
                         console.log(response);

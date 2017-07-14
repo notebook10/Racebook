@@ -59,13 +59,50 @@ class Bets extends Model
             ->whereBetween("created_at",[$currentDate . " 00:00:00", $currentDate . " 23:59:59"])
             ->get();
     }
-    public function checkExacta($trkCode, $raceDate, $raceNum, $combination){
+//    public function checkExacta($trkCode, $raceDate, $raceNum, $combination, $wagerType){
+//        return DB::table($this->table)
+//            ->where("race_track", $trkCode)
+//            ->where("race_number",$raceNum)
+//            ->where("race_date",$raceDate)
+//            ->where("bet",$combination)
+//            ->where("bet_type",$wagerType)
+//            ->get();
+//    }
+//    public function checkExactaBox($trkCode, $raceDate, $raceNum, $combination){
+//        return DB::table($this->table)
+//            ->where("race_track", $trkCode)
+//            ->where("race_number",$raceNum)
+//            ->where("race_date",$raceDate)
+//            ->where("bet",$combination)
+//            ->where("bet_type","exactabox")
+//            ->get();
+//    }
+//    public function checkTrifecta($trkCode, $raceDate, $raceNum, $combination){
+//        return DB::table($this->table)
+//            ->where("race_track", $trkCode)
+//            ->where("race_number",$raceNum)
+//            ->where("race_date",$raceDate)
+//            ->where("bet",$combination)
+//            ->where("bet_type","trifecta")
+//            ->get();
+//    }
+    public function checkWinners($trkCode, $raceDate, $raceNum, $combination, $wagerType){
         return DB::table($this->table)
             ->where("race_track", $trkCode)
             ->where("race_number",$raceNum)
             ->where("race_date",$raceDate)
             ->where("bet",$combination)
-            ->where("bet_type","exacta")
+            ->where("bet_type",$wagerType)
+            ->get();
+    }
+    public function checkWps($trkCode, $raceDate, $raceNum, $combination, $wagerType, $type){
+        return DB::table($this->table)
+            ->where("race_track", $trkCode)
+            ->where("race_number",$raceNum)
+            ->where("race_date",$raceDate)
+            ->where("bet_type",$wagerType)
+            ->where("type",$type)
+            ->where("bet",$combination)
             ->get();
     }
 }
