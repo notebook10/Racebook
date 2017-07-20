@@ -65,4 +65,15 @@ class Results extends Model
             ->where("race_number", $raceNum + 1)
             ->first();
     }
+    public function getAllResults(){
+        return DB::table($this->table)
+            ->get();
+    }
+    public function getFirstRaceRes($trkCode, $raceNum, $raceDate){
+        return DB::table($this->table)
+            ->where("track_code",$trkCode)
+            ->where("race_date",$raceDate)
+            ->where("race_number", $raceNum - 1)
+            ->first();
+    }
 }

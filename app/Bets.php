@@ -105,4 +105,28 @@ class Bets extends Model
             ->where("bet",$combination)
             ->get();
     }
+    public function checkWinnersForDD($trkCode, $raceDate, $raceNum, $combination, $wagerType){
+        return DB::table($this->table)
+            ->where("race_track", $trkCode)
+            ->where("race_number",$raceNum - 1)
+            ->where("race_date",$raceDate)
+            ->where("bet",$combination)
+            ->where("bet_type",$wagerType)
+            ->get();
+    }
+    public function getBetsForScratch($dataArray){
+        return DB::table($this->table)
+            ->where("race_track",$dataArray["trk"])
+            ->where("race_number", $dataArray["num"])
+            ->where("race_date", $dataArray["date"])
+            ->get();
+    }
+    public function scratchBet($id){
+        return DB::table($this->table)
+            ->where("id", $id)
+            ->update([
+                "status" => 1,
+                "result" => 3, // SCRATCHED !!!
+            ]);
+    }
 }

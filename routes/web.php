@@ -27,6 +27,7 @@ Route::group(['middleware' => ['auth']],function(){
     Route::post('dashboard/getTrackCode','HomeController@getTrackCode');
     Route::post('dashboard/getWagerForRace','HomeController@getWagerForRace');
     Route::get('dashboard/checkIfOpen','HomeController@checkIfOpen');
+    Route::post('dashboard/getMinimum','HomeController@getMinimum');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');
@@ -45,5 +46,10 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('submitResults','AdminController@submitResults');
         Route::post('checkResults','AdminController@checkResults');
         Route::post('getLatestResultID','AdminController@getLatestResultID');
+        Route::post('getWagerForRace','HomeController@getWagerForRace');
+        Route::post('saveMinimum','AdminController@saveMinimum');
+        Route::post('checkMinimum','AdminController@checkMinimum');
+        Route::post('checkPayout','AdminController@checkPayout');
+        Route::post('scratchBets','AdminController@scratchBets');
     });
 });

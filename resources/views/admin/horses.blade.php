@@ -34,7 +34,7 @@
                                     <button class="btn btn-success" data-id="{{ $value->id }}" disabled>EDIT</button>
                                     <?php
                                         if($value->pp != "SCRATCHED"){
-                                            echo '<button class="btn btn-danger btnScratch" data-id="'. $value->id .'">SCRATCH</button>';
+                                            echo '<button class="btn btn-danger btnScratch" data-id="'. $value->id .'" data-num="'. $value->race_number .'" data-track="'. $value->race_track .'" data-date="'. $value->race_date .'" data-pp="'. $value->pp .'">SCRATCH</button>';
                                         }
                                     ?>
                                 </td>
@@ -57,8 +57,12 @@
             ]
         });
     }
-    $("body").delegate(".btnScratch","click", function(){
+    $("body").delegate(".btnScratch","click", function(e){
         var id = $(this).data("id");
+        var num = $(this).data("num");
+        var date = $(this).data("date");
+        var trk = $(this).data("track");
+        var pp = $(this).data("pp");
         swal({
                 title: "Are you sure?",
                 text: "You will not be able to recover this after the changes!",
@@ -81,8 +85,29 @@
                             id : id
                         },
                         success : function(response){
-                            swal("SCRATCH IT","Success","success");
-                            $("button.confirm").on("click",function(){location.reload();});
+                            $.ajax({
+                                "url" : BASE_URL + '/scratchBets',
+                                type : "POST",
+                                data : {
+                                    _token : $('[name="_token"]').val(),
+                                    id : id,
+                                    trk : trk,
+                                    num : num.replace(/\D/g,''),
+                                    date : date,
+                                    pp : pp
+                                },
+                                success : function(respo){
+                                    if(respo != 1){
+                                        swal("SCRATCH IT","Success","success");
+                                        $("button.confirm").on("click",function(){location.reload();});
+                                    }else{
+                                        swal("Do nothing!!!");
+                                    }
+                                },
+                                error : function(xhr, status, err){
+                                    alert(err);
+                                }
+                            });
                         },
                         error : function(xhr, status, err){
                             swal("Error",err,"error");

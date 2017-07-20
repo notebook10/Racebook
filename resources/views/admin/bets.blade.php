@@ -4,6 +4,10 @@ date_default_timezone_set('America/Los_Angeles');
 ?>
 <style>
     th{text-align: center}
+    .defeat{color: #fff;background: #ff4d28 !important;}
+    .null{color: #020202;background: #fffdcb !important;}
+    .victory{color: #fff;background: #00724b  !important;}
+    .scratched{color:#fff;background: #000 !important;}
 </style>
 <input id="date">
 <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -24,11 +28,24 @@ date_default_timezone_set('America/Los_Angeles');
                                 <th>Post Time</th>
                                 <th>Status</th>
                                 <th>Result</th>
+                                <th>Return</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($betsToday as $key => $value)
-                                <tr>
+                                <?php
+                                    $resultVar = "";
+                                    if($value->result == 0){
+                                        $resultVar = "Null";
+                                    }else if($value->result == 1){
+                                        $resultVar = "Victory";
+                                    }else if($value->result == 2){
+                                        $resultVar = "Defeat";
+                                    }else if($value->result == 3){
+                                        $resultVar = "Scratched";
+                                    }
+                                ?>
+                                <tr class="<?php echo strtolower($resultVar) ?>">
                                     <td>{{ $value->player_id }}</td>
                                     <td>{{ "Race " . $value->race_number }}</td>
                                     <td>{{ \App\Tracks::getTrackNameWithCode($value->race_track)->name }}</td>
@@ -54,16 +71,9 @@ date_default_timezone_set('America/Los_Angeles');
                                         ?>
                                     </td>
                                     <td>
-                                        <?php
-                                            if($value->result == 0){
-                                                echo "Null";
-                                            }else if($value->result == 1){
-                                                echo "Victory";
-                                            }else if($value->result == 2){
-                                                echo "Defeat";
-                                            }
-                                        ?>
+                                        <?php echo $resultVar; ?>
                                     </td>
+                                    <td>{{ $value->win_amount }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -95,6 +105,7 @@ date_default_timezone_set('America/Los_Angeles');
                     if(!$.trim(response)){
                         t.rows().remove().draw();
                     }else{
+                        t.rows().remove().draw();
                         $.each(response, function(index, value){
                             var status = response[index]["status"] == 0 ? "Pending" : "Graded";
                             var result = response[index]["result"] == 0 ? "Defeat" : "Victory";
@@ -107,7 +118,8 @@ date_default_timezone_set('America/Los_Angeles');
                                 response[index]["bet_amount"],
                                 response[index]["post_time"],
                                 status,
-                                result
+                                result,
+                                response[index]["win_amount"]
                             ]).draw(false);
 //                        $("table#tblBets tbody").append("<tr><td>"+ response[index]["player_id"] +"</td><td> Race "+ response[index]["race_number"] +"</td><td>"+ response[index]["race_track"] +"</td>" +
 //                            "<td>"+ response[index]["bet_type"] +"</td><td>"+ response[index]["bet_amount"] +"</td><td>"+ response[index]["post_time"] +"</td>" +

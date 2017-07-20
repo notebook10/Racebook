@@ -61,7 +61,7 @@ select option:hover {
     font-weight: bold;
 }
 .raceNum:hover, .raceNum:focus, .raceNum:active{cursor: pointer; color: #00724b;}
-.raceNum{padding: 5px 25px; color: #333;}
+.raceNum, .noRace{padding: 5px 25px; color: #333;}
 #date {
     font-size: 14px;
     font-weight: bold;

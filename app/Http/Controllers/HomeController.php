@@ -3,6 +3,7 @@ namespace App\Http\Controllers;
 
 use App\Bets;
 use App\Horses;
+use App\Minimum;
 use App\Timezone;
 use App\Wager;
 use Illuminate\Http\Request;
@@ -74,7 +75,6 @@ class HomeController extends Controller
         $date = date('mdy',time());
         $tracks = new Tracks();
         $racingTracks = $tracks->getAllTracks($date);
-//        dd($racingTracks);
         $data = [
             'tracks' => $racingTracks
         ];
@@ -115,17 +115,17 @@ class HomeController extends Controller
     }
     public function getServerTime(){
         date_default_timezone_set('America/Los_Angeles'); // Pacific
-        $pdtDate = date('F d, Y h:i:s', time());
+        $pdtDate = date('m/d/y h:i:s A', time());
         $pdt = date('H:i:s', time());
         date_default_timezone_set('America/Denver'); // Mountain
-        $mdtDate = date('F d, Y h:i:s', time());
+        $mdtDate = date('m/d/y h:i:s A', time());
         $mdt = date('H:i:s', time());
         date_default_timezone_set('America/Chicago'); // Central
         $cdt = date('H:i:s', time());
-        $cdtDate = date('F d, Y h:i:s', time());
+        $cdtDate = date('m/d/y h:i:s A', time());
         date_default_timezone_set('America/New_York'); // Eastern
         $edt = date('H:i:s', time());
-        $edtDate = date('F d, Y h:i:s', time());
+        $edtDate = date('m/d/y h:i:s A', time());
         $dateArray = [
             "dateTimePDT" => $pdtDate,
             "dateTimeMDT" => $mdtDate,
@@ -242,15 +242,23 @@ class HomeController extends Controller
         return $foo->track_name;
     }
     public function checkPostTime(Request $request){
+        $date = $request->input("date");
         $postTime = $request->input('postTime');
         $trackCode = $request->input('trk');
         $trackTimeZone = HomeController::getTimezone($trackCode);
         $time = $this->getServerTime();
-        $timeZoneTime = $time[strtolower($trackTimeZone)];
-        $foo = date("g:i A",strtotime($timeZoneTime));
-        $variable = "";
-        if(strtotime($postTime) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
-            $variable = "lt"; // race finished
+//        $timeZoneTime = $time[strtolower($trackTimeZone)];
+//        if(strtotime($postTime) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
+//            $variable = "lt"; // race finished
+//        }else{
+//            $variable = "gt"; // ok
+//        }
+//        return $variable;
+        $timeZoneTime = $time["dateTime".strtoupper($trackTimeZone)];
+        $convertTemp = date("m/d/y h:i A",strtotime($timeZoneTime));
+        $dateSlashed = substr($date,0,2) . "/" . substr($date,2,2) . "/" . substr($date,4,2);
+        if(strtotime($dateSlashed . " " . $postTime) < strtotime($convertTemp)){
+            $variable = "lt"; // close
         }else{
             $variable = "gt"; // ok
         }
@@ -310,32 +318,34 @@ class HomeController extends Controller
     }
     public function checkIfOpen(Request $request){
         $date = $request->input("date");
-        $dateTime = DateTime::createFromFormat("mdy",$date);
-        $currentFormattedDate = $dateTime->format("m/d/y");
         $postTimeArr = $request->input("postTime");
         $trkCode = $request->input("trk");
         $trackTimeZone = HomeController::getTimezone($trkCode);
         $time = $this->getServerTime();
-        dd($time['dateTimeCDT']);
-        $timeZoneTime = $time[strtolower($trackTimeZone)];
+        $timeZoneTime = $time["dateTime".strtoupper($trackTimeZone)];
+        $convertTemp = date("m/d/y h:i A",strtotime($timeZoneTime));
         $resArr = [];
         $dateSlashed = substr($date,0,2) . "/" . substr($date,2,2) . "/" . substr($date,4,2);
-        $temp = $dateSlashed . " 9:00 PM";
-//        foreach ($postTimeArr as $key => $val){
-//            if(strtotime($postTimeArr[$key]) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
-//                array_push($resArr, "lt"); // close
-//            }else{
-//                array_push($resArr, "gt"); // ok
-//            }
-//        }
-        dd($timeZoneTime);
         foreach ($postTimeArr as $key => $val){
-            if(strtotime($dateSlashed . " " . $postTimeArr[$key]) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
+            if(strtotime($dateSlashed . " " . $postTimeArr[$key]) < strtotime($convertTemp)){
                 array_push($resArr, "lt"); // close
             }else{
                 array_push($resArr, "gt"); // ok
             }
         }
-//        return $resArr;
+        return $resArr;
+    }
+    public function getMinimum(Request $request){
+        $minimumModel = new Minimum();
+        $arr = [
+            "trk" => $request->input("trk"),
+            "date" => $request->input("date")
+        ];
+        if($minimumModel->getMinimum($arr)){
+            return response()->json(json_decode($minimumModel->getMinimum($arr)->content));
+        }else{
+            return 1;
+        }
+
     }
 }

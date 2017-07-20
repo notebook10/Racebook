@@ -5,7 +5,13 @@
 {{--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>--}}
 {{--<script src="{{ asset('js/sweetalert.min.js') }}"></script>--}}
 {{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
-
+<style>
+    .defeat{color: #fff;background: #ff4d28 !important;}
+    .null{color: #020202;background: #fffdcb !important;}
+    .victory{color: #fff;background: #00724b  !important;}
+    .scratched{color:#fff;background: #000 !important;}
+    th,td{text-align: center;}
+</style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -24,12 +30,25 @@
                             <th>Post Time</th>
                             <th>Status</th>
                             <th>Result</th>
+                            <th>Return</th>
                             <th>Date</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($history as $key => $value)
-                            <tr>
+                            <?php
+                                $resultVar = "";
+                                if($value->result == 0){
+                                    $resultVar = "Null";
+                                }else if($value->result == 1){
+                                    $resultVar = "Victory";
+                                }else if($value->result == 2){
+                                    $resultVar = "Defeat";
+                                }else if($value->result == 3){
+                                    $resultVar = "Scratched";
+                                }
+                            ?>
+                            <tr class="<?php echo strtolower($resultVar); ?>">
                                 <td>
                                     <?php
                                     if($value->bet_type === "wps"){
@@ -58,12 +77,15 @@
                                 </td>
                                 <td>
                                     <?php
-                                        if($value->result == 0){
-                                            echo "Null";
-                                        }else if($value->result == 1){
-                                            echo "Victory";
-                                        }else if($value->result == 2){
-                                            echo "Defeat";
+                                        echo $resultVar;
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php
+                                        if($value->win_amount <= 0 || $value->win_amount == ""){
+                                            echo "---";
+                                        }else{
+                                            echo $value->win_amount;
                                         }
                                     ?>
                                 </td>
@@ -85,7 +107,5 @@
                 "aaSorting": []
             });
         }
-        $("tr.trRed").css("color","red");
-        $("tr.trGreen").css("color","green");
     });
 </script>

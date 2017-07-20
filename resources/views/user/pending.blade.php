@@ -5,7 +5,11 @@
 {{--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>--}}
 {{--<script src="{{ asset('js/sweetalert.min.js') }}"></script>--}}
 {{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
-
+<style>
+    .defeat{color: #fff;background: #ff4d28 !important;}
+    .null{color: #020202;background: #fffdcb !important;}
+    .victory{color: #fff;background: #00724b  !important;}
+</style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -28,7 +32,7 @@
                     </thead>
                     <tbody>
                     @foreach($pending as $key => $value)
-                        <tr>
+                        <tr class="null">
                             <td>
                                 <?php
                                     if($value->bet_type === "wps"){
