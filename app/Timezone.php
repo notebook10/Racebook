@@ -36,4 +36,18 @@ class Timezone extends Model
             ->where("track_name"," " . $trkName)
             ->first();
     }
+    public function getTracksNotToday($trkArray){
+        $arrayOfTracks = [];
+        $allTracks = DB::table($this->table)->get();
+        $foo = json_decode($allTracks);
+//        echo $foo[$index]->track_name;
+        foreach ($trkArray as $key => $value){
+            foreach ($foo as $index => $val){
+                if($foo[$index]->track_code == $value){
+                    unset($allTracks[$index]);
+                }
+            }
+        }
+        return $allTracks;
+    }
 }

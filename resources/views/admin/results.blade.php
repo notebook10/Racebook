@@ -4,6 +4,7 @@
     th,td{text-align: center}
     #tblResults{margin-bottom: 30px;}
     label.error{color:red;font-size: 9px;}
+    #submitMinimum{margin-top: 30px;width:100%;}
 </style>
 <input type="hidden" value="{{ csrf_token() }}" name="_token">
 <div class="container">

@@ -51,5 +51,12 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('checkMinimum','AdminController@checkMinimum');
         Route::post('checkPayout','AdminController@checkPayout');
         Route::post('scratchBets','AdminController@scratchBets');
+        Route::post('getTracksForNewTrack','AdminController@getAllTracksWithoutToday');
+        Route::post('submitNewTrack','AdminController@submitNewTrack');
+        Route::post('getTracksToday','AdminController@getTracksToday');
+        Route::post('submitHorse','AdminController@submitHorse');
+        Route::post('submitNewWager','AdminController@submitNewWager');
+        Route::post('getHorseData','AdminController@getHorseData');
+        Route::post('getWagerByRace','AdminController@getWagerByRace');
     });
 });

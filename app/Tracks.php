@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use DB;
+use App\Timezone;
 class Tracks extends Model
 {
     protected $table = "tracks";
@@ -28,5 +29,27 @@ class Tracks extends Model
         return DB::table('tracks')
             ->where('code',$code)
             ->first();
+    }
+    public function getTracksWithoutToday($date){
+        $tmzModel = new Timezone();
+        $trkArray= [];
+        $trkToday = DB::table($this->table)
+            ->where("date",$date)
+            ->get();
+        foreach ($trkToday as $key => $value){
+            array_push($trkArray, $value->code);
+        }
+        $filteredTracks = $tmzModel->getTracksNotToday($trkArray);
+        return $filteredTracks;
+    }
+    public function submitNewTrack($trkName, $trkCode , $date){
+        $dataArray = [
+            "name" => " " . $trkName,
+            "code" => $trkCode,
+            "visibility" => "0",
+            "date" => $date
+        ];
+        return DB::table($this->table)
+            ->insert($dataArray);
     }
 }

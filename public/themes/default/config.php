@@ -79,11 +79,13 @@ return array(
             $theme->asset()->add('css-bootstrap-min', 'css/bootstrap/bootstrap.min.css');
             $theme->asset()->add('css-sweetalert', 'css/sweetalert.css');
             $theme->asset()->add('css-datatable', 'css/datatables.min.css');
+            $theme->asset()->add('css-mCustomScrollbar', 'css/jquery.mCustomScrollbar.min.css');
 
             $theme->asset()->add('js-jquery-3.2.1', 'js/jquery-3.2.1.min.js');
             $theme->asset()->add('js-bootstrap-min', 'js/bootstrap/bootstrap.min.js');
             $theme->asset()->add('js-sweetalert', 'js/sweetalert.min.js');
             $theme->asset()->add('js-datatable', 'js/jquery.datatables.js');
+            $theme->asset()->add('js-mCustomScrollbar', 'js/jquery.mCustomScrollbar.concat.min.js');
 		},
 
 		'beforeRenderLayout' => array(

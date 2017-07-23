@@ -50,4 +50,18 @@ class Horses extends Model
             ->where("id",$id)
             ->update($arr);
     }
+    public function insertNewHorse($dataArray){
+        return DB::table($this->table)
+            ->insert($dataArray);
+    }
+    public function getHorseById($id){
+        return DB::table($this->table)
+            ->where("id",$id)
+            ->first();
+    }
+    public function updateHorse($id, $dataArray){
+        return DB::table($this->table)
+            ->where("id", $id)
+            ->update($dataArray);
+    }
 }

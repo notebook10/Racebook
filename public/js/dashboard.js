@@ -446,17 +446,17 @@ $("document").ready(function(){
                     else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                     else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                     else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                    else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                    else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
                     else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
                     else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
                     else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
-                    else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
-                    else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
-                    else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
-                    else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
-                    else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
-                    else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
-                    else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
+                    else if($(this).data("key") == 10){$(this).css({"background":"#800080","color":"#fff"});}
+                    else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#fff"});}
+                    else if($(this).data("key") == 12){$(this).css({"background":"#32CD32","color":"#000"});}
+                    else if($(this).data("key") == 13){$(this).css({"background":"#8A2BE2","color":"#fff"});}
+                    else if($(this).data("key") == 14){$(this).css({"background":"#808000","color":"#fff"});}
+                    else if($(this).data("key") == 15){$(this).css({"background":"#ADA96E","color":"#fff"});}
+                    else if($(this).data("key") == 16){$(this).css({"background":"#2B547E","color":"#fff"});}
                     else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
                     else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
                     else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
@@ -1237,6 +1237,7 @@ $("document").ready(function(){
             }
         });
     });
+    // $(".col-tracks").mCustomScrollbar();
 });
 function displayConfirmationDiv(){
     $("#raceDiv").css("display","none");
@@ -1273,17 +1274,17 @@ function ajaxGetHorsesPerRace($url,trk,currentDate, num){
                 else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                 else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                 else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
                 else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
                 else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
                 else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
-                else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
-                else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
-                else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
-                else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
-                else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
-                else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
-                else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
+                else if($(this).data("key") == 10){$(this).css({"background":"#800080","color":"#fff"});}
+                else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#fff"});}
+                else if($(this).data("key") == 12){$(this).css({"background":"#32CD32","color":"#000"});}
+                else if($(this).data("key") == 13){$(this).css({"background":"#8A2BE2","color":"#fff"});}
+                else if($(this).data("key") == 14){$(this).css({"background":"#808000","color":"#fff"});}
+                else if($(this).data("key") == 15){$(this).css({"background":"#ADA96E","color":"#fff"});}
+                else if($(this).data("key") == 16){$(this).css({"background":"#2B547E","color":"#fff"});}
                 else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
                 else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
                 else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
@@ -1434,17 +1435,17 @@ function fooFunction($url,trk,date,num,wager){
                 else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                 else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                 else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
-                else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#ff0"});}
+                else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
                 else if($(this).data("key") == 7){$(this).css({"background":"#ff711f","color":"#000"});}
                 else if($(this).data("key") == 8){$(this).css({"background":"#ff52b1","color":"#000"});}
                 else if($(this).data("key") == 9){$(this).css({"background":"#3badad","color":"#fff"});}
-                else if($(this).data("key") == 10){$(this).css({"background":"#9900ff","color":"#fff"});}
-                else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#f00"});}
-                else if($(this).data("key") == 12){$(this).css({"background":"#8A2BE2","color":"#fff"});}
-                else if($(this).data("key") == 13){$(this).css({"background":"#808000","color":"#fff"});}
-                else if($(this).data("key") == 14){$(this).css({"background":"#f0e68c","color":"#fff"});}
-                else if($(this).data("key") == 15){$(this).css({"background":"#2B547E","color":"#fff"});}
-                else if($(this).data("key") == 16){$(this).css({"background":"#000080","color":"#fff"});}
+                else if($(this).data("key") == 10){$(this).css({"background":"#800080","color":"#fff"});}
+                else if($(this).data("key") == 11){$(this).css({"background":"#b7b7b7","color":"#fff"});}
+                else if($(this).data("key") == 12){$(this).css({"background":"#32CD32","color":"#000"});}
+                else if($(this).data("key") == 13){$(this).css({"background":"#8A2BE2","color":"#fff"});}
+                else if($(this).data("key") == 14){$(this).css({"background":"#808000","color":"#fff"});}
+                else if($(this).data("key") == 15){$(this).css({"background":"#ADA96E","color":"#fff"});}
+                else if($(this).data("key") == 16){$(this).css({"background":"#2B547E","color":"#fff"});}
                 else if($(this).data("key") == 17){$(this).css({"background":"#228b22","color":"#fff"});}
                 else if($(this).data("key") == 18){$(this).css({"background":"#4169e1","color":"#fff"});}
                 else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}

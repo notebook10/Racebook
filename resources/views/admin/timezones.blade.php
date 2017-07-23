@@ -10,7 +10,7 @@
                 <button class="btn btn-primary" id="addTmz">ADD TMZ</button>
             </div>
             <div>
-                <table class="table table-responsive table-striped table-bordered" id="tblTracksAndTimezone">
+                <table class="table table-responsive table-striped table-bordered table-hover" id="tblTracksAndTimezone">
                     <thead>
                     <tr>
                         <th>Track Name</th>

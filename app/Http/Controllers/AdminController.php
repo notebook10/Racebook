@@ -455,4 +455,98 @@ class AdminController extends Controller
             return 1; // Empty
         }
     }
+    public function getAllTracksWithoutToday(Request $request){
+        $date = $request->input("date");
+        $tracksModel = new Tracks();
+        return $tracksModel->getTracksWithoutToday($date);
+    }
+    public function submitNewTrack(Request $request){
+        $trkCode = $request->input("trkCode");
+        $date = $request->input("date");
+        $trkName = $request->input("trkName");
+        $trkModel = new Tracks();
+        if($trkModel->submitNewTrack($trkName,$trkCode,$date)){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public function getTracksToday(Request $request){
+        $trkModel = new Tracks();
+        return $trkModel->getAllTracks($request->input("date"));
+    }
+    public function submitHorse(Request $request){
+        $formData = $request->input("frm");
+        $horseModel = new Horses();
+        $dataArray = [
+            "pp" => $formData[0]["value"],
+            "horse" => $formData[1]["value"],
+            "jockey" => $formData[2]["value"],
+            "race_number" => "Race " .$formData[3]["value"],
+            "race_time" => " " . $formData[4]["value"],
+            "race_date" => $request->input("date"),
+            "race_track" => $formData[5]["value"]
+        ];
+        if($request->input("operation") == 0){
+            $res = $horseModel->insertNewHorse($dataArray);
+        }else if($request->input("operation") == 1){
+            $id = $request->input("id");
+            $res = $horseModel->updateHorse($id, $dataArray);
+        }
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public function submitNewWager(Request $request){
+        $wagerModel = new Wager();
+        $formData = $request->input("frm");
+        $date = $request->input("date");
+        $wagerArr = [];
+        foreach ($formData as $index => $value){
+            if($formData[$index]["value"] == "exacta"){
+                array_push($wagerArr, "Exacta");
+                array_push($wagerArr, "Exacta Box");
+            }else if($formData[$index]["value"] == "trifecta"){
+                array_push($wagerArr, "Trifecta");
+                array_push($wagerArr, "Trifecta Box");
+            }else if($formData[$index]["value"] == "superfecta"){
+                array_push($wagerArr, "Superfecta");
+            }else if($formData[$index]["value"] == "dd"){
+                array_push($wagerArr, "Daily Double");
+            }else if($formData[$index]["value"] == "wps"){
+                array_push($wagerArr, "WPS");
+            }
+        }
+        $dataArray = [
+            "code" => $formData[0]["value"],
+            "num" => $formData[1]["value"],
+            "wager" => $wagerArr,
+            "date" => $date
+        ];
+        $res = $wagerModel->submitWager($dataArray);
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public function getHorseData(Request $request){
+        $horseModel = new Horses();
+        return response()->json($horseModel->getHorseById($request->input("id")));
+    }
+    public function getWagerByRace(Request $request){
+        $wagerModel = new Wager();
+        $res = $wagerModel->getWagerById($request->input("id"));
+        $dataArray = [
+            "id" => $res->id,
+            "race_date" => $res->race_date,
+            "race_number" => preg_replace('/\D/', '', $res->race_number),
+            "race_time" => $res->race_time,
+            "track_code" => $res->track_code,
+            "extracted" => unserialize($res->extracted)
+        ];
+        return $dataArray;
+    }
 }
