@@ -15,6 +15,7 @@ use Validator;
 use Theme;
 use Illuminate\Support\Facades\Redirect;
 use DateTime;
+use DB;
 class HomeController extends Controller
 {
     public function index(){
@@ -164,67 +165,79 @@ class HomeController extends Controller
         $cdtArr = [];
         $edtArr = [];
         foreach ($pdtResults as $key => $val){
-            $timezone = HomeController::getTimezone($val->race_track);
-            if($timezone){
-                $trackname = HomeController::getTrack($val->race_track);
-                if($timezone === "PDT"){
-                    $to = strtotime($pdt);
-                    $mtp = round((strtotime($val->race_time) - $to) / 60);
-                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $pdtArr, TRUE)){
-                    }else{
-                        array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time );
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "PDT"){
+                        $to = strtotime($pdt);
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $pdtArr, TRUE)){
+                        }else{
+                            array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time );
+                        }
                     }
-                }
-            }else{
+                }else{
 
+                }
             }
         }
         foreach ($mdtResults as $key => $val){
-            $timezone = HomeController::getTimezone($val->race_track);
-            if($timezone){
-                $trackname = HomeController::getTrack($val->race_track);
-                if($timezone === "MDT"){
-                    $to = strtotime($mdt);
-                    $mtp = round((strtotime($val->race_time) - $to) / 60);
-                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $mdtArr, TRUE)){
-                    }else{
-                        array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "MDT"){
+                        $to = strtotime($mdt);
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $mdtArr, TRUE)){
+                        }else{
+                            array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                        }
                     }
-                }
-            }else{
+                }else{
 
+                }
             }
         }
         foreach ($cdtResults as $key => $val){
-            $timezone = HomeController::getTimezone($val->race_track);
-            if($timezone){
-                $trackname = HomeController::getTrack($val->race_track);
-                if($timezone === "CDT"){
-                    $to = strtotime($cdt);
-                    $mtp = round((strtotime($val->race_time) - $to) / 60);
-                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $cdtArr, TRUE)){
-                    }else{
-                        array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "CDT"){
+                        $to = strtotime($cdt);
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $cdtArr, TRUE)){
+                        }else{
+                            array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                        }
                     }
-                }
-            }else{
+                }else{
 
+                }
             }
         }
         foreach ($edtResults as $key => $val){
-            $timezone = HomeController::getTimezone($val->race_track);
-            if($timezone){
-                $trackname = HomeController::getTrack($val->race_track);
-                if($timezone === "EDT"){
-                    $to = strtotime($edt);
-                    $mtp = round((strtotime($val->race_time) - $to) / 60);
-                    if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $edtArr, TRUE)){
-                    }else{
-                        array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "EDT"){
+                        $to = strtotime($edt);
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $edtArr, TRUE)){
+                        }else{
+                            array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                        }
                     }
-                }
-            }else{
+                }else{
 
+                }
             }
         }
         // Array merge here
@@ -347,5 +360,11 @@ class HomeController extends Controller
             return 1;
         }
 
+    }
+    public static function checkTrackVisibility($trkCode,$date){
+        return DB::table("tracks")
+            ->where("code",$trkCode)
+            ->where("date",$date)
+            ->first();
     }
 }

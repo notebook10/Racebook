@@ -83,7 +83,9 @@
                 data : {
                     _token : $('[name="_token"]').val(),
                     date : $("#date").val(),
-                    frm : $("#frmWager").serializeArray()
+                    frm : $("#frmWager").serializeArray(),
+                    operation : $("#wagerOperation").val(),
+                    id : $("#updateID").val()
                 },
                 success : function(data){
                     alert("success");
@@ -95,6 +97,7 @@
         });
         $("body").delegate(".editWager","click", function(){
             var id = $(this).data("id");
+            $("#updateID").val(id);
             $.ajax({
                 "url" : BASE_URL + '/getTracksToday',
                 type : "post",
@@ -179,6 +182,7 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="wagerOperation" name="wagerOperation" value="0">
+                <input type="text" id="updateID" name="updateID">
                 <form id="frmWager" name="frmWager">
                     <div class="form-group">
                         <label for="selectTrack">Track :</label>

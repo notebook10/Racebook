@@ -21,13 +21,25 @@ class Wager extends Model
             ->where('race_date',$date)
             ->first();
     }
-    public function submitWager($dataArray){
-        $wager = new Wager();
-        $wager->track_code = $dataArray["code"];
-        $wager->race_number = "Race " . $dataArray["num"];
-        $wager->extracted = serialize($dataArray["wager"]);
-        $wager->race_date = $dataArray["date"];
-        $wager->save();
+    public function submitWager($dataArray,$operation,$id){
+        if($operation == 0){
+            $wager = new Wager();
+            $wager->track_code = $dataArray["code"];
+            $wager->race_number = "Race " . $dataArray["num"];
+            $wager->extracted = serialize($dataArray["wager"]);
+            $wager->race_date = $dataArray["date"];
+            $wager->save();
+        }else if($operation == 1){
+            $arr = [
+                "track_code" => $dataArray["code"],
+                "race_number" => "Race " . $dataArray["num"],
+                "extracted" => serialize($dataArray["wager"]),
+                "race_date" => $dataArray["date"]
+            ];
+            return DB::table($this->table)
+                ->where("id",$id)
+                ->update($arr);
+        }
     }
     public function getWagerById($id){
         return DB::table($this->table)

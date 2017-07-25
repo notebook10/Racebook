@@ -1,17 +1,21 @@
 <?php
-
 namespace App\Http\Controllers;
 
 use App\Bets;
 use App\Horses;
+use App\Minimum;
 use App\Timezone;
+use App\Wager;
 use Illuminate\Http\Request;
 use App\User;
 use App\Tracks;
 use Auth;
+use League\Flysystem\Exception;
 use Validator;
 use Theme;
 use Illuminate\Support\Facades\Redirect;
+use DateTime;
+use DB;
 class HomeController extends Controller
 {
     public function index(){
@@ -72,7 +76,6 @@ class HomeController extends Controller
         $date = date('mdy',time());
         $tracks = new Tracks();
         $racingTracks = $tracks->getAllTracks($date);
-//        dd($racingTracks);
         $data = [
             'tracks' => $racingTracks
         ];
@@ -91,36 +94,44 @@ class HomeController extends Controller
         return $horses;
     }
     public function saveBet(Request $request){
+        $model = new Bets();
         $dataArray = [
             'bettype' => $request->input("bettype"),
             'track' => $request->input("track"),
             'raceNum' => $request->input("raceNum"),
             'racePost' => $request->input("racePost"),
             'betamount' => $request->input("betamount"),
-            'bet' => json_encode($request->input("bet")),
-            'user' => Auth::user()->id
+            'bet' => $request->input("value"),
+            'type' => $request->input("wpsType"),
+//            'user' => Auth::user()->id
         ];
-        $model = new Bets();
         $temp = $model->saveBets($dataArray);
         return $temp;
     }
     public function getTrackName(Request $request){
         $model = new Tracks();
         $foo = $model->getTrackName($request->input("trk"));
-        return $foo->name;
+        $tmz = HomeController::getTimezone($request->input("trk"));
+        return [$foo->name,$tmz];
     }
     public function getServerTime(){
         date_default_timezone_set('America/Los_Angeles'); // Pacific
-        $pdtDate = date('F d, Y h:i:s', time());
-        $pdt = date('h:i:s', time());
+        $pdtDate = date('m/d/y h:i:s A', time());
+        $pdt = date('H:i:s', time());
         date_default_timezone_set('America/Denver'); // Mountain
-        $mdt = date('h:i:s', time());
+        $mdtDate = date('m/d/y h:i:s A', time());
+        $mdt = date('H:i:s', time());
         date_default_timezone_set('America/Chicago'); // Central
-        $cdt = date('h:i:s', time());
+        $cdt = date('H:i:s', time());
+        $cdtDate = date('m/d/y h:i:s A', time());
         date_default_timezone_set('America/New_York'); // Eastern
-        $edt = date('h:i:s', time());
+        $edt = date('H:i:s', time());
+        $edtDate = date('m/d/y h:i:s A', time());
         $dateArray = [
             "dateTimePDT" => $pdtDate,
+            "dateTimeMDT" => $mdtDate,
+            "dateTimeCDT" => $cdtDate,
+            "dateTimeEDT" => $edtDate,
             "pdt" => $pdt,
             "mdt" => $mdt,
             "cdt" => $cdt,
@@ -137,59 +148,102 @@ class HomeController extends Controller
         $mdt = $request->input("mdt");
         $cdt = $request->input("cdt");
         $edt = $request->input("edt");
-        $pdtStart = date('H:i A', strtotime($pdt));
-        $mdtStart = date('H:i A', strtotime($mdt));
-        $cdtStart = date('H:i A', strtotime($cdt));
-        $edtStart = date('H:i A', strtotime($edt));
-        $pdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($pdt)))));
-        $mdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($mdt)))));
-        $cdtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($cdt)))));
-        $edtEnd = date("H:i A", strtotime('+30 minutes', strtotime(date("H:i A",strtotime($edt)))));
+        $pdtStart = date('g:i A', strtotime($pdt));
+        $mdtStart = date('g:i A', strtotime($mdt));
+        $cdtStart = date('g:i A', strtotime($cdt));
+        $edtStart = date('g:i A', strtotime($edt));
+        $pdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($pdt)))));
+        $mdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($mdt)))));
+        $cdtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($cdt)))));
+        $edtEnd = date("g:i A", strtotime('+30 minutes', strtotime(date("H:i",strtotime($edt)))));
         $pdtResults = $horsesModel->getUpcomingRaces($date,$pdtStart,$pdtEnd);
-//        $mdtResults = $horsesModel->getUpcomingRaces($date,$mdtStart,$mdtEnd);
-//        $cdtResults = $horsesModel->getUpcomingRaces($date,$cdtStart,$cdtEnd);
-//        $edtResults = $horsesModel->getUpcomingRaces($date,$edtStart,$edtEnd);
+        $mdtResults = $horsesModel->getUpcomingRaces($date,$mdtStart,$mdtEnd);
+        $cdtResults = $horsesModel->getUpcomingRaces($date,$cdtStart,$cdtEnd);
+        $edtResults = $horsesModel->getUpcomingRaces($date,$edtStart,$edtEnd);
         $pdtArr = [];
+        $mdtArr = [];
+        $cdtArr = [];
+        $edtArr = [];
         foreach ($pdtResults as $key => $val){
-            $timezone = HomeController::getTimezone($val->race_track);
-            $trackname = HomeController::getTrack($val->race_track);
-            $to = "";
-//            if($timezone === "EDT"){
-                switch ($timezone){
-                    case "PDT":
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "PDT"){
                         $to = strtotime($pdt);
-                        break;
-                    case "MDT":
-                        $to = strtotime($mdt);
-                        break;
-                    case "CDT":
-                        $to = strtotime($cdt);
-                        break;
-                    case "EDT":
-                        $to = strtotime($edt);
-                        break;
-                    default:break;
-                }
-                $mtp = round(abs($to - strtotime($val->race_time)) / 60,2);
-                if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) , $pdtArr, TRUE)){
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $pdtArr, TRUE)){
+                        }else{
+                            array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time );
+                        }
+                    }
                 }else{
-                    array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) );
+
                 }
-//            }
+            }
+        }
+        foreach ($mdtResults as $key => $val){
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "MDT"){
+                        $to = strtotime($mdt);
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $mdtArr, TRUE)){
+                        }else{
+                            array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                        }
+                    }
+                }else{
+
+                }
+            }
+        }
+        foreach ($cdtResults as $key => $val){
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "CDT"){
+                        $to = strtotime($cdt);
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $cdtArr, TRUE)){
+                        }else{
+                            array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                        }
+                    }
+                }else{
+
+                }
+            }
+        }
+        foreach ($edtResults as $key => $val){
+            $visibility = HomeController::checkTrackVisibility($val->race_track,$date)->visibility;
+            if($visibility == 0){
+                $timezone = HomeController::getTimezone($val->race_track);
+                if($timezone){
+                    $trackname = HomeController::getTrack($val->race_track);
+                    if($timezone === "EDT"){
+                        $to = strtotime($edt);
+                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $edtArr, TRUE)){
+                        }else{
+                            array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
+                        }
+                    }
+                }else{
+
+                }
+            }
         }
         // Array merge here
-
-        return $pdtArr;
+        $mergedArray = array_merge($pdtArr,$edtArr,$mdtArr, $cdtArr);
+        return $mergedArray;
     }
-//    public function appendUpcomingRaces(Request $request){
-//        $pacificTime = $request->input("pacific");
-//        $mtp = strtotime('',$request->input("raceTime"));
-//        $datetime1 = strtotime("2011-10-10 10:00:00");
-//        $datetime2 = strtotime("2011-10-10 10:45:00");
-//        $interval  = abs($datetime2 - $datetime1);
-//        $minutes   = round($interval / 60);
-//        return "Asdad";
-//    }
     public static function getTimezone($trackCode){
         $model = new Timezone();
         $foo = $model->getTimezoneByCode($trackCode);
@@ -199,5 +253,118 @@ class HomeController extends Controller
         $model = new Timezone();
         $foo = $model->getTimezoneByCode($trackCode);
         return $foo->track_name;
+    }
+    public function checkPostTime(Request $request){
+        $date = $request->input("date");
+        $postTime = $request->input('postTime');
+        $trackCode = $request->input('trk');
+        $trackTimeZone = HomeController::getTimezone($trackCode);
+        $time = $this->getServerTime();
+//        $timeZoneTime = $time[strtolower($trackTimeZone)];
+//        if(strtotime($postTime) < strtotime(date("g:i A",strtotime($timeZoneTime)))){
+//            $variable = "lt"; // race finished
+//        }else{
+//            $variable = "gt"; // ok
+//        }
+//        return $variable;
+        $timeZoneTime = $time["dateTime".strtoupper($trackTimeZone)];
+        $convertTemp = date("m/d/y h:i A",strtotime($timeZoneTime));
+        $dateSlashed = substr($date,0,2) . "/" . substr($date,2,2) . "/" . substr($date,4,2);
+        if(strtotime($dateSlashed . " " . $postTime) < strtotime($convertTemp)){
+            $variable = "lt"; // close
+        }else{
+            $variable = "gt"; // ok
+        }
+        return $variable;
+    }
+    public function insertBets(Request $request){
+        $betsModel = new Bets();
+        $betsModel->insertBets($request->input("dataArray"));
+        return "0";
+    }
+    public function past(){
+        $betsModel = new Bets();
+        $data = [
+            'history' => $betsModel->getAllBets(Auth::id())
+        ];
+        $theme = Theme::uses('default')->layout('layout')->setTitle('History');
+        return $theme->of('user/history', $data)->render();
+    }
+    public function pending(){
+        $betsModel = new Bets();
+        $data = [
+            'pending' => $betsModel->getPendingBets(Auth::id())
+        ];
+        $theme = Theme::uses('default')->layout('layout')->setTitle('Pending');
+        return $theme->of('user/pending', $data)->render();
+    }
+    public function validateTrackTmz(Request $request){
+        $trkCode = $request->input("code");
+        $tmzModel = new Timezone();
+        $result = $tmzModel->getTimezoneByCode($trkCode);
+        if($result == null){
+            return null;
+        }else{
+            echo $result->time_zone;
+        }
+    }
+    public function getTrackCode(Request $request){
+        $trkName = $request->input("name");
+        $raceNum = $request->input("raceNum");
+        $date = $request->input("date");
+        $tmzModel = new Timezone();
+        $horsesModel = new Horses();
+        // GET RACE POST TIME
+        $trkCode = $tmzModel->getTrkCodeByName($trkName);
+        $firstRacePostTime = $horsesModel->getRaceTime($trkCode->track_code,$date,"Race " . $raceNum);
+        $dataArray = [
+            'horses' => $horsesModel->getHorsesPerRace($trkCode->track_code,$date,$raceNum),
+            'trkCode' => $trkCode->track_code,
+            'firstRacePostTime' => $firstRacePostTime->race_time
+        ];
+        return $dataArray;
+    }
+    public function getWagerForRace(Request $request){
+        $wagerModel = new Wager();
+        $wager = $wagerModel->getWagerForRace($request->input('trk'),$request->input('num'),$request->input('date'));
+        return unserialize($wager->extracted);
+    }
+    public function checkIfOpen(Request $request){
+        $date = $request->input("date");
+        $postTimeArr = $request->input("postTime");
+        $trkCode = $request->input("trk");
+        $trackTimeZone = HomeController::getTimezone($trkCode);
+        $time = $this->getServerTime();
+        $timeZoneTime = $time["dateTime".strtoupper($trackTimeZone)];
+        $convertTemp = date("m/d/y h:i A",strtotime($timeZoneTime));
+        $resArr = [];
+        $dateSlashed = substr($date,0,2) . "/" . substr($date,2,2) . "/" . substr($date,4,2);
+        foreach ($postTimeArr as $key => $val){
+            if(strtotime($dateSlashed . " " . $postTimeArr[$key]) < strtotime($convertTemp)){
+                array_push($resArr, "lt"); // close
+            }else{
+                array_push($resArr, "gt"); // ok
+            }
+        }
+        return $resArr;
+    }
+    public function getMinimum(Request $request){
+        $minimumModel = new Minimum();
+        $arr = [
+            "trk" => $request->input("trk"),
+            "date" => $request->input("date")
+        ];
+        if($minimumModel->getMinimum($arr)){
+            return response()->json(json_decode($minimumModel->getMinimum($arr)->content));
+        }else{
+            return 1;
+        }
+
+    }
+    public static function checkTrackVisibility($trkCode,$date){
+        return DB::table("tracks")
+            ->where("code",$trkCode)
+            ->where("date",$date)
+            ->first();
     }
 }

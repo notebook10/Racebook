@@ -2,9 +2,10 @@
 date_default_timezone_set('America/Los_Angeles');
 ?>
 <style>
-    .trkDiv{padding: 15px;text-align: center;border: 1px solid #00724b;}
+    .trkDiv{padding: 15px;text-align: center;border: 1px solid #fff;}
     .trkDiv:hover{cursor: pointer;}
     .show{background: #00724b;color:#fff;}
+    .tago{background: #ff6c64;color:#000;font-weight:900;}
     .addDiv{background: #faf7ed;color:#b6a361;border: 1px solid #b6a361;font-weight: bold;padding: 15px;text-align: center;}
     .addDiv:hover{background:#9c8948;color: #fff;cursor: pointer;}
 </style>
@@ -21,7 +22,7 @@ date_default_timezone_set('America/Los_Angeles');
         <div class="row">
             <?php
             foreach($tracks as $key => $value){
-                $visibility = $value->visibility == 0 ? "show" : "hide";
+                $visibility = $value->visibility == 0 ? "show" : "tago";
                 echo '<div class="col-sm-3 trkDiv '. $visibility .'" data-code="'. $value->code .'">' . $value->name . '</div>';
             }
             ?>
@@ -54,6 +55,25 @@ date_default_timezone_set('America/Los_Angeles');
         });
         $("body").delegate(".trkDiv","click",function(){
             var trkCode = $(this).data("code");
+            $.ajax({
+                "url" : BASE_URL + '/removeTrack',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    trk : trkCode,
+                    operation : $(this).hasClass("show") == true ? 1 : 0
+                },
+                success : function(respo){
+                    if(respo == 1){
+                        swal("Something went wrong!","","error");
+                    }else{
+                        location.reload();
+                    }
+                },
+                error : function(xhr, status, error){
+                    alert("Error: " + error);
+                }
+            });
         });
         $("#submitNewTrack").on("click", function(){
             var trkCode = $("#selectNewTrack").val();

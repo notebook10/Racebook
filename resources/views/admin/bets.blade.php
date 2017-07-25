@@ -8,6 +8,7 @@ date_default_timezone_set('America/Los_Angeles');
     .null{color: #020202;background: #fffdcb !important;}
     .victory{color: #fff;background: #00724b  !important;}
     .scratched{color:#fff;background: #000 !important;}
+    label.error{color:red;font-size: 9px;}
 </style>
 <input id="date">
 <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -197,6 +198,7 @@ date_default_timezone_set('America/Los_Angeles');
                     console.log(respo);
                     $("#wager").attr("disabled",false);
                     $("#wager").attr("disabled",false).empty();
+                    $("#wager").append("<option disabled selected>-- SELECT WAGER --</option>");
                     $.each(respo, function(index, value){
                         switch(value){
                             case "Exacta":
@@ -230,6 +232,70 @@ date_default_timezone_set('America/Los_Angeles');
                 }
             });
         });
+        $("#wager").on("change", function(){
+            $(".horse,  .horseLabel").remove();
+            var wager = $(this).val();
+            switch (wager){
+                case "exacta":
+                    $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST' id='first' name='first'></div>");
+                    $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND' id='second' name='second'></div>");
+                    break;
+                case "trifecta":
+                    $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST' id='first' name='first'></div>");
+                    $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND' id='second' name='second'></div>");
+                    $("#frmBets").append("<div><label for='third' class='horseLabel'>Third Horse:</label><input type='text' class='form-control horse' placeholder='THIRD' id='third' name='third'></div>");
+                    break;
+                case "superfecta":
+                    $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST' id='first' name='first'></div>");
+                    $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND' id='second' name='second'></div>");
+                    $("#frmBets").append("<div><label for='third' class='horseLabel'>Third Horse:</label><input type='text' class='form-control horse' placeholder='THIRD' id='third' name='third'></div>");
+                    $("#frmBets").append("<div><label for='fourth' class='horseLabel'>Fourth Horse:</label><input type='text' class='form-control horse' placeholder='FOURTH' id='fourth' name='fourth'></div>");
+                    break;
+                case "dailydouble":
+                    $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST RACE' id='first' name='first'></div>");
+                    $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND RACE' id='second' name='second'></div>");
+                    break;
+                case "w":
+                    $("#frmBets").append("<div><label for='first' class='horseLabel'>Win:</label><input type='text' class='form-control horse' placeholder='Win' id='first' name='first'></div>");
+                    break;
+                case "p":
+                    $("#frmBets").append("<div><label for='first' class='horseLabel'>Place:</label><input type='text' class='form-control horse' placeholder='Place' id='first' name='first'></div>");
+                    break;
+                case "s":
+                    $("#frmBets").append("<div><label for='first' class='horseLabel'>Show:</label><input type='text' class='form-control horse' placeholder='Show' id='first' name='first'></div>");
+                    break;
+                default:
+                    break;
+            }
+        });
+        $("#frmBets").validate({
+            rules : {
+                player_id : "required",
+                raceTrack : "required",
+                raceNum : "required",
+                wager : "required",
+                first : {required:true,maxlength:2},
+                second : {required:true,maxlength:2},
+                third : {required:true,maxlength:2},
+                fourth : {required:true,maxlength:2},
+            }
+        });
+        $("#btnSubmitNewBet").on("click", function(){
+            $("#frmBets").submit();
+        });
+        var optionsBets = {
+            success: function(response){
+                if(response == 0){
+                    swal("Bet Saved!","","success");
+                }else{
+                    swal("Failed!","","error");
+                }
+                $("button.confirm").on("click", function(){
+                    location.reload();
+                });
+            }
+        };
+        $("#frmBets").ajaxForm(optionsBets);
     });
     function loadBetsDataTable(){
         $("#tblBets").DataTable();
@@ -245,24 +311,38 @@ date_default_timezone_set('America/Los_Angeles');
                 <h4 class="modal-title">BETTTTTTTTTTTTTTTTTTSSSSSSSSSSSSSSSSSS!!!!!!!!!!!!!!!</h4>
             </div>
             <div class="modal-body">
-                <form id="frmBets" class="form-group">
-                    <label for="playerID">Player ID:</label>
-                    <input type="text" class="form-control" id="player_id" name="player_id" placeholder="Player ID">
-                    <label for="raceTrack">Race Track:</label>
-                    <select id="raceTrack" name="raceTrack" class="form-control">
-                        <option selected disabled>-- SELECT TRACK --</option>
-                    </select>
-                    <label for="raceNum">Race Number:</label>
-                    <select id="raceNum" name="raceNum" class="form-control" disabled>
-                        <option selected disabled>-- RACE NUMBER --</option>
-                    </select>
-                    <label for="wager">Wager Type:</label>
-                    <select id="wager" name="wager" class="form-control" disabled>
-                        <option disabled selected>-- WAGER --</option>
-                    </select>
+                <form id="frmBets" class="form-group" method="post" action="submitNewBet">
+                    <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                    <div>
+                        <label for="playerID">Player ID:</label>
+                        <input type="text" class="form-control" id="player_id" name="player_id" placeholder="Player ID">
+                    </div>
+                    <div>
+                        <label for="amount">Amount:</label>
+                        <input type="text" class="form-control" id="amount" name="amount" placeholder="Bet amount">
+                    </div>
+                    <div>
+                        <label for="raceTrack">Race Track:</label>
+                        <select id="raceTrack" name="raceTrack" class="form-control">
+                            <option selected disabled>-- SELECT TRACK --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="raceNum">Race Number:</label>
+                        <select id="raceNum" name="raceNum" class="form-control" disabled>
+                            <option selected disabled>-- RACE NUMBER --</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label for="wager">Wager Type:</label>
+                        <select id="wager" name="wager" class="form-control" disabled>
+                            <option disabled selected>-- WAGER --</option>
+                        </select>
+                    </div>
                 </form>
             </div>
             <div class="modal-footer">
+                <button type="button" class="btn btn-success" id="btnSubmitNewBet">Submit</button>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
             </div>
         </div>

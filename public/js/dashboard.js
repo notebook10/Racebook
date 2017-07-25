@@ -10,6 +10,7 @@ $("document").ready(function(){
     var selectedWagerPrev = "";
     var openRaces2 = [];
     setTimeout(getUpcomingRaces,3000);
+    $(".loader").css("display","block");
     $(".trkName").on("click",function(){
         if($(this).hasClass("collapsed")){
             $(this).next("div.panel-body").find("div.raceNum").remove();
@@ -886,7 +887,10 @@ $("document").ready(function(){
                         }
                     }else{
                         swal("There was a problem!", "The minimum stake for this wager is $" + minimumBet,"error");
-                        $("#betAmount").val("").focus();
+                        $("button.confirm").on("click", function(){
+                            $("#betAmount").val("");
+                            $("#betAmount").focus();
+                        });
                     }
                 },
                 error : function(xhr, status, error){
@@ -1057,6 +1061,7 @@ $("document").ready(function(){
                 edt : $("h5#edt").text()
             },
             success : function(response){
+                $(".loader").css("display","none");
                 var trackName,raceNumber,mtp = "";
                 $("table#tblUpcomingRace tbody tr").remove();
                 $.each(response, function(index, value){
@@ -1069,7 +1074,7 @@ $("document").ready(function(){
                     }else {
                         $("table#tblUpcomingRace tbody").append("<tr><td class='upcomingRace' data-track='" + trackName + "' data-number='" + raceNumber + "'>" + trackName + "</td><td>" + raceNumber + "</td><td>" + mtp + "</td></tr>");
                     }
-                    });
+                });
                 console.log(response);
             },
             error : function(xhr, status, err){

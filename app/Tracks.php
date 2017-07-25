@@ -11,6 +11,12 @@ class Tracks extends Model
     public function getAllTracks($date){
         return DB::table($this->table)
             ->where('date',$date)
+            ->where('visibility',0)
+            ->get();
+    }
+    public function getAllTracksForAdmin($date){
+        return DB::table($this->table)
+            ->where('date',$date)
             ->get();
     }
     public function getTrackName($trackCode){
@@ -51,5 +57,14 @@ class Tracks extends Model
         ];
         return DB::table($this->table)
             ->insert($dataArray);
+    }
+    public function removeTrack($trk,$date,$operation){
+        $arr = [
+            "visibility" => $operation == 1 ? 1 : 0
+        ];
+        return DB::table($this->table)
+            ->where("code",$trk)
+            ->where("date",$date)
+            ->update($arr);
     }
 }

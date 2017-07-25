@@ -129,4 +129,16 @@ class Bets extends Model
                 "result" => 3, // SCRATCHED !!!
             ]);
     }
+    public function saveNewBet($betArray){
+        return DB::table($this->table)
+            ->insert($betArray);
+    }
+    public function undoScratch($id){
+        return DB::table($this->table)
+            ->where("id",$id)
+            ->update([
+                "status" => 0,
+                "result" => 0
+            ]);
+    }
 }

@@ -58,5 +58,8 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('submitNewWager','AdminController@submitNewWager');
         Route::post('getHorseData','AdminController@getHorseData');
         Route::post('getWagerByRace','AdminController@getWagerByRace');
+        Route::post('submitNewBet','AdminController@submitNewBet');
+        Route::post('undoScratch','AdminController@undoScratch');
+        Route::post('removeTrack','AdminController@removeTrack');
     });
 });

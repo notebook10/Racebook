@@ -27,7 +27,7 @@ class AdminController extends Controller
     public function tracks(){
         date_default_timezone_set('America/Los_Angeles');
         $betsModel = new Tracks();
-        $tracks = $betsModel->getAllTracks(date('mdy',time()));
+        $tracks = $betsModel->getAllTracksForAdmin(date('mdy',time()));
         $dataArray = [
             'tracks' => $tracks
         ];
@@ -91,7 +91,7 @@ class AdminController extends Controller
     public function scratch(Request $request){
         $id = $request->input("id");
         $horsesModel = new Horses();
-        $arr = ['pp' => 'SCRATCHED'];
+        $arr = ['pp' => 'SCRATCHED','pnumber' => $request->input("pp")];
         return $horsesModel->scratch($id,$arr);
     }
     public function wager(){
@@ -504,6 +504,8 @@ class AdminController extends Controller
         $formData = $request->input("frm");
         $date = $request->input("date");
         $wagerArr = [];
+        $operation = $request->input("operation");
+        $id = $request->input("id");
         foreach ($formData as $index => $value){
             if($formData[$index]["value"] == "exacta"){
                 array_push($wagerArr, "Exacta");
@@ -525,7 +527,7 @@ class AdminController extends Controller
             "wager" => $wagerArr,
             "date" => $date
         ];
-        $res = $wagerModel->submitWager($dataArray);
+        $res = $wagerModel->submitWager($dataArray,$operation,$id);
         if($res){
             return 0;
         }else{
@@ -548,5 +550,93 @@ class AdminController extends Controller
             "extracted" => unserialize($res->extracted)
         ];
         return $dataArray;
+    }
+    public function submitNewBet(Request $request){
+        date_default_timezone_set('America/Los_Angeles');
+        $pacificDate = date('Y-m-d H:i:s', time());
+        $raceDate = date('mdy',time());
+        if($request->input("fourth") != null){
+            $betString = $request->input("first") . ',' . $request->input("second") . ',' . $request->input("third") . ',' . $request->input("fourth");
+        }else if($request->input("third") != null){
+            $betString = $request->input("first") . ',' . $request->input("second") . ',' . $request->input("third");
+        }else if($request->input("second") != null){
+            $betString = $request->input("first") . ',' . $request->input("second");
+        }else if($request->input("first") != null){
+            $betString = $request->input("first");
+        }
+        if($request->input("wager") == "w" || $request->input("wager") == "p" || $request->input("wager") == "s"){
+            $wager = "wps";
+        }else{
+            $wager = $request->input("wager");
+        }
+        if($request->input("wager") == "w"){
+            $type = "w";
+        }else if($request->input("wager") == "p"){
+            $type = "p";
+        }else if($request->input("wager") == "w"){
+            $type = "s";
+        }else{
+            $type = "x";
+        }
+        $betArray = [
+            'player_id' => $request->input("player_id"),
+            'race_number' => $request->input("raceNum"),
+            'race_track' => $request->input("raceTrack"),
+            'bet_type' => $wager,
+            'bet_amount' => $request->input("amount"),
+            'type' => $type,
+            'bet' => $betString,
+            'status' => '0',
+            'created_at' => $pacificDate,
+            'updated_at' => $pacificDate,
+            'race_date' => $raceDate
+        ];
+        $betsModel = new Bets();
+        $res = $betsModel->saveNewBet($betArray);
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public function undoScratch(Request $request){
+        $pnum = $request->input("pnum");
+        $trk = $request->input("trk");
+        $num = $request->input("num");
+        $date = $request->input("date");
+        $dataArray = [
+            "trk" => $trk,
+            "date" => $date,
+            "num" => $num
+        ];
+        $betsModel = new Bets();
+        $horseModel = new Horses();
+        $undo = $horseModel->undoScratch($request->input("id"),$pnum);
+        if($undo){
+            $bets = $betsModel->getBetsForScratch($dataArray);
+            if($bets){
+                foreach ($bets as $key => $value){
+                    $betStr = explode(",",$value->bet);
+                    if(in_array($pnum, $betStr)){
+                        $betsModel->undoScratch($value->id);
+                    }else{
+                        // Do nothing
+                    }
+                }
+            }else{
+                return 1; // Empty
+            }
+        }
+
+    }
+    public function removeTrack(Request $request){
+        date_default_timezone_set('America/Los_Angeles');
+        $trkModel = new Tracks();
+        $res = $trkModel->removeTrack($request->input("trk"),date("mdy",time()),$request->input("operation"));
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
     }
 }

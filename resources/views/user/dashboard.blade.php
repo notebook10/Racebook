@@ -50,6 +50,7 @@
             <!-- Upcoming Races -->
             <div id="upcomingRacesDiv">
                 <h1>Upcoming Races</h1>
+                <div class="loader"></div>
                 <table class="table table-bordered table-striped" id="tblUpcomingRace">
                     <thead>
                         <tr>
@@ -60,6 +61,7 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+                <div class="test"></div>
             </div>
             <div id="raceDiv">
                 <!-- Race Info -->

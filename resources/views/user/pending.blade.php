@@ -7,8 +7,9 @@
 {{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
 <style>
     .defeat{color: #fff;background: #ff4d28 !important;}
-    .null{color: #020202;background: #fffdcb !important;}
+    .null{color: #020202;background: #faf7ed !important;}
     .victory{color: #fff;background: #00724b  !important;}
+    th,td{text-align: center;}
 </style>
 <div class="container">
     <div class="row">

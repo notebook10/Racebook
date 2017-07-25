@@ -40,6 +40,10 @@
                                     <?php
                                         if($value->pp != "SCRATCHED"){
                                             echo '<button class="btn btn-danger btnScratch" data-id="'. $value->id .'" data-num="'. $value->race_number .'" data-track="'. $value->race_track .'" data-date="'. $value->race_date .'" data-pp="'. $value->pp .'">SCRATCH</button>';
+                                        }else{
+                                            if(is_numeric($value->pnumber)){
+                                                echo '<button class="btn btn-primary undo" data-id="'. $value->id .'" data-num="'. $value->race_number .'" data-track="'. $value->race_track .'" data-date="'. $value->race_date .'" data-pnumber="'. $value->pnumber .'">UNDO</button>';
+                                            }
                                         }
                                     ?>
                                 </td>
@@ -81,7 +85,8 @@
                             type : "POST",
                             data : {
                                 _token : $('[name="_token"]').val(),
-                                id : id
+                                id : id,
+                                pp : pp
                             },
                             success : function(response){
                                 $.ajax({
@@ -225,6 +230,39 @@
 //                }
 //            });
 //            $("#horseModal").modal("show");
+        });
+        $("body").delegate(".undo","click", function(){
+            var id = $(this).data("id");
+            var pnum = $(this).data("pnumber");
+            var trk = $(this).data("track");
+            var raceDate = $(this).data("date");
+            var raceNum = $(this).data("num").replace(/\D/g,'');
+            $.ajax({
+                "url" : BASE_URL + '/undoScratch',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    id : id,
+                    pnum : pnum,
+                    date : raceDate,
+                    num : raceNum,
+                    trk : trk
+                },
+                success : function(data){
+                    if(data == 0){
+                        swal("Success","","success");
+                    }
+                    else{
+                        swal("Failed!","","error");
+                    }
+                    $("button.confirm").on("click", function(){
+                        location.reload();
+                    });
+                },
+                error : function(xhr, status, err){
+                    alert("Error : " + err);
+                }
+            });
         });
     });
     function loadHorsesDataTable(){

@@ -7,7 +7,7 @@
 {{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
 <style>
     .defeat{color: #fff;background: #ff4d28 !important;}
-    .null{color: #020202;background: #fffdcb !important;}
+    .null{color: #020202;background: #faf7ed !important;}
     .victory{color: #fff;background: #00724b  !important;}
     .scratched{color:#fff;background: #000 !important;}
     th,td{text-align: center;}
@@ -103,8 +103,13 @@
     $("document").ready(function(){
         loadHistoryDataTable();
         function loadHistoryDataTable(){
-            $("#tblHistory").DataTable({
-                "aaSorting": []
+            $("#tblHistory").on('draw.dt',function(){
+                console.log("Loading");
+            }).DataTable({
+                "aaSorting": [],
+                oLanguage: {
+                    sProcessing: "TEST"
+                },
             });
         }
     });

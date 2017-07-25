@@ -64,4 +64,11 @@ class Horses extends Model
             ->where("id", $id)
             ->update($dataArray);
     }
+    public function undoScratch($id,$pnum){
+        return DB::table($this->table)
+            ->where("id",$id)
+            ->update([
+                "pp" => $pnum
+            ]);
+    }
 }
