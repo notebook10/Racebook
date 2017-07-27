@@ -10,7 +10,7 @@ date_default_timezone_set('America/Los_Angeles');
     .scratched{color:#fff;background: #000 !important;}
     label.error{color:red;font-size: 9px;}
 </style>
-<input id="date">
+{{--<input id="date">--}}
 <input type="hidden" name="_token" value="{{ csrf_token() }}">
 <input type="hidden" id="tempDate" value="<?php echo date('mdy',time()); ?>">
 <div class="container">
@@ -28,10 +28,11 @@ date_default_timezone_set('America/Los_Angeles');
                                 <th>Bet Type</th>
                                 <th>Bet</th>
                                 <th>Bet Amount</th>
-                                <th>Post Time</th>
+                                {{--<th>Post Time</th>--}}
                                 <th>Status</th>
                                 <th>Result</th>
                                 <th>Return</th>
+                                <th>Date</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -61,9 +62,9 @@ date_default_timezone_set('America/Los_Angeles');
                                             }
                                         ?>
                                     </td>
-                                    <td>{{ $value->bet }}</td>
+                                    <td><?php echo str_replace(',','-',$value->bet) ?></td>
                                     <td>{{ $value->bet_amount }}</td>
-                                    <td>{{ $value->post_time }}</td>
+                                    {{--<td>{{ $value->post_time }}</td>--}}
                                     <td>
                                         <?php
                                             if($value->status === 0){
@@ -77,6 +78,7 @@ date_default_timezone_set('America/Los_Angeles');
                                         <?php echo $resultVar; ?>
                                     </td>
                                     <td>{{ $value->win_amount }}</td>
+                                    <td>{{ $value->created_at }}</td>
                                 </tr>
                             @endforeach
                         </tbody>
@@ -298,7 +300,9 @@ date_default_timezone_set('America/Los_Angeles');
         $("#frmBets").ajaxForm(optionsBets);
     });
     function loadBetsDataTable(){
-        $("#tblBets").DataTable();
+        $("#tblBets").DataTable({
+            "aaSorting": [],
+        });
     }
 </script>
 

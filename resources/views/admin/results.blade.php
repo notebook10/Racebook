@@ -238,7 +238,8 @@
         var optionsResults = {
             success: function(response){
                 var lastId = response;
-                alert("success: " + lastId);
+//                alert("success: " + lastId);
+                swal("Success",lastId,"success");
                 // SUCCESSFULLY SAVED / UPDATED RESULT
                 $.ajax({
                     "url" : BASE_URL + "/getLatestResultID",

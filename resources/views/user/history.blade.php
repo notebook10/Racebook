@@ -6,11 +6,12 @@
 {{--<script src="{{ asset('js/sweetalert.min.js') }}"></script>--}}
 {{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
 <style>
-    .defeat{color: #fff;background: #ff4d28 !important;}
+    .defeat{color: #000;background: #f5856e !important;}
     .null{color: #020202;background: #faf7ed !important;}
-    .victory{color: #fff;background: #00724b  !important;}
+    .victory{color: #000;background: #90de70 !important;}
     .scratched{color:#fff;background: #000 !important;}
     th,td{text-align: center;}
+    thead{background: #e6efff;}
 </style>
 <div class="container">
     <div class="row">

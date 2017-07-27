@@ -225,8 +225,8 @@
 //                    $("#postTime").val($.trim(respo["race_time"]));
 //                    $("#selectTrack").val(respo["race_track"]);
 //                },
-//                error : function(xhr, status, error){
-//                    alert(error);
+//                errors : function(xhr, status, errors){
+//                    alert(errors);
 //                }
 //            });
 //            $("#horseModal").modal("show");

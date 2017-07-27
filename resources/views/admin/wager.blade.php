@@ -88,10 +88,15 @@
                     id : $("#updateID").val()
                 },
                 success : function(data){
-                    alert("success");
+                    if(data == 0){
+                        swal("Success","","success");
+                    }else if(data == 1){
+                        swal("Error","","error");
+                    }
+                    $("button.confirm").on("click", function(){location.reload();});
                 },
                 error : function(xhr,status,error){
-                    alert("error: " + error);
+                    alert("errors: " + error);
                 }
             });
         });
@@ -166,7 +171,7 @@
     function clearFrm(){
         var form = $("#frmWager");
         form[0].reset();
-        $("label.error").css("display","none");
+        $("label.errors").css("display","none");
         $("input[type='checkbox']").each(function(){
             $(this).attr("checked",false);
         });

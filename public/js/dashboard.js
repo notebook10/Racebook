@@ -106,8 +106,8 @@ $("document").ready(function(){
                                 //     //             $(".panel-body."+ code).append("<div class='raceNum'>RACE "+ i +" : " + " CLOSED</div>");
                                 //     //         }
                                 //     //     },
-                                //     //     error : function(xhr, status, error){
-                                //     //         alert("Error: " + error);
+                                //     //     errors : function(xhr, status, errors){
+                                //     //         alert("Error: " + errors);
                                 //     //     }
                                 //     // });
                                 //     $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
@@ -136,7 +136,7 @@ $("document").ready(function(){
             event.preventDefault();
             return false;
         }
-        $("#tempRaces table").remove();
+        // $("#tempRaces table").remove();
         $("#betTicket").css("display","none");
         $("#betAmount").val("");
         selectedWagerPrev = $("#selectWager option:selected").text();
@@ -159,6 +159,7 @@ $("document").ready(function(){
             },
             success : function(response){
                 $("#selectWager").empty();
+                $("#tempRaces table").remove();
                 $.each(response, function(index, value){
                     switch(value){
                         case "WPS":
@@ -247,43 +248,13 @@ $("document").ready(function(){
                         default:
 
                             break;
-                    }
+                }
                 fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
             },
             error : function(xhr,status, error){
                 swal("Error","Error: " + error,"error");
             }
         });
-        // switch(wager){
-        //     case "wps":
-        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         break;
-        //     case "superfecta":
-        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         break;
-        //     case "exacta":
-        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         break;
-        //     case "exactabox":
-        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         break;
-        //     case "trifecta":
-        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         break;
-        //     case "trifectabox":
-        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         break;
-        //     case "dailydouble":
-        //         $("#tempRaces div#ddBoard").html("");
-        //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-        //         ajaxGetHorsesPerRace(BASE_URL,trk,CURRENT_DATE, ddselectedRaceNum);
-        //         break;
-        //     default:
-        //
-        //         break;
-        // }
-        // fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
         fooFunction2(BASE_URL,trk,num,post);
     });
 
@@ -848,7 +819,7 @@ $("document").ready(function(){
                                 }
                             });
                             if (fArr.length <= 2) {
-                                swal("There was an error!", "Trifecta Box requires atleast three selections.", "error");
+                                swal("There was an errors!", "Trifecta Box requires atleast three selections.", "error");
                             } else {
                                 $.each(fArr, function (fKey, fVal) {
                                     $.each(sArr, function (sKey, sVal) {
@@ -1072,7 +1043,8 @@ $("document").ready(function(){
                     if(mtp > 30){
                         // 30 mins
                     }else {
-                        $("table#tblUpcomingRace tbody").append("<tr><td class='upcomingRace' data-track='" + trackName + "' data-number='" + raceNumber + "'>" + trackName + "</td><td>" + raceNumber + "</td><td>" + mtp + "</td></tr>");
+                        var minuteToPost = mtp < 1 ? "POST" : mtp;
+                        $("table#tblUpcomingRace tbody").append("<tr><td class='upcomingRace' data-track='" + trackName + "' data-number='" + raceNumber + "'>" + trackName + "</td><td>" + raceNumber + "</td><td>" + minuteToPost + "</td></tr>");
                     }
                 });
                 console.log(response);
@@ -1085,6 +1057,7 @@ $("document").ready(function(){
     $("body").delegate(".upcomingRace","click", function(){
         var trkName = $(this).data("track");
         var num = $(this).data("number").replace(/\D/g,'');
+        var parent = $('h5:contains("'+ trkName +'")').closest("a").click();
         $.ajax({
             "url" : BASE_URL + "/dashboard/getTrackCode",
             type : "POST",

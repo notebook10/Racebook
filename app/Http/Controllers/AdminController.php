@@ -206,7 +206,7 @@ class AdminController extends Controller
             $ddCombination = $firstRaceWinner[0] . "," . $explode[0];
             $exeDD = $betsModel->checkWinnersForDD($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
             foreach ($exeDD as $key => $value){
-                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
+                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
             }
             $ddRaceNum = $raceNum -1;
             AdminController::gradeWrongBets($raceDate,$trkCode,$ddRaceNum);
@@ -218,60 +218,64 @@ class AdminController extends Controller
             $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
             $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
             foreach ($exeDD as $key => $value){
-                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
+                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
             }
         }
         // Set Results -------------------------------------------------------------------------------------------------
         foreach ($execExacta as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
+            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
         }
         foreach ($execExactaBox as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
+            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
         }
         foreach ($execTrifecta as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
+            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
         }
         foreach ($execTrifectaBox as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
+            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
         }
         foreach ($execSuperfecta as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
+            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
         }
         foreach ($execW as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"w");
+            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"w",$value->race_number);
         }
         foreach ($exeP1 as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p1");
+            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p1",$value->race_number);
         }
         foreach ($exeP2 as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p2");
+            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p2",$value->race_number);
         }
         foreach ($exeS1 as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s1");
+            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s1",$value->race_number);
         }
         foreach ($exeS2 as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s2");
+            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s2",$value->race_number);
         }
         foreach ($exeS3 as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s3");
+            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s3",$value->race_number);
         }
         // Set Defeat
         AdminController::gradeWrongBets($raceDate,$trkCode,$raceNum);
     }
-    public static function updateBetStatus($id, $betAmount, $betType){
+    public static function updateBetStatus($id, $betAmount, $betType, $raceNum){
         $dataArray = [
             "status" => 1,
             "result" => 1, // 1 for win
             "win_amount" => ""
         ];
         $bets = DB::table("bets")->where("id",$id)->first();
-        $payoutContent = DB::table("payout")->where("track_code",$bets->race_track)->where("race_date",$bets->race_date)->first();
+        $payoutContent = DB::table("payout")
+            ->where("track_code",$bets->race_track)
+            ->where("race_date",$bets->race_date)
+            ->where("race_number",$raceNum)
+            ->first();
         // Payout (Payout required!)
         switch ($betType){
             case "exacta":
@@ -389,14 +393,18 @@ class AdminController extends Controller
             ->where("bet_type","dailydouble")
             ->update($dataArray);
     }
-    public static function updateBetStatusWPS($id, $betAmount, $wps){
+    public static function updateBetStatusWPS($id, $betAmount, $wps, $raceNum){
         $dataArray = [
             "status" => 1,
             "result" => 1, // 1 for win
             "win_amount" => ""
         ];
         $bets = DB::table("bets")->where("id",$id)->first();
-        $payoutContent = DB::table("payout")->where("track_code",$bets->race_track)->where("race_date",$bets->race_date)->first();
+        $payoutContent = DB::table("payout")
+            ->where("track_code",$bets->race_track)
+            ->where("race_date",$bets->race_date)
+            ->where("race_number",$raceNum)
+            ->first();
         switch ($wps){
             case "w":
                 $payout = json_decode($payoutContent->content)->wPayout;

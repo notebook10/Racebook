@@ -172,7 +172,8 @@ class HomeController extends Controller
                     $trackname = HomeController::getTrack($val->race_track);
                     if($timezone === "PDT"){
                         $to = strtotime($pdt);
-                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        $time = strtotime($val->race_time) - (5 * 60);
+                        $mtp = round(($time - $to) / 60);
                         if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $pdtArr, TRUE)){
                         }else{
                             array_push($pdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time );
@@ -191,7 +192,8 @@ class HomeController extends Controller
                     $trackname = HomeController::getTrack($val->race_track);
                     if($timezone === "MDT"){
                         $to = strtotime($mdt);
-                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        $time = strtotime($val->race_time) - (5 * 60);
+                        $mtp = round(($time - $to) / 60);
                         if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $mdtArr, TRUE)){
                         }else{
                             array_push($mdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
@@ -210,7 +212,8 @@ class HomeController extends Controller
                     $trackname = HomeController::getTrack($val->race_track);
                     if($timezone === "CDT"){
                         $to = strtotime($cdt);
-                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        $time = strtotime($val->race_time) - (5 * 60);
+                        $mtp = round(($time - $to) / 60);
                         if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time , $cdtArr, TRUE)){
                         }else{
                             array_push($cdtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
@@ -229,7 +232,8 @@ class HomeController extends Controller
                     $trackname = HomeController::getTrack($val->race_track);
                     if($timezone === "EDT"){
                         $to = strtotime($edt);
-                        $mtp = round((strtotime($val->race_time) - $to) / 60);
+                        $time = strtotime($val->race_time) - (5 * 60);
+                        $mtp = round(($time - $to) / 60);
                         if(in_array($val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  , $edtArr, TRUE)){
                         }else{
                             array_push($edtArr, $val->race_track . "|" . trim($trackname) . "@" . $mtp . "&" . trim($val->race_number) . "/" . $val->race_time  );
@@ -270,7 +274,8 @@ class HomeController extends Controller
         $timeZoneTime = $time["dateTime".strtoupper($trackTimeZone)];
         $convertTemp = date("m/d/y h:i A",strtotime($timeZoneTime));
         $dateSlashed = substr($date,0,2) . "/" . substr($date,2,2) . "/" . substr($date,4,2);
-        if(strtotime($dateSlashed . " " . $postTime) < strtotime($convertTemp)){
+        $fiveMinutesEarly = strtotime($dateSlashed . " " . $postTime) - (5 * 60);
+        if( $fiveMinutesEarly < strtotime($convertTemp)){
             $variable = "lt"; // close
         }else{
             $variable = "gt"; // ok
@@ -340,11 +345,17 @@ class HomeController extends Controller
         $resArr = [];
         $dateSlashed = substr($date,0,2) . "/" . substr($date,2,2) . "/" . substr($date,4,2);
         foreach ($postTimeArr as $key => $val){
-            if(strtotime($dateSlashed . " " . $postTimeArr[$key]) < strtotime($convertTemp)){
+            $time_FiveMinutesEarly =  strtotime($dateSlashed . " " . $postTimeArr[$key]) - (5 * 60);
+            if( $time_FiveMinutesEarly < strtotime($convertTemp)){
                 array_push($resArr, "lt"); // close
             }else{
                 array_push($resArr, "gt"); // ok
             }
+//            if(strtotime($dateSlashed . " " . $postTimeArr[$key]) < strtotime($convertTemp)){
+//                array_push($resArr, "lt"); // close
+//            }else{
+//                array_push($resArr, "gt"); // ok
+//            }
         }
         return $resArr;
     }

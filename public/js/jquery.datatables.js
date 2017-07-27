@@ -38,7 +38,7 @@
         module.exports = function (root, $) {
             if ( ! root ) {
                 // CommonJS environments without a window global must pass a
-                // root. This will give an error otherwise
+                // root. This will give an errors otherwise
                 root = window;
             }
 
@@ -796,7 +796,7 @@
          *    update a whole row.
          *  @param {bool} [bRedraw=true] Redraw the table or not
          *  @param {bool} [bAction=true] Perform pre-draw actions or not
-         *  @returns {int} 0 on success, 1 on error
+         *  @returns {int} 0 on success, 1 on errors
          *  @dtopt API
          *  @deprecated Since v1.10
          *
@@ -2591,7 +2591,7 @@
              * nested object so we loop over the data for each level to get the next
              * level down. On each loop we test for undefined, and if found immediately
              * return. This allows entire objects to be missing and sDefaultContent to
-             * be used if defined, rather than throwing an error
+             * be used if defined, rather than throwing an errors
              */
             var fetchData = function (data, type, src) {
                 var arrayNotation, funcNotation, out, innerSrc;
@@ -3882,7 +3882,7 @@
                         _fnLog( oSettings, 0, 'Invalid JSON response', 1 );
                     }
                     else if ( xhr.readyState === 4 ) {
-                        _fnLog( oSettings, 0, 'Ajax error', 7 );
+                        _fnLog( oSettings, 0, 'Ajax errors', 7 );
                     }
                 }
 
@@ -4215,7 +4215,7 @@
         // Update the input elements whenever the table is filtered
         $(settings.nTable).on( 'search.dt.DT', function ( ev, s ) {
             if ( settings === s ) {
-                // IE9 throws an 'unknown error' if document.activeElement is used
+                // IE9 throws an 'unknown errors' if document.activeElement is used
                 // inside an iframe or frame...
                 try {
                     if ( jqFilter[0] !== document.activeElement ) {
@@ -6027,7 +6027,7 @@
             var sTitle = col.sTitle.replace( /<.*?>/g, "" );
             var th = col.nTh;
 
-            // IE7 is throwing an error when setting these properties with jQuery's
+            // IE7 is throwing an errors when setting these properties with jQuery's
             // attr() and removeAttr() methods...
             th.removeAttribute('aria-sort');
 
@@ -6413,11 +6413,11 @@
 
 
     /**
-     * Log an error message
+     * Log an errors message
      *  @param {object} settings dataTables settings object
-     *  @param {int} level log error messages, or display them to the user
-     *  @param {string} msg error message
-     *  @param {int} tn Technical note id to get more information about the error.
+     *  @param {int} level log errors messages, or display them to the user
+     *  @param {string} msg errors message
+     *  @param {int} tn Technical note id to get more information about the errors.
      *  @memberof DataTable#oApi
      */
     function _fnLog( settings, level, msg, tn )
@@ -6426,7 +6426,7 @@
             (settings ? 'table id='+settings.sTableId+' - ' : '')+msg;
 
         if ( tn ) {
-            msg += '. For more information about this error, please see '+
+            msg += '. For more information about this errors, please see '+
                 'http://datatables.net/tn/'+tn;
         }
 
@@ -7423,7 +7423,7 @@
      * Set the current page.
      *
      * Note that if you attempt to show a page which does not exist, DataTables will
-     * not throw an error, but rather reset the paging.
+     * not throw an errors, but rather reset the paging.
      *
      * @param {integer|string} action The paging action to take. This can be one of:
      *  * `integer` - The page index to jump to
@@ -7830,7 +7830,7 @@
 
             // Short cut - selector is a number and no options provided (default is
             // all records, so no need to check if the index is in there, since it
-            // must be - dev error if the index doesn't exist).
+            // must be - dev errors if the index doesn't exist).
             if ( selInt !== null && ! opts ) {
                 return [ selInt ];
             }
@@ -13583,7 +13583,7 @@
         "bDrawing": false,
 
         /**
-         * Draw index (iDraw) of the last error when parsing the returned data
+         * Draw index (iDraw) of the last errors when parsing the returned data
          *  @type int
          *  @default -1
          */
@@ -13852,7 +13852,7 @@
         /**
          * Error reporting.
          *
-         * How should DataTables report an error. Can take the value 'alert',
+         * How should DataTables report an errors. Can take the value 'alert',
          * 'throw', 'none' or a function.
          *
          *  @type string|function
@@ -14617,8 +14617,8 @@
                     }
                 };
 
-                // IE9 throws an 'unknown error' if document.activeElement is used
-                // inside an iframe or frame. Try / catch the error. Not good for
+                // IE9 throws an 'unknown errors' if document.activeElement is used
+                // inside an iframe or frame. Try / catch the errors. Not good for
                 // accessibility, but neither are frames.
                 var activeEl;
 

@@ -5,7 +5,9 @@ Route::post('login','HomeController@login');
 Route::get('register','HomeController@register');
 Route::post('insertuser','HomeController@insertuser');
 Route::get('logout','HomeController@logout');
-
+Route::match(array('GET','POST'),'test',function(){
+    return "<a href='dashboard'>Dashboard</a>";
+});
 Route::group(['middleware' => ['auth']],function(){
     // User
     Route::get('dashboard','HomeController@dashboard');

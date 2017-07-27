@@ -10,6 +10,7 @@
     .null{color: #020202;background: #faf7ed !important;}
     .victory{color: #fff;background: #00724b  !important;}
     th,td{text-align: center;}
+    thead{background: #e6efff;}
 </style>
 <div class="container">
     <div class="row">
