@@ -187,7 +187,7 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="wagerOperation" name="wagerOperation" value="0">
-                <input type="text" id="updateID" name="updateID">
+                <input type="hidden" id="updateID" name="updateID">
                 <form id="frmWager" name="frmWager">
                     <div class="form-group">
                         <label for="selectTrack">Track :</label>

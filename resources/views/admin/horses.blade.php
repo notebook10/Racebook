@@ -3,6 +3,7 @@
 ?>
 <style>
     table tr,th{text-align: center}
+    .sa-errors-container{display: none !important;}
 </style>
 <input type="hidden" name="_token" value="{{ csrf_token() }}">
 <input type="hidden" id="date" value="<?php echo date('mdy',time()); ?>">
@@ -161,6 +162,9 @@
                     }else{
                         swal("ERROR");
                     }
+                    $("button.confirm").on("click",function(){
+                        location.reload();
+                    });
                 },
                 error : function(error){
                     alert(error);

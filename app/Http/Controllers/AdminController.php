@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Bets;
+use App\Cancelled;
 use App\Horses;
 use App\Minimum;
 use App\Payout;
@@ -28,8 +29,11 @@ class AdminController extends Controller
         date_default_timezone_set('America/Los_Angeles');
         $betsModel = new Tracks();
         $tracks = $betsModel->getAllTracksForAdmin(date('mdy',time()));
+        $dateTomorrow = date('mdy', strtotime('+1 day', time()));
+        $tracksTomorrow = $betsModel->getAllTracksTomorrowForAdmin($dateTomorrow);
         $dataArray = [
-            'tracks' => $tracks
+            'tracks' => $tracks,
+            'tracksTomorrow' => $tracksTomorrow
         ];
         $theme = Theme::uses('admin')->layout('layout')->setTitle('Admin');
         return $theme->of('admin/tracks', $dataArray)->render();
@@ -135,7 +139,8 @@ class AdminController extends Controller
             'second' => $request->input("second"),
             'third' => $request->input("third"),
             'fourth' => $request->input("fourth"),
-            'race_date' => date('mdy', time())
+//            'race_date' => date('mdy', time())
+            'race_date' => $request->input("raceDateInp"),
         ];
         $payoutArray = [
             'wPayout' => $request->input("wPayout"),
@@ -151,7 +156,14 @@ class AdminController extends Controller
         ];
         $resultModel = new Results();
         $payoutModel = new Payout();
-        $payoutModel->submitPayout($payoutArray, $request->input("payoutOperation"), $request->input("tracksToday"), $request->input("racePerTrack"), date('mdy', time()));
+//        $payoutModel->submitPayout($payoutArray, $request->input("payoutOperation"), $request->input("tracksToday"), $request->input("racePerTrack"), date('mdy', time()));
+        $payoutModel->submitPayout($payoutArray, $request->input("payoutOperation"), $request->input("tracksToday"), $request->input("racePerTrack"), $request->input("raceDateInp"));
+//        if($request->input("exacta") != NULL){
+//            AdminController::newCancelWager($dataArray,"exacta");
+//        }
+//        if($request->input("trifecta") != NULL){
+//            AdminController::newCancelWager($dataArray,"trifecta");
+//        }
         return $resultModel->insertResult($dataArray,$request->input('operation'));
     }
     public function checkResults(Request $request){
@@ -263,6 +275,52 @@ class AdminController extends Controller
         }
         // Set Defeat
         AdminController::gradeWrongBets($raceDate,$trkCode,$raceNum);
+        // For Cancelling Wager
+        $cancelArray = [
+            "trk" => $request->input("trk"),
+            "num" => $request->input("num"),
+            "date" => $request->input("date"),
+            "operation" => $request->input("cancelOperation")
+        ];
+        // Get checked Cancel Wager *
+        if($request->input("exacta") == 1){
+            AdminController::newCancelWager($cancelArray,"exacta");
+            AdminController::newCancelWager($cancelArray,"exactabox");
+            AdminController::saveCancel($cancelArray,"exacta");
+        }else{
+            AdminController::deleteCancel($cancelArray,"exacta");
+        }
+        if($request->input("trifecta") == 1){
+            AdminController::newCancelWager($cancelArray,"trifecta");
+            AdminController::newCancelWager($cancelArray,"trifectabox");
+            AdminController::saveCancel($cancelArray,"trifecta");
+        }else{
+            AdminController::deleteCancel($cancelArray,"trifecta");
+        }
+        if($request->input("superfecta") == 1){
+            AdminController::newCancelWager($cancelArray,"superfecta");
+            AdminController::saveCancel($cancelArray,"superfecta");
+        }else{
+            AdminController::deleteCancel($cancelArray,"superfecta");
+        }
+        if($request->input("dailydouble") == 1){
+            AdminController::newCancelWager($cancelArray,"dailydouble");
+            AdminController::saveCancel($cancelArray,"dailydouble");
+        }else{
+            AdminController::deleteCancel($cancelArray,"dailydouble");
+        }
+        if($request->input("wps") == 1){
+            AdminController::newCancelWager($cancelArray,"wps");
+            AdminController::saveCancel($cancelArray,"wps");
+        }else{
+            AdminController::deleteCancel($cancelArray,"wps");
+        }
+        if($request->input("noshow") == 1){
+            AdminController::newCancelWager($cancelArray,"s");
+            AdminController::saveCancel($cancelArray,"s");
+        }else{
+            AdminController::deleteCancel($cancelArray,"s");
+        }
     }
     public static function updateBetStatus($id, $betAmount, $betType, $raceNum){
         $dataArray = [
@@ -280,28 +338,27 @@ class AdminController extends Controller
         switch ($betType){
             case "exacta":
                 $payout = json_decode($payoutContent->content)->exactaPayout;
-                $dataArray["win_amount"] = $payout * ($betAmount / 2);
+                $dataArray["win_amount"] = str_replace(',','',$payout) * ($betAmount / 2);
                 break;
             case "exactabox":
                 $payout = json_decode($payoutContent->content)->exactaPayout;
-                $dataArray["win_amount"] = $payout * ($betAmount / 2);
+                $dataArray["win_amount"] = str_replace(',','',$payout) * ($betAmount / 2);
                 break;
             case "trifecta":
                 $payout = json_decode($payoutContent->content)->trifectaPayout;
-                $dataArray["win_amount"] = $payout * ($betAmount / 2);
+                $dataArray["win_amount"] = str_replace(',','',$payout) * ($betAmount / 2);
                 break;
             case "trifectabox":
                 $payout = json_decode($payoutContent->content)->trifectaPayout;
-                $dataArray["win_amount"] = $payout * ($betAmount / 2);
+                $dataArray["win_amount"] = str_replace(',','',$payout) * ($betAmount / 2);
                 break;
             case "superfecta":
                 $payout = json_decode($payoutContent->content)->superfectaPayout;
-                $dataArray["win_amount"] = $payout * ($betAmount / 2);
+                $dataArray["win_amount"] = str_replace(',','',$payout) * ($betAmount / 2);
                 break;
             case "dailydouble":
                 $payout = json_decode($payoutContent->content)->ddPayout;
-                $dataArray["win_amount"] = $payout * ($betAmount / 2);
-                break;
+                $dataArray["win_amount"] = str_replace(',','',$payout) * ($betAmount / 2);
                 break;
             default:
                 $dataArray["win_amount"] = 0;
@@ -334,6 +391,7 @@ class AdminController extends Controller
             ->where("race_track",$trackCode)
             ->where("race_date",$raceDate)
             ->where("race_number", $raceNum)
+            ->where("result","!=",3)
             ->update($dataArray);
     }
     public function saveMinimum(Request $request){
@@ -391,6 +449,7 @@ class AdminController extends Controller
             ->where("race_date",$raceDate)
             ->where("race_number", $raceNum - 1)
             ->where("bet_type","dailydouble")
+            ->where("result","!=",3)
             ->update($dataArray);
     }
     public static function updateBetStatusWPS($id, $betAmount, $wps, $raceNum){
@@ -646,5 +705,104 @@ class AdminController extends Controller
         }else{
             return 1;
         }
+    }
+    public function showTemp(Request $request){
+        date_default_timezone_set('America/Los_Angeles');
+        $dateTomorrow = date('mdy', strtotime('+1 day', time()));
+        $trkModel = new Tracks();
+        $res = $trkModel->showTemp($dateTomorrow,$request->input('trk'),$request->input('operation'));
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public function cancelWager(Request $request){
+        $betsModel = new Bets();
+        $dataArray = [
+            "date" => $request->input("date"),
+            "wagerType" => $request->input("wagerType"),
+            "trk" => $request->input("trk"),
+            "num" => $request->input("num")
+        ];
+        $res = $betsModel->cancelWager($dataArray);
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public function noShow(Request $request){
+        $betsModel = new Bets();
+        $dataArray = [
+            "date" => $request->input("date"),
+            "trk" => $request->input("trk"),
+            "num" => $request->input("num")
+        ];
+        $res = $betsModel->noShow($dataArray);
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public static function newCancelWager($dataArray,$wagerType){
+//        date_default_timezone_set('America/Los_Angeles');
+//        $date = date("mdy",time()); // CURRENT DATE
+        $betsModel = new Bets();
+        $dataArray = [
+            "date" => $dataArray["date"],
+            "wagerType" => $wagerType,
+            "trk" => $dataArray["trk"],
+            "num" => $dataArray["num"]
+        ];
+        if($wagerType == "s"){
+            $res = $betsModel->cancelWagerShow($dataArray);
+        }else{
+            $res = $betsModel->cancelWager($dataArray);
+        }
+        if($res){
+            return 0;
+        }else{
+            return 1;
+        }
+    }
+    public static function saveCancel($dataArray, $wager){
+        date_default_timezone_set('America/Los_Angeles');
+            // SAVE
+        return DB::table("cancelled")
+            ->insert([
+                "track_code" => $dataArray["trk"],
+                "race_number" => $dataArray["num"],
+                "race_date" => $dataArray["date"],
+                "status" => 1,
+                "wager" => $wager,
+                "created_at" => date('Y-m-d H:i:s', time()),
+                "updated_at" => date('Y-m-d H:i:s', time())
+            ]);
+    }
+    public function checkCancelled(Request $request){
+        $cancelledModel = new Cancelled();
+        $dataArray = [
+            "trk" => $request->input("trk"),
+            "num" => $request->input("num"),
+            "date" => $request->input("date")
+        ];
+        $res = $cancelledModel->check($dataArray);
+        return $res;
+    }
+    public static function deleteCancel($dataArray, $wager){
+        return DB::table("cancelled")
+            ->where("track_code",$dataArray["trk"])
+            ->where("race_number",$dataArray["num"])
+            ->where("race_date",$dataArray["date"])
+            ->where("wager",$wager)
+            ->delete();
+    }
+    public function getTracksWithDate(Request $request){
+        $selectedDate =  $request->input("date");
+        $tracksModel = new Tracks();
+        $tracks = $tracksModel->getAllTracks($selectedDate);
+        return $tracks;
     }
 }

@@ -1,10 +1,14 @@
 <?php date_default_timezone_set('America/Los_Angeles'); ?>
-<input type="text" value="<?php echo date('mdy', time()) ?>" id="racedate">
+<input type="hidden" value="<?php echo date('mdy', time()) ?>" id="racedate">
 <style>
     th,td{text-align: center}
     #tblResults{margin-bottom: 30px;}
     label.error{color:red;font-size: 9px;}
     #submitMinimum{margin-top: 30px;width:100%;}
+    .sa-errors-container{display: none !important;}
+    #cancelDiv{margin-top: 10px;}
+    #cancelDiv > .btn{width: 30%;margin: 5px;}
+    .btn-primary{font-weight: bold;}
 </style>
 <input type="hidden" value="{{ csrf_token() }}" name="_token">
 <div class="container">
@@ -48,6 +52,11 @@
                 </div>
                 <div class="form-group">
                     <div class="col-md-12">
+                        <label>Race Date</label>
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        <input type="text" id="raceDateInp" name="raceDateInp" class="form-control" placeholder="Race Date">
+                    </div>
+                    <div class="col-md-12">
                         <label>Race Tracks</label>
                         <select class="form-control" id="tracksToday" name="tracksToday">
                             <option selected disabled>-- Select Track --</option>
@@ -69,8 +78,9 @@
                     <h1>PAYOUT</h1>
                 </div>
                 <div class="" id="payoutDiv">
-
                 </div>
+                <input type="hidden" id="cancelOperation" value="0">
+                <div id="cancelDiv"></div>
             </div>
             <div class="col-md-3">
                 <div class="jumbotron text-center">
@@ -111,18 +121,23 @@
 <script>
     $("document").ready(function(){
         var BASE_URL = $("#hiddenURL").val();
+        $("#raceDateInp").datepicker({
+            dateFormat : 'mmddy',
+            maxDate : 0
+        }).val($("#racedate").val());
         loadResultsDataTable();
         $("#tracksToday").on("change", function(){
             var trkCode = $(this).val();
             $("#first, #second, #third, #fourth").val("");
-            $("#payoutDiv, #minimumDiv").html("");
+            $("#payoutDiv, #minimumDiv, #cancelDiv").html("");
             $.ajax({
                 "url" : BASE_URL + "/getRaces",
                 type : "POST",
                 data : {
                     _token : $('[name="_token"]').val(),
                     code : trkCode,
-                    date : $("#racedate").val()
+//                    date : $("#racedate").val()
+                    date : $("#raceDateInp").val()
                 },
                 success : function(response){
                     var od = JSON.stringify(response);
@@ -144,7 +159,8 @@
                         data: {
                             _token: $('[name="_token"]').val(),
                             trk: trkCode,
-                            date: $("#racedate").val(),
+//                            date: $("#racedate").val(),
+                            date : $("#raceDateInp").val(),
                             num : 1 // TEMPORARY
                         },
                         success: function (data) {
@@ -175,7 +191,8 @@
                                 data : {
                                     _token : $('[name="_token"]').val(),
                                     trk : trkCode,
-                                    date : $("#racedate").val(),
+//                                    date : $("#racedate").val(),
+                                    date : $("#raceDateInp").val(),
                                 },
                                 success : function(respo){
                                     if(respo != 1){
@@ -213,19 +230,19 @@
                 racePerTrack : "required",
                 tracksToday : "required",
                 exactaPayout : {"required":true,number:true},
-                trifectaPayout : {"required":true,number:true},
-                superfectaPayout : {"required":true,number:true},
+                trifectaPayout : {number:true},
+                superfectaPayout : {number:true},
                 ddPayout : {"required":true,number:true},
                 wPayout : {"required":true,number:true},
                 "1pPayout" : {"required":true,number:true},
                 "2pPayout" : {"required":true,number:true},
-                "1sPayout" : {"required":true,number:true},
-                "2sPayout" : {"required":true,number:true},
-                "3sPayout" : {"required":true,number:true},
+//                "1sPayout" : {"required":true,number:true},
+//                "2sPayout" : {"required":true,number:true},
+//                "3sPayout" : {"required":true,number:true},
                 first : "required",
                 second : "required",
-                third : "required",
-                fourth : "required",
+//                third : "required",
+//                fourth : "required",
             },
             messages : {
                 racePerTrack : "This is required!",
@@ -238,7 +255,6 @@
         var optionsResults = {
             success: function(response){
                 var lastId = response;
-//                alert("success: " + lastId);
                 swal("Success",lastId,"success");
                 // SUCCESSFULLY SAVED / UPDATED RESULT
                 $.ajax({
@@ -246,7 +262,18 @@
                     type : "POST",
                     data : {
                         _token : $('[name="_token"]').val(),
-                        lastId : lastId
+                        lastId : lastId,
+                        trk : $('#tracksToday').val(),
+                        num : $('#racePerTrack').val(),
+                        exacta : $('[name="exacta"]').is(':checked') ? 1 : 0,
+                        trifecta : $('[name="trifecta"]').is(':checked') ? 1 : 0,
+                        superfecta : $('[name="superfecta"]').is(':checked') ? 1 : 0,
+                        dailydouble : $('[name="dailydouble"]').is(':checked') ? 1 : 0,
+                        wps : $('[name="wps"]').is(':checked') ? 1 : 0,
+                        noshow : $('[name="noshow"]').is(':checked') ? 1 : 0,
+//                        date : $("#racedate").val(),
+                        date : $("#raceDateInp").val(),
+                        cancelOperation : $("#cancelOperation").val()
                     },
                     success : function(response){
                         console.log(response);
@@ -268,7 +295,8 @@
                 data : {
                     _token : $('[name="_token"]').val(),
                     trkCode : trk,
-                    raceDate : date,
+//                    raceDate : date,
+                    raceDate : $("#raceDateInp").val(),
                     raceNum : num
                 },
                 success : function(response){
@@ -299,28 +327,37 @@
                 data : {
                     _token : $('[name="_token"]').val(),
                     trk : trk,
-                    date : date,
+//                    date : date,
+                    date : $("#raceDateInp").val(),
                     num : num
                 },
                 success : function(data){
-                    $("#payoutDiv, #minimumDiv").html("");
+                    $("#payoutDiv, #minimumDiv, #cancelDiv").html("");
                     $.each(data, function(key,val){
                         switch (val){
                             case "Exacta" :
                                 $("#payoutDiv").append("<div><label for='exactaPayout'>Exacta:</label><input type='text' class='form-control' placeholder='EXACTA' id='exactaPayout' name='exactaPayout'></div>");
                                 $("#minimumDiv").append("<label for='exactaMinimum'>Exacta Minimum:</label><input type='text' class='form-control' placeholder='EXACTA' id='exactaMinimum' name='exactaMinimum'>");
+//                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='exacta' value='Cancel Exacta'>");
+                                $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='exacta' value='exacta' name='exacta'>Cancel Exacta</label></div>");
                                 break;
                             case "Trifecta":
                                 $("#payoutDiv").append("<div><label for='trifectaPayout'>Trifecta:</label><input type='text' class='form-control' placeholder='TRIFECTA' id='trifectaPayout' name='trifectaPayout'></div>");
                                 $("#minimumDiv").append("<label for='trifectaMinimum'>Trifecta Minimum:</label><input type='text' class='form-control' placeholder='TRIFECTA' id='trifectaMinimum' name='trifectaMinimum'>");
+//                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='trifecta' value='Cancel Trifecta'>");
+                                $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='trifecta' value='trifecta' name='trifecta'>Cancel Trifecta</label></div>");
                                 break;
                             case "Superfecta":
                                 $("#payoutDiv").append("<div><label for='superfectaPayout'>Superfecta:</label><input type='text' class='form-control' placeholder='SUPERFECTA' id='superfectaPayout' name='superfectaPayout'></div>");
                                 $("#minimumDiv").append("<label for='superfectaMinimum'>Superfecta Minimum:</label><input type='text' class='form-control' placeholder='SUPERFECTA' id='superfectaMinimum' name='superfectaMinimum'>");
+//                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='superfecta' value='Cancel Superfecta'>");
+                                $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='superfecta' value='superfecta' name='superfecta'>Cancel Superfecta</label></div>");
                                 break;
                             case "Daily Double":
                                 $("#payoutDiv").append("<div><label for='ddPayout'>Daily Double:</label><input type='text' class='form-control' placeholder='DAILY DOUBLE' id='ddPayout' name='ddPayout'></div>");
                                 $("#minimumDiv").append("<label for='ddMinimum'>Daily Double Minimum:</label><input type='text' class='form-control' placeholder='DAILY DOUBLE' id='ddMinimum' name='ddMinimum'>");
+//                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='dailydouble'  value='Cancel DD'>");
+                                $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='dailydouble' value='dailydouble' name='dailydouble'>Cancel Daily Double</label></div>");
                                 break;
                             case "WPS":
                                 $("#minimumDiv").append("<label for='wpsMinimum'>WPS Minimum:</label><input type='text' class='form-control' placeholder='WPS MINIMUM' id='wpsMinimum' name='wpsMinimum'>");
@@ -330,6 +367,10 @@
                                 $("#payoutDiv").append("<div><input type='text' class='form-control' placeholder='1st S Payout' id='1sPayout' name='1sPayout'></div>");
                                 $("#payoutDiv").append("<div><input type='text' class='form-control' placeholder='2nd S Payout' id='2sPayout' name='2sPayout'></div>");
                                 $("#payoutDiv").append("<div><input type='text' class='form-control' placeholder='3rd S Payout' id='3sPayout' name='3sPayout'></div>");
+//                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='wps'  value='Cancel WPS'>");
+                                $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='wps' value='wps' name='wps'>Cancel WPS</label></div>");
+//                                $("#cancelDiv").append("<input type='button' class='btn btn-default noShow' data-type='wps'  value='No Show'>");
+                                $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' value='noshow' name='noshow'>No SHOW</label></div>");
                                 break;
                             default:
 
@@ -344,7 +385,8 @@
                         data : {
                             _token : $('[name="_token"]').val(),
                             trk : trk,
-                            date : date,
+//                            date : date,
+                            date : $("#raceDateInp").val(),
                             num : 1 // TEMP
                         },
                         success : function(respo){
@@ -372,7 +414,8 @@
                         data : {
                             _token : $('[name="_token"]').val(),
                             trk : trk,
-                            date : date,
+//                            date : date,
+                            date : $("#raceDateInp").val(),
                             num : num
                         },
                         success : function(datum){
@@ -396,6 +439,51 @@
                             alert(err);
                         }
                     });
+                    $.ajax({
+                        "url" : BASE_URL + '/checkCancelled',
+                        type : "POST",
+                        data : {
+                            _token : $('[name="_token"]').val(),
+                            trk : $('#tracksToday').val(),
+                            num : $('#racePerTrack').val(),
+                            date : $("#raceDateInp").val(),
+                        },
+                        success : function(data){
+                            console.log(data);
+                            if(!$.trim(data)){
+                                $("#cancelOperation").val(0);
+                            }else{
+                                $("#cancelOperation").val(1);
+                            }
+                            $.each(data, function(i,v){
+                                switch(data[i].wager){
+                                    case "exacta":
+                                        $("input[type=checkbox][value=exacta]").attr("checked",true);
+                                        break;
+                                    case "trifecta":
+                                        $("input[type=checkbox][value=trifecta]").attr("checked",true);
+                                        break;
+                                    case "superfecta":
+                                        $("input[type=checkbox][value=superfecta]").attr("checked",true);
+                                        break;
+                                    case "dailydouble":
+                                        $("input[type=checkbox][value=dailydouble]").attr("checked",true);
+                                        break;
+                                    case "wps":
+                                        $("input[type=checkbox][value=wps]").attr("checked",true);
+                                        break;
+                                    case "s":
+                                        $("input[type=checkbox][value=noshow]").attr("checked",true);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            });
+                        },
+                        error : function(xhr, status, error){
+                            alert(error);
+                        }
+                    });
                 },
                 error : function(xhr, status, error){
                     alert(error);
@@ -410,7 +498,8 @@
                    _token : $('[name="_token"]').val(),
                    trk : $("#tracksToday").val(),
                    num : $("#racePerTrack").val(),
-                   date : $("#racedate").val(),
+//                   date : $("#racedate").val(),
+                   date : $("#raceDateInp").val(),
                    wps : $("#wpsMinimum").val(),
                    exacta : $("#exactaMinimum").val(),
                    trifecta : $("#trifectaMinimum").val(),
@@ -436,5 +525,137 @@
         function loadResultsDataTable(){
             $("#tblResults").DataTable();
         }
+        $("body").delegate(".cancelWager","click", function(){
+            var type = $(this).data("type");
+            $.ajax({
+                "url" : BASE_URL + '/cancelWager',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    trk : $("#tracksToday").val(),
+                    num : $("#racePerTrack").val(),
+                    wagerType : type,
+//                    date : $("#racedate").val()
+                    date : $("#raceDateInp").val(),
+                },
+                success : function(respo){
+                    if(respo == 0){
+                        swal({title:type + " bets updated!",text:"",type:"warning"});
+                    }else{
+                        swal({title:"No bets updated!",text:"",type:"warning"});
+                    }
+                    switch(type){
+                        case "exacta":
+                            $("#exactaPayout").val(0);
+                            break;
+                        case "trifecta":
+                            $("#trifectaPayout").val(0);
+                            break;
+                        case "superfecta":
+                            $("#superfectaPayout").val(0);
+                            break;
+                        case "dailydouble":
+                            $("#ddPayout").val(0);
+                            break;
+                        case "wps":
+                            $("#wPayout, #1pPayout, #2pPayout, #1sPayout, #2sPayout, #3sPayout").val(0);
+                            break;
+                    }
+                },
+                error : function(xhr,status,error){
+                    alert("Error: " + error);
+                }
+            });
+        });
+        $("body").delegate(".noShow","click", function(){
+            $.ajax({
+                "url" : BASE_URL + '/noShow',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    trk : $("#tracksToday").val(),
+                    num : $("#racePerTrack").val(),
+                    date : $("#racedate").val()
+                },
+                success : function(respo){
+                    $("#1sPayout, #2sPayout, #3sPayout").val(0);
+                },
+                error : function(xhr, status, error){
+                    swal({title:"Something went wrong!",text:"",type:"warning"});
+                }
+            });
+        });
+        $("body").delegate(".checkbox","change",function(){
+            var type = this.value;
+            if(this.checked){
+                switch(type){
+                    case "exacta":
+                        $("#exactaPayout").val(0.00);
+                        break;
+                    case "trifecta":
+                        $("#trifectaPayout").val(0.00);
+                        break;
+                    case "superfecta":
+                        $("#superfectaPayout").val(0.00);
+                        break;
+                    case "dailydouble":
+                        $("#ddPayout").val(0.00);
+                        break;
+                    case "wps":
+                        $("#wPayout, #1pPayout, #2pPayout, #1sPayout, #2sPayout, #3sPayout").val(0.00);
+                        break;
+                    case "noshow":
+                        $("#1sPayout, #2sPayout, #3sPayout").val(0.00);
+                        break;
+                }
+            }else{
+                switch(type){
+                    case "exacta":
+                        $("#exactaPayout").val("");
+                        break;
+                    case "trifecta":
+                        $("#trifectaPayout").val("");
+                        break;
+                    case "superfecta":
+                        $("#superfectaPayout").val("");
+                        break;
+                    case "dailydouble":
+                        $("#ddPayout").val("");
+                        break;
+                    case "wps":
+                        $("#wPayout, #1pPayout, #2pPayout, #1sPayout, #2sPayout, #3sPayout").val("");
+                        break;
+                    case "noshow":
+                        $("#1sPayout, #2sPayout, #3sPayout").val("");
+                        break;
+                }
+            }
+        });
+        $("#raceDateInp").on("change",function(){
+            var selectedDate = $(this).val();
+            $("#first, #second, #third, #fourth").val("");
+            $("#payoutDiv, #minimumDiv, #cancelDiv").html("");
+            $("#racePerTrack").attr("disabled",true).empty();
+            $("#racePerTrack").append("<option selected disabled>-- Select Race Number --</option>");
+            $.ajax({
+                "url" : BASE_URL + '/getTracksWithDate',
+                type : "POST",
+                data : {
+                    _token : $('[name="_token"]').val(),
+                    date : selectedDate
+                },
+                success : function(respo){
+                    console.log(respo);
+                    $("#tracksToday option").remove();
+                    $("#tracksToday").append("<option selected disabled>-- Select Track --</option>");
+                    $.each(respo, function(i,v){
+                        $("#tracksToday").append("<option data-code='"+ respo[i]["code"] +"' value='"+ respo[i]["code"] +"'>"+ respo[i]["name"] +"</option>");
+                    });
+                },
+                error : function(xhr, status, error){
+                    alert("Error " + error);
+                }
+            });
+        });
     });
 </script>

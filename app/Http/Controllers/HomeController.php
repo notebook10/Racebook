@@ -76,11 +76,13 @@ class HomeController extends Controller
         $date = date('mdy',time());
         $tracks = new Tracks();
         $racingTracks = $tracks->getAllTracks($date);
+        $raceTomorrow = $tracks->getShowTemp();
         $data = [
-            'tracks' => $racingTracks
+            'tracks' => $racingTracks,
+            'tomorrow' => $raceTomorrow
         ];
 //        return view('user/UserPage',$data);
-        $theme = Theme::uses('default')->layout('layout')->setTitle('Dashboard');
+        $theme = Theme::uses('default')->layout('layout')->setTitle('Racebook');
         return $theme->of('user/dashboard',$data)->render();
     }
     public function getRaces(Request $request){

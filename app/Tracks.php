@@ -12,6 +12,7 @@ class Tracks extends Model
         return DB::table($this->table)
             ->where('date',$date)
             ->where('visibility',0)
+//            ->orWhere('_showTemp',1)
             ->get();
     }
     public function getAllTracksForAdmin($date){
@@ -66,5 +67,30 @@ class Tracks extends Model
             ->where("code",$trk)
             ->where("date",$date)
             ->update($arr);
+    }
+    public function getAllTracksTomorrowForAdmin($date){
+        return DB::table($this->table)
+            ->where('date',$date)
+            ->get();
+    }
+    public function showTemp($date,$trk,$operation){
+        if($operation == 1){
+            // Show
+            return DB::table($this->table)
+                ->where("code",$trk)
+                ->where("date",$date)
+                ->update(["_showTemp"=>1]);
+        }else if($operation == 0){
+            // Hide
+            return DB::table($this->table)
+                ->where("code",$trk)
+                ->where("date",$date)
+                ->update(["_showTemp"=>0]);
+        }
+    }
+    public function getShowTemp(){
+        return DB::table($this->table)
+            ->where("_showTemp",1)
+            ->get();
     }
 }

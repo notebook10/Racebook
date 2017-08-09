@@ -7,7 +7,7 @@
         <div class="col-md-12">
             <div class="text-center">
                 <h1>Timezone <?php echo date('mdy',time()) ?></h1>
-                <button class="btn btn-primary" id="addTmz">ADD TMZ</button>
+                <button class="btn btn-primary" id="addTmz" disabled>ADD TMZ</button>
             </div>
             <div>
                 <table class="table table-responsive table-striped table-bordered table-hover" id="tblTracksAndTimezone">

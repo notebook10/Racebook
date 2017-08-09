@@ -28,6 +28,15 @@ date_default_timezone_set('America/Los_Angeles');
             ?>
             <div class="col-sm-3 addDiv" data-code="'. $value->code .'" id="addDiv"><span class="glyphicon glyphicon-plus"></span>&nbsp;&nbsp;ADD TRACK</div>
         </div>
+        <div class="row" style="display: block;">
+            <div style="width: 100%;text-align: center;padding: 20px;"><h1>TRACKS TOMORROW</h1></div>
+            <?php
+                foreach ($tracksTomorrow as $key => $value){
+                    $visibility = $value->_showTemp == 1 ? "show" : "tago";
+                    echo '<div class="col-sm-3 trkDiv tomorrow '. $visibility .'" data-code="'. $value->code .'">' . $value->name . '</div>';
+                }
+            ?>
+        </div>
     </div>
 </div>
 <script>
@@ -55,25 +64,47 @@ date_default_timezone_set('America/Los_Angeles');
         });
         $("body").delegate(".trkDiv","click",function(){
             var trkCode = $(this).data("code");
-            $.ajax({
-                "url" : BASE_URL + '/removeTrack',
-                type : "POST",
-                data : {
-                    _token : $('[name="_token"]').val(),
-                    trk : trkCode,
-                    operation : $(this).hasClass("show") == true ? 1 : 0
-                },
-                success : function(respo){
-                    if(respo == 1){
-                        swal("Something went wrong!","","error");
-                    }else{
-                        location.reload();
+            if($(this).hasClass("tomorrow")){
+                $.ajax({
+                    "url" : BASE_URL + '/showTemp',
+                    type : 'POST',
+                    data : {
+                        _token : $('[name="_token"]').val(),
+                        trk : trkCode,
+                        operation : $(this).hasClass("tago") == true ? 1 : 0
+                    },
+                    success : function(response){
+                        if(response == 1){
+                            swal("Something went wrong!","","error");
+                        }else{
+                            location.reload();
+                        }
+                    },
+                    error : function(xhr, status, error){
+                        alert("Error : " + error);
                     }
-                },
-                error : function(xhr, status, error){
-                    alert("Error: " + error);
-                }
-            });
+                });
+            }else{
+                $.ajax({
+                    "url" : BASE_URL + '/removeTrack',
+                    type : "POST",
+                    data : {
+                        _token : $('[name="_token"]').val(),
+                        trk : trkCode,
+                        operation : $(this).hasClass("show") == true ? 1 : 0
+                    },
+                    success : function(respo){
+                        if(respo == 1){
+                            swal("Something went wrong!","","error");
+                        }else{
+                            location.reload();
+                        }
+                    },
+                    error : function(xhr, status, error){
+                        alert("Error: " + error);
+                    }
+                });
+            }
         });
         $("#submitNewTrack").on("click", function(){
             var trkCode = $("#selectNewTrack").val();

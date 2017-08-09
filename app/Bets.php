@@ -142,4 +142,38 @@ class Bets extends Model
                 "result" => 0
             ]);
     }
+    public function cancelWager($dataArray){
+        return DB::table($this->table)
+            ->where("race_date", $dataArray["date"])
+            ->where("bet_type", $dataArray["wagerType"])
+            ->where("race_track", $dataArray["trk"])
+            ->where("race_number", $dataArray["num"])
+            ->update([
+                "status" => 1,
+                "result" => 3
+            ]);
+    }
+    public function noShow($dataArray){
+        return DB::table($this->table)
+            ->where("race_date", $dataArray["date"])
+            ->where("race_track", $dataArray["trk"])
+            ->where("race_number", $dataArray["num"])
+            ->where("bet_type","wps")
+            ->where("type","s")
+            ->update([
+                "status" => 1,
+                "result" => 3
+            ]);
+    }
+    public function cancelWagerShow($dataArray){
+        return DB::table($this->table)
+            ->where("race_date", $dataArray["date"])
+            ->where("type", $dataArray["wagerType"])
+            ->where("race_track", $dataArray["trk"])
+            ->where("race_number", $dataArray["num"])
+            ->update([
+                "status" => 1,
+                "result" => 3
+            ]);
+    }
 }

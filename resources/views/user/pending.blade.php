@@ -6,9 +6,9 @@
 {{--<script src="{{ asset('js/sweetalert.min.js') }}"></script>--}}
 {{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
 <style>
-    .defeat{color: #fff;background: #ff4d28 !important;}
+    .defeat, .lose{color: #fff;background: #ff4d28 !important;}
     .null{color: #020202;background: #faf7ed !important;}
-    .victory{color: #fff;background: #00724b  !important;}
+    .victory, .win{color: #fff;background: #00724b  !important;}
     th,td{text-align: center;}
     thead{background: #e6efff;}
 </style>
@@ -45,8 +45,8 @@
                                 ?>
                             </td>
                             <td>{{ \App\Http\Controllers\HomeController::getTrack($value->race_track) }}</td>
-                            <td>{{ $value->race_number }}</td>
-                            <td>{{ $value->bet }}</td>
+                            <td>{{ "Race " . $value->race_number }}</td>
+                            <td><?php echo str_replace(',','-',$value->bet) ?></td>
                             <td>{{ $value->bet_amount }}</td>
                             <td>{{ $value->post_time }}</td>
                             <td>

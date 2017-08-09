@@ -129,6 +129,10 @@
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
     }
+    ul.errormessage li{
+        color: red;
+        font-size: 13px;
+    }
 </style>
 
 <script>

@@ -4,11 +4,12 @@ date_default_timezone_set('America/Los_Angeles');
 ?>
 <style>
     th{text-align: center}
-    .defeat{color: #fff;background: #ff4d28 !important;}
-    .null{color: #020202;background: #fffdcb !important;}
-    .victory{color: #fff;background: #00724b  !important;}
-    .scratched{color:#fff;background: #000 !important;}
+    .defeat, .lose{color: #000;background: #f5856e !important;}
+    .null{color: #020202;background: #faf7ed !important;}
+    .victory, .win{color: #000;background: #90de70 !important;}
+    .scratched, .aborted{color:#fff;background: #000 !important;}
     label.error{color:red;font-size: 9px;}
+    .sa-errors-container{display: none !important;}
 </style>
 {{--<input id="date">--}}
 <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -42,11 +43,11 @@ date_default_timezone_set('America/Los_Angeles');
                                     if($value->result == 0){
                                         $resultVar = "Null";
                                     }else if($value->result == 1){
-                                        $resultVar = "Victory";
+                                        $resultVar = "Win";
                                     }else if($value->result == 2){
-                                        $resultVar = "Defeat";
+                                        $resultVar = "Lose";
                                     }else if($value->result == 3){
-                                        $resultVar = "Scratched";
+                                        $resultVar = "Aborted";
                                     }
                                 ?>
                                 <tr class="<?php echo strtolower($resultVar) ?>">
@@ -77,7 +78,7 @@ date_default_timezone_set('America/Los_Angeles');
                                     <td>
                                         <?php echo $resultVar; ?>
                                     </td>
-                                    <td>{{ $value->win_amount }}</td>
+                                    <td>{{ number_format($value->win_amount,2) }}</td>
                                     <td>{{ $value->created_at }}</td>
                                 </tr>
                             @endforeach
@@ -302,6 +303,7 @@ date_default_timezone_set('America/Los_Angeles');
     function loadBetsDataTable(){
         $("#tblBets").DataTable({
             "aaSorting": [],
+            "pageLength": 100
         });
     }
 </script>

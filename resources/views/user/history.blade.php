@@ -6,10 +6,10 @@
 {{--<script src="{{ asset('js/sweetalert.min.js') }}"></script>--}}
 {{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
 <style>
-    .defeat{color: #000;background: #f5856e !important;}
+    .defeat, .lose{color: #000;background: #f5856e !important;}
     .null{color: #020202;background: #faf7ed !important;}
-    .victory{color: #000;background: #90de70 !important;}
-    .scratched{color:#fff;background: #000 !important;}
+    .victory, .win{color: #000;background: #90de70 !important;}
+    .scratched, .aborted{color:#fff;background: #000 !important;}
     th,td{text-align: center;}
     thead{background: #e6efff;}
 </style>
@@ -42,11 +42,11 @@
                                 if($value->result == 0){
                                     $resultVar = "Null";
                                 }else if($value->result == 1){
-                                    $resultVar = "Victory";
+                                    $resultVar = "Win";
                                 }else if($value->result == 2){
-                                    $resultVar = "Defeat";
+                                    $resultVar = "Lose";
                                 }else if($value->result == 3){
-                                    $resultVar = "Scratched";
+                                    $resultVar = "Aborted";
                                 }
                             ?>
                             <tr class="<?php echo strtolower($resultVar); ?>">
@@ -60,8 +60,8 @@
                                     ?>
                                 </td>
                                 <td>{{ \App\Http\Controllers\HomeController::getTrack($value->race_track) }}</td>
-                                <td>{{ $value->race_number }}</td>
-                                <td>{{ $value->bet }}</td>
+                                <td>{{ "Race " . $value->race_number }}</td>
+                                <td><?php echo str_replace(',','-',$value->bet) ?></td>
                                 <td>{{ $value->bet_amount }}</td>
                                 <td>{{ $value->post_time }}</td>
                                 <td>
@@ -86,7 +86,7 @@
                                         if($value->win_amount <= 0 || $value->win_amount == ""){
                                             echo "---";
                                         }else{
-                                            echo $value->win_amount;
+                                            echo number_format($value->win_amount,2);
                                         }
                                     ?>
                                 </td>

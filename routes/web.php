@@ -6,7 +6,7 @@ Route::get('register','HomeController@register');
 Route::post('insertuser','HomeController@insertuser');
 Route::get('logout','HomeController@logout');
 Route::match(array('GET','POST'),'test',function(){
-    return "<a href='dashboard'>Dashboard</a>";
+    return "<a href='dashboard'>". strtolower("TESTING") ."</a>";
 });
 Route::group(['middleware' => ['auth']],function(){
     // User
@@ -63,5 +63,13 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('submitNewBet','AdminController@submitNewBet');
         Route::post('undoScratch','AdminController@undoScratch');
         Route::post('removeTrack','AdminController@removeTrack');
+        Route::post('showTemp','AdminController@showTemp');
+        Route::post('cancelWager','AdminController@cancelWager');
+        Route::post('noShow','AdminController@noShow');
+        Route::post('checkCancelled','AdminController@checkCancelled');
+        Route::post('getTracksWithDate','AdminController@getTracksWithDate');
+        Route::post('login',function(){
+            return "test";
+        });
     });
 });

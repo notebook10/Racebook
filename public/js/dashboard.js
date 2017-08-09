@@ -86,7 +86,7 @@ $("document").ready(function(){
                                         $(".closed").css("display","none");
                                     },
                                     error : function(xhr, status, error){
-                                        alert("Error: " + error);
+                                        swal("Error: " + error);
                                     }
                                 });
                                 // for(var i = firstRace; i <= raceTimeArr.length; i++){
@@ -113,14 +113,14 @@ $("document").ready(function(){
                                 //     $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
                                 // }
                             },
-                            error : function(){
-                                alert("error");
+                            error : function(xhr,status,err){
+                                swal(err,"Please try again","error");
                             }
                         });
                     }
                 },
                 error : function(xhr, status, err){
-                    alert("Error: " + err);
+                    swal(err,"Please try again","error");
                 }
             });
 
@@ -491,7 +491,7 @@ $("document").ready(function(){
                         // Default Minimum bet = 2
                         minimumBet = 2;
                     }
-                    if(parseInt($("#betAmount").val()) >= parseInt(minimumBet)){
+                    if(parseFloat($("#betAmount").val()) >= parseFloat(minimumBet)){
                         $("input[type=checkbox]").each(function () {
                             if (this.checked) {
                                 betArray.push($(this).data("id"));
@@ -510,7 +510,7 @@ $("document").ready(function(){
                         if (betType === "wps") {
                             console.log(ppArray);
                             if (ppArray.length < 1) {
-                                swal("There was a problem!", "An Win/Place/Show requires atleast one selection.", "error");
+                                swal({title:"There was a problem!",text :"An Win/Place/Show requires atleast one selection.",type:"warning"});
                             } else {
                                 var w = [];
                                 var p = [];
@@ -554,7 +554,7 @@ $("document").ready(function(){
                         else if (betType === "exacta") {
                             console.log(ppArray);
                             if (ppArray.length <= 1) {
-                                swal("There was a problem!", "An Exacta requires two selection.", "error");
+                                swal({title:"There was a problem!",text:"An Exacta requires two selection.",type : "warning"});
                             } else {
                                 var first = [];
                                 var second = [];
@@ -566,11 +566,11 @@ $("document").ready(function(){
                                     }
                                 });
                                 if (second.length <= 0 || first.length <= 0) {
-                                    swal("There was a problem!", "There must be atleast one selection to finish first and atleast one selection to finish second!", "error");
+                                    swal({title:"There was a problem!",text:"There must be atleast one selection to finish first and atleast one selection to finish second!",type:"warning"});
                                 } else {
                                     if (first.length == 1 && second.length == 1) {
                                         if (first[0] == second[0]) {
-                                            swal("Invalid selections", " Please check that your selections include at least one different runner per leg", "error");
+                                            swal({title:"Invalid selections!",text:"Please check that your selections include at least one different runner per leg",type :"warning"});
                                         } else {
                                             var exactaBets = [];
                                             var totalBetAmount = "";
@@ -618,7 +618,7 @@ $("document").ready(function(){
                         }
                         else if (betType === "superfecta") {
                             if (ppArray.length <= 1) {
-                                swal("There was a problem!", "Ticket has no selection.", "error");
+                                swal({title:"There was a problem!",text : "Ticket has no selection.",type : "warning"});
                             } else {
                                 var firstArr = [];
                                 var secondArr = [];
@@ -669,7 +669,7 @@ $("document").ready(function(){
                                 });
                                 // Error trap for empty || invalid selection
                                 if (superfectaArray.length <= 0) {
-                                    swal("There was a problem!", "Invalid Combination", "error");
+                                    swal({title:"There was a problem!", text :"Invalid Combination",type : "warning"});
                                 } else {
                                     var superfectaTotalAmount = superfectaArray.length * amount;
                                     $.each(superfectaArray, function (index, value) {
@@ -717,7 +717,7 @@ $("document").ready(function(){
                                 });
                             });
                             if (trifectaArray.length <= 0) {
-                                swal("There was a problem!", "Please select three horses for first, second and third place.", "error");
+                                swal({title:"There was a problem!", text:"Please select three horses for first, second and third place.",type : "warning"});
                             } else {
                                 $.each(trifectaArray, function (index, value) {
                                     $("table#ticketTbl tbody").append("<tr><td> Race: " + raceNumber + " BetType: " + betType + " Track: " + trk + " Amount: " + amount + " (" + trifectaArray[index] + ")</td><td>" + amount + "</td></tr>");
@@ -748,7 +748,7 @@ $("document").ready(function(){
                                 }
                             });
                             if (ppArray.length <= 0 || ddArray.length <= 0) {
-                                swal("There was a problem!", "Please select your first horse and second horse", "error");
+                                swal({title :"There was a problem!",text:"Please select your first horse and second horse",type : "warning"});
                             } else {
                                 var firstDD = [];
                                 var secondDD = [];
@@ -786,7 +786,7 @@ $("document").ready(function(){
                                 extBoxArr2.push(ppArray[index]["pp"]);
                             });
                             if (extBoxArr.length <= 1) {
-                                swal("There was a problem!", "Exacta Box requires atleast two selection", "error");
+                                swal({title :"There was a problem!", text :"Exacta Box requires atleast two selection",type : "warning"});
                             } else {
                                 $.each(extBoxArr, function (index, value) {
                                     $.each(extBoxArr2, function (key, val) {
@@ -819,7 +819,7 @@ $("document").ready(function(){
                                 }
                             });
                             if (fArr.length <= 2) {
-                                swal("There was an errors!", "Trifecta Box requires atleast three selections.", "error");
+                                swal({title : "There was an errors!",text : "Trifecta Box requires atleast three selections.",type : "warning"});
                             } else {
                                 $.each(fArr, function (fKey, fVal) {
                                     $.each(sArr, function (sKey, sVal) {
@@ -857,25 +857,29 @@ $("document").ready(function(){
                             displayConfirmationDiv();
                         }
                     }else{
-                        swal("There was a problem!", "The minimum stake for this wager is $" + minimumBet,"error");
+                        swal({title:"There was a problem!",text:" The minimum stake for this wager is $" + minimumBet,type:"warning"});
                         $("button.confirm").on("click", function(){
-                            $("#betAmount").val("");
+                            // $("#betAmount").val("");
                             $("#betAmount").focus();
                         });
                     }
                 },
                 error : function(xhr, status, error){
-                    swal("Something went wrong!","Please try again","error");
+                    swal({title:"Something went wrong!",text:"Please try again",type : "warning"});
                 }
             });
 
         }else{
-            swal("Empty Wager","Please enter a wager amount.","error");
+            swal({title:"Empty Wager",text :" Please enter a wager amount.",type : "warning"});
+            $("button.confirm").on("click", function(){
+                $("#betAmount").val("");
+                $("#betAmount").focus();
+            });
         }
     });
     $("#confirmBet").unbind("dblclick");
     $("#confirmBet").on("click",function(){
-        $("#confirmBet").attr("disabled",true);
+        // $("#confirmBet").attr("disabled",true);
         var betType = $("#selectWager").val();
         var trk = $("#selectedTrack").val();
         var raceNumber = $("#selectedRaceNum").val();
@@ -907,7 +911,8 @@ $("document").ready(function(){
             success : function(response){
                 console.log(submitArray); // gt or lt
                 if(response === "lt"){
-                    swal("Race Closed","Race is closed.","error");
+                    // swal("Race Closed","Race is closed.","error");
+                    swal("Race Closed!");
                 }else if(response === "gt"){
                     var allBetsArr = [];
                     switch(betType){
@@ -976,14 +981,14 @@ $("document").ready(function(){
                             }
                         },
                         error : function(xhr,status,error){
-                            alert(error);
+                            swal(error,"Please try again","error");
                         }
                     });
                     // ##############################################
                 }
             },
             error : function(xhr,status,err){
-                alert(err);
+                swal(err,"Please try again","error");
             }
         });
     });
@@ -1211,7 +1216,7 @@ $("document").ready(function(){
                 fooFunction2(BASE_URL,response['trkCode'],num,firstRacePostTime);
             },
             error : function(xhr, status, error){
-                alert(error);
+                swal(error,"Please try again","error");
             }
         });
     });
