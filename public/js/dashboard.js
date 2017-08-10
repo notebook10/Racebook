@@ -35,7 +35,8 @@ $("document").ready(function(){
                             data : {
                                 _token : $('[name="_token"]').val(),
                                 code : code,
-                                date : CURRENT_DATE
+                                // date : CURRENT_DATE
+                                date : raceDate
                             },
                             dataType: "json",
                             success : function(response){
@@ -73,7 +74,7 @@ $("document").ready(function(){
                                             if(respo[i-1] == "lt"){
                                                 // $(".panel-body."+ code).append("<div class='raceNum closed' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'> Race "+ i +": CLOSED</div>");
                                             }else if(respo[i-1] == "gt"){
-                                                $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
+                                                $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"' data-date='"+ raceDate +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
                                             }
                                         }
                                         if(jQuery.inArray("gt",respo) != -1){
@@ -148,6 +149,8 @@ $("document").ready(function(){
         // getWagerForRace(BASE_URL, trk, num, CURRENT_DATE);
         // var wager = $("#selectWager").val();
         var wager = "";
+        var date = $(this).data("date");
+        $("#selectedDate").val(date);
         $.ajax({
             "url" : BASE_URL + "/dashboard/getWagerForRace",
             type : "POST",
@@ -155,7 +158,8 @@ $("document").ready(function(){
                 _token : $('[name="_token"]').val(),
                 trk : trk,
                 num : num,
-                date : CURRENT_DATE
+                // date : CURRENT_DATE
+                date : $(this).data("date")
             },
             success : function(response){
                 $("#selectWager").empty();
@@ -249,7 +253,8 @@ $("document").ready(function(){
 
                             break;
                 }
-                fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
+                // fooFunction(BASE_URL,trk,CURRENT_DATE,num,wager);
+                fooFunction(BASE_URL,trk,date,num,wager);
             },
             error : function(xhr,status, error){
                 swal("Error","Error: " + error,"error");
@@ -277,6 +282,7 @@ $("document").ready(function(){
         var selectedTrack = $("#selectedTrack").val();
         var selectedRaceNum = $("#selectedRaceNum").val();
         var ddselectedRaceNum = parseInt($("#selectedRaceNum").val()) + parseInt(1);
+        var selectedDate = $("#selectedDate").val();
         selectedWagerPrev = $("#selectWager option:selected").text();
         $.ajax({
             "url" : BASE_URL + '/dashboard/getHorsesPerRace',
@@ -284,7 +290,8 @@ $("document").ready(function(){
             data : {
                 _token : $('[name="_token"]').val(),
                 code : selectedTrack,
-                date : CURRENT_DATE,
+                // date : CURRENT_DATE,
+                date : selectedDate,
                 number : selectedRaceNum
             },
             success : function(response){
@@ -313,7 +320,8 @@ $("document").ready(function(){
                         $("#tempRaces div#ddBoard").html("");
                         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ selectedTrack + selectedRaceNum +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
                         $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ selectedTrack + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                        ajaxGetHorsesPerRace(BASE_URL,selectedTrack,CURRENT_DATE, ddselectedRaceNum);
+                        // ajaxGetHorsesPerRace(BASE_URL,selectedTrack,CURRENT_DATE, ddselectedRaceNum);
+                        ajaxGetHorsesPerRace(BASE_URL,selectedTrack,selectedDate, ddselectedRaceNum);
                         break;
                     default:
                         break;
@@ -887,6 +895,7 @@ $("document").ready(function(){
         var amount = $("#betAmount").val();
         var betArray = [];
         var ppArray = [];
+        var selectedDate = $("#selectedDate").val();
 
         $("input[type=checkbox]").each(function(){
             if(this.checked){
@@ -906,7 +915,8 @@ $("document").ready(function(){
                 _token : $('[name="_token"]').val(),
                 trk : trk,
                 postTime : racePostTime,
-                date : CURRENT_DATE
+                // date : CURRENT_DATE
+                date : selectedDate
             },
             success : function(response){
                 console.log(submitArray); // gt or lt
@@ -1037,6 +1047,8 @@ $("document").ready(function(){
                 edt : $("h5#edt").text()
             },
             success : function(response){
+                console.log("<<<<");
+                console.log(response);
                 $(".loader").css("display","none");
                 var trackName,raceNumber,mtp = "";
                 $("table#tblUpcomingRace tbody tr").remove();
@@ -1063,6 +1075,7 @@ $("document").ready(function(){
         var trkName = $(this).data("track");
         var num = $(this).data("number").replace(/\D/g,'');
         var parent = $('h5:contains("'+ trkName +'")').closest("a").click();
+        $("#selectedDate").val(CURRENT_DATE);
         $.ajax({
             "url" : BASE_URL + "/dashboard/getTrackCode",
             type : "POST",
@@ -1093,6 +1106,7 @@ $("document").ready(function(){
                         date : CURRENT_DATE
                     },
                     success : function(response){
+                        $("#tempRaces table").remove();
                         $("#selectWager").empty();
                         $.each(response, function(index, value){
                             switch(value){
@@ -1221,6 +1235,11 @@ $("document").ready(function(){
         });
     });
     // $(".col-tracks").mCustomScrollbar();
+    $("#betAmount").keypress(function (e) {
+        if ((event.which != 46 || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
+            event.preventDefault();
+        }
+    });
 });
 function displayConfirmationDiv(){
     $("#raceDiv").css("display","none");

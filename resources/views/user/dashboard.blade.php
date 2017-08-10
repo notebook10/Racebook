@@ -8,6 +8,7 @@
 <?php
     date_default_timezone_set('America/Los_Angeles');
     use App\Horses;
+    $currentDate = date('mdy',time());
 ?>
 
 <style>
@@ -43,25 +44,29 @@
                         </div>
                     </div>
                 @endforeach
-                <!-- TEMP -->
-                        @foreach($tomorrow as $value)
-                            <div class="panel panel-default">
-                                <div class="panel-heading" role="tab" id="headingThree">
-                                    <h4 class="panel-title">
-                                        <a class="collapsed trkName" role="button" data-toggle="collapse" data-code="{!! $value->code !!}" data-parent="#accordion" href="#{!! $value->code !!}" aria-expanded="false" aria-controls="{!! $value->code !!}" data-date="{!! $value->date !!}">
-                                            <i class="more-less glyphicon glyphicon-plus"></i>
-                                            <h5 class="title-menu">{!! $value->name !!}</h5>
-                                        </a>
-                                    </h4>
-                                </div>
-                                <div id="{!! $value->code !!}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
-                                    <div class="panel-body {!! $value->code !!}">
+                <!-- Tracks Tomorrow -->
+                @foreach($tomorrow as $value)
+                    @if($value->date != $currentDate)
+                    <div class="panel panel-default">
+                        <div class="panel-heading" role="tab" id="headingThree">
+                            <h4 class="panel-title">
+                                <a class="collapsed trkName" role="button" data-toggle="collapse" data-code="{!! $value->code !!}" data-parent="#accordion" href="#{!! $value->code !!}" aria-expanded="false" aria-controls="{!! $value->code !!}" data-date="{!! $value->date !!}">
+                                    <i class="more-less glyphicon glyphicon-plus"></i>
+                                    <h5 class="title-menu">{!! $value->name !!}</h5>
+                                </a>
+                            </h4>
+                        </div>
+                        <div id="{!! $value->code !!}" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
+                            <div class="panel-body {!! $value->code !!}">
 
-                                    </div>
-                                </div>
                             </div>
-                        @endforeach
-                <!-- TEMP -->
+                        </div>
+                    </div>
+                    @else
+
+                    @endif
+                @endforeach
+                <!-- Tracks Tomorrow -->
             </div>
             {{-- ---------------------------------------------------------------------------------------------------------------------------------------------------------------- --}}
         </div>
@@ -104,6 +109,7 @@
                     <input type="hidden" id="selectedTrack">
                     <input type="hidden" id="selectedRaceNum">
                     <input type="hidden" id="selectedRacePostTime">
+                    <input type="hidden" id="selectedDate">
                 </div>
                 <div id="tempRaces"></div>
                 <div id="submitBet" style="display: none;text-align: center;">

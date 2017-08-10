@@ -1,6 +1,7 @@
 <?php date_default_timezone_set('America/Los_Angeles'); ?>
 <style>
     table#tblTracksAndTimezone tr,table#tblTracksAndTimezone th{text-align: center;}
+    .sa-errors-container{display: none !important;}
 </style>
 <div class="container">
     <div class="row">
