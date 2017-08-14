@@ -90,29 +90,6 @@ $("document").ready(function(){
                                         swal("Error: " + error);
                                     }
                                 });
-                                // for(var i = firstRace; i <= raceTimeArr.length; i++){
-                                //     // $.ajax({
-                                //     //     "url" : BASE_URL + '/dashboard/checkPostTime',
-                                //     //     type : "get",
-                                //     //     async: false,
-                                //     //     data : {
-                                //     //         _token : $('[name="_token"]').val(),
-                                //     //         trk : code,
-                                //     //         postTime : raceTimeArr[i-1]
-                                //     //     },
-                                //     //     success : function(data){
-                                //     //         if(data === "gt"){
-                                //     //             $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
-                                //     //         }else{
-                                //     //             $(".panel-body."+ code).append("<div class='raceNum'>RACE "+ i +" : " + " CLOSED</div>");
-                                //     //         }
-                                //     //     },
-                                //     //     errors : function(xhr, status, errors){
-                                //     //         alert("Error: " + errors);
-                                //     //     }
-                                //     // });
-                                //     $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
-                                // }
                             },
                             error : function(xhr,status,err){
                                 swal(err,"Please try again","error");
@@ -337,10 +314,10 @@ $("document").ready(function(){
 
                             }else{
                                 $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pp +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
-                                    "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pnumber +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
+                                    "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td><input type='checkbox' class='wps' data-id='"+ selectedTrack + selectedRaceNum + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                             }
                             break;
                         case "superfecta":
@@ -350,11 +327,11 @@ $("document").ready(function(){
 
                             }else{
                                 $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td><input type='checkbox' class='superfecta' data-id='"+ selectedTrack + selectedRaceNum + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                             }
                             break;
                         case "exacta":
@@ -364,9 +341,9 @@ $("document").ready(function(){
 
                             }else{
                                 $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='exacta' data-id='"+ selectedTrack + selectedRaceNum + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='exacta' data-id='"+ selectedTrack + selectedRaceNum + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    "<td><input type='checkbox' class='exacta' data-id='"+ selectedTrack + selectedRaceNum + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td><input type='checkbox' class='exacta' data-id='"+ selectedTrack + selectedRaceNum + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                             }
                             break;
                         case "exactabox":
@@ -376,8 +353,8 @@ $("document").ready(function(){
 
                             }else{
                                 $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='exactabox' data-id='"+ selectedTrack + selectedRaceNum + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    "<td><input type='checkbox' class='exactabox' data-id='"+ selectedTrack + selectedRaceNum + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                             }
                             break;
                         case "trifecta":
@@ -387,10 +364,10 @@ $("document").ready(function(){
 
                             }else{
                                 $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td><input type='checkbox' class='trifecta' data-id='"+ selectedTrack + selectedRaceNum + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                             }
                             break;
                         case "trifectabox":
@@ -400,8 +377,8 @@ $("document").ready(function(){
 
                             }else{
                                 $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='trifectabox' data-id='"+ selectedTrack + selectedRaceNum + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    "<td><input type='checkbox' class='trifectabox' data-id='"+ selectedTrack + selectedRaceNum + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                             }
                             break;
                         case "dailydouble":
@@ -411,8 +388,8 @@ $("document").ready(function(){
 
                             }else{
                                 $("table."+ selectedTrack + selectedRaceNum +" tbody").append("<tr>" +
-                                    "<td><input type='checkbox' class='dailydouble' data-id='"+ selectedTrack + selectedRaceNum + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                    "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                    "<td><input type='checkbox' class='dailydouble' data-id='"+ selectedTrack + selectedRaceNum + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                    "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                             }
                             break;
                         default:
@@ -422,7 +399,9 @@ $("document").ready(function(){
                 });
                 $(".tdPP").each(function(key,val){
                     if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
+                    else if($(this).data("key") == "1A"){$(this).css({"background":"#FF0000","color":"#fff"});}
                     else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
+                    else if($(this).data("key") == "2B"){$(this).css({"background":"#fff","color":"#000"});}
                     else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                     else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                     else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
@@ -944,7 +923,6 @@ $("document").ready(function(){
                             $.each(submitArray, function(index, value){
                                 allBetsArr.push({'player_id': userId ,'race_number':raceNumber,'race_track':trk,'bet_type':betType,'bet_amount':amount,'post_time':racePostTime,'status':0,'type':'x','bet':value,'created_at':'','updated_at':''});
                             });
-                            console.log("<<<<<");
                             console.log(submitArray);
                             break;
                         case "superfecta":
@@ -1047,7 +1025,6 @@ $("document").ready(function(){
                 edt : $("h5#edt").text()
             },
             success : function(response){
-                console.log("<<<<");
                 console.log(response);
                 $(".loader").css("display","none");
                 var trackName,raceNumber,mtp = "";
@@ -1195,38 +1172,6 @@ $("document").ready(function(){
                         swal("Error","Error: " + error,"error");
                     }
                 });
-                // var ddselectedRaceNum = parseInt(num) + parseInt(1);
-                // getWagerForRace(BASE_URL,trk,num,CURRENT_DATE);
-                // // var wager = $("#selectWager").val();
-                // switch(wager){
-                //     case "wps":
-                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>W</th><th>P</th><th>S</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         break;
-                //     case "superfecta":
-                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th>4</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         break;
-                //     case "exacta":
-                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         break;
-                //     case "exactabox":
-                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         break;
-                //     case "trifecta":
-                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th>2</th><th>3</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         break;
-                //     case "trifectabox":
-                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>BOX</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         break;
-                //     case "dailydouble":
-                //         $("#tempRaces div#ddBoard").html("");
-                //         $("#tempRaces").append("<table class=' table table-bordered table-striped "+ trk + num +"'><thead><tr><th>1</th><th class='pp-class'>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         $("#tempRaces").append("<div id='ddBoard'><div> Race "+ ddselectedRaceNum +" </div></div><table class=' table table-bordered table-striped "+ trk + ddselectedRaceNum + " dailydouble'><thead><tr><th>1</th><th>PP</th><th>Horse</th><th>Jockey</th></tr></thead><tbody></tbody></table>");
-                //         ajaxGetHorsesPerRace(BASE_URL,response['trkCode'],CURRENT_DATE, ddselectedRaceNum);
-                //         break;
-                //     default:
-                //         break;
-                // }
-                // fooFunction(BASE_URL,response['trkCode'],CURRENT_DATE,num,wager);
                 fooFunction2(BASE_URL,response['trkCode'],num,firstRacePostTime);
             },
             error : function(xhr, status, error){
@@ -1234,7 +1179,6 @@ $("document").ready(function(){
             }
         });
     });
-    // $(".col-tracks").mCustomScrollbar();
     $("#betAmount").keypress(function (e) {
         if ((event.which != 46 || $(this).val().indexOf('.') != -1) && (event.which < 48 || event.which > 57)) {
             event.preventDefault();
@@ -1266,13 +1210,15 @@ function ajaxGetHorsesPerRace($url,trk,currentDate, num){
 
                 }else{
                     $("table."+ trk + num +" tbody").append("<tr>" +
-                        "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                        "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                        "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                        "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                 }
             });
             $(".tdPP").each(function(key,val){
                 if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
+                else if($(this).data("key") == "1A"){$(this).css({"background":"#FF0000","color":"#fff"});}
                 else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
+                else if($(this).data("key") == "2B"){$(this).css({"background":"#fff","color":"#000"});}
                 else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                 else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                 else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
@@ -1295,32 +1241,6 @@ function ajaxGetHorsesPerRace($url,trk,currentDate, num){
         },
         error:function(){
             swal("Something went wrong!","Please try again.","error");
-        }
-    });
-}
-function ajaxSaveBets(url,betType,trk,raceNumber,racePostTime,amount,betArray,ppArray,wpstype,value){
-    $.ajax({
-        "url" : url + '/dashboard/saveBet',
-        type : "POST",
-        data : {
-            _token : $('[name="_token"]').val(),
-            bettype : betType,
-            track : trk,
-            raceNum : raceNumber,
-            racePost : racePostTime,
-            betamount : amount,
-//                bet : betArray,
-//                pp : ppArray,
-            wpsType : wpstype,
-            value : value
-        },
-        success : function(response){
-            alert(jQuery.type(response));
-            console.log("Saved!");
-        },
-        error : function(xhr,status,err){
-            console.log("Error: " + xhr + status + err);
-            swal("Error in saving!","Something went wrong","error");
         }
     });
 }
@@ -1348,10 +1268,10 @@ function fooFunction($url,trk,date,num,wager){
 
                         }else{
                             $("table."+ trk + num +" tbody").append("<tr>" +
-                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pp +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
-                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-W" +"' data-val='W' data-pp='"+ obj[index].pnumber +"'></td>" + // TrackCode + RaceNumber + WagerType + HorsePP
+                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-P" +"' data-val='P' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td><input type='checkbox' class='wps' data-id='"+ trk + num + "wps"+ obj[index].pp + "-S" +"' data-val='S' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                         }
                         break;
                     case "superfecta":
@@ -1361,11 +1281,11 @@ function fooFunction($url,trk,date,num,wager){
 
                         }else{
                             $("table."+ trk + num +" tbody").append("<tr>" +
-                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td><input type='checkbox' class='superfecta' data-id='"+ trk + num + "superfecta"+ obj[index].pp + "-4" +"' data-val='4' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                         }
                         break;
                     case "exacta":
@@ -1375,9 +1295,9 @@ function fooFunction($url,trk,date,num,wager){
 
                         }else{
                             $("table."+ trk + num +" tbody").append("<tr>" +
-                                "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td><input type='checkbox' class='exacta' data-id='"+ trk + num + "exacta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                         }
                         break;
                     case "exactabox":
@@ -1387,8 +1307,8 @@ function fooFunction($url,trk,date,num,wager){
 
                         }else{
                             $("table."+ trk + num +" tbody").append("<tr>" +
-                                "<td><input type='checkbox' class='exactabox' data-id='"+ trk + num + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                "<td><input type='checkbox' class='exactabox' data-id='"+ trk + num + "exactabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                         }
                         break;
                     case "trifecta":
@@ -1398,10 +1318,10 @@ function fooFunction($url,trk,date,num,wager){
 
                         }else{
                             $("table."+ trk + num +" tbody").append("<tr>" +
-                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-2" +"' data-val='2' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td><input type='checkbox' class='trifecta' data-id='"+ trk + num + "trifecta"+ obj[index].pp + "-3" +"' data-val='3' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                         }
                         break;
                     case "trifectabox":
@@ -1411,8 +1331,8 @@ function fooFunction($url,trk,date,num,wager){
 
                         }else{
                             $("table."+ trk + num +" tbody").append("<tr>" +
-                                "<td><input type='checkbox' class='trifectabox' data-id='"+ trk + num + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                "<td><input type='checkbox' class='trifectabox' data-id='"+ trk + num + "trifectabox"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                         }
                         break;
                     case "dailydouble":
@@ -1422,8 +1342,8 @@ function fooFunction($url,trk,date,num,wager){
 
                         }else{
                             $("table."+ trk + num +" tbody").append("<tr>" +
-                                "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pp +"'></td>" +
-                                "<td class='tdPP' data-key='"+ obj[index].pp +"'>"+ obj[index].pp +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
+                                "<td><input type='checkbox' class='dailydouble' data-id='"+ trk + num + "dailydouble"+ obj[index].pp + "-1" +"' data-val='1' data-pp='"+ obj[index].pnumber +"'></td>" +
+                                "<td class='tdPP' data-key='"+ obj[index].pnumber +"'>"+ obj[index].pnumber +"</td><td>"+ obj[index].horse + "</td><td>"+ obj[index].jockey +"</td></tr>");
                         }
                         break;
                     default:
@@ -1433,7 +1353,9 @@ function fooFunction($url,trk,date,num,wager){
             });
             $(".tdPP").each(function(key,val){
                 if($(this).data("key") == 1){$(this).css({"background":"#FF0000","color":"#fff"});}
+                else if($(this).data("key") == "1A"){$(this).css({"background":"#FF0000","color":"#fff"});}
                 else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
+                else if($(this).data("key") == "2B"){$(this).css({"background":"#fff","color":"#000"});}
                 else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
                 else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                 else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
@@ -1493,43 +1415,6 @@ function fooFunction2(url,trk,num,post){
         error : function(){
             swal("Something went wrong!","Please try again.","error");
             $("#tempRaces table").remove();
-        }
-    });
-}
-function getWagerForRace(url ,trkCode, raceNum, date){
-    $.ajax({
-        "url" : url + "/dashboard/getWagerForRace",
-        type : "POST",
-        data : {
-            _token : $('[name="_token"]').val(),
-            trk : trkCode,
-            num : raceNum,
-            date : date
-        },
-        success : function(response){
-            $("#selectWager").empty();
-            $.each(response, function(index, value){
-                switch(value){
-                    case "WPS":
-                        $('#selectWager').append($('<option>', {value : 'wps', text : 'Win/Place/Show'}));
-                        break;
-                    case "Exacta":
-                        $('#selectWager').append($('<option>', {value : 'exacta', text : value}));
-                        break;
-                    case "Daily Double":
-                        $('#selectWager').append($('<option>', {value : 'dailydouble', text : value}));
-                        break;
-                    case "Trifecta":
-                        $('#selectWager').append($('<option>', {value : 'trifecta', text : value}));
-                        break;
-                    case "Superfecta":
-                        $('#selectWager').append($('<option>', {value : 'superfecta', text : value}));
-                        break;
-                }
-            });
-        },
-        error : function(xhr,status, error){
-            swal("Error","Error: " + error,"error");
         }
     });
 }

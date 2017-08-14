@@ -16,7 +16,7 @@
             <input type="hidden" name="_token" value="{{ csrf_token() }}">
             <input type="text" name="username" placeholder="username" required />
             <input type="password" name="password" placeholder="password" required />
-            <input type="submit" id="submit" class="submit-button">
+            <input type="submit" id="submit" class="submit-button" value="LOGIN">
 
             {{--<p class="message">Not registered? <a href="#">Create an account</a></p>--}}
             <ul class="errormessage">

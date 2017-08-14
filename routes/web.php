@@ -1,6 +1,6 @@
 <?php
 
-Route::get('/','HomeController@index');
+Route::get('/','HomeController@index')->name('/');
 Route::post('login','HomeController@login');
 Route::get('register','HomeController@register');
 Route::post('insertuser','HomeController@insertuser');

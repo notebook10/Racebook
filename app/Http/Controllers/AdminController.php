@@ -338,7 +338,12 @@ class AdminController extends Controller
             ->where("track_code",$bets->race_track)
             ->where("race_date",$bets->race_date)
             ->first();
-        $temp = json_decode($minimumContent->content);
+//        $temp = $minimumContent->content != null ? json_decode($minimumContent->content) : "";
+        if($minimumContent != null){
+            $temp = json_decode($minimumContent->content);
+        }else{
+            $temp = null;
+        }
         // Payout (Payout required!)
         switch ($betType){
             case "exacta":
@@ -479,7 +484,7 @@ class AdminController extends Controller
             ->where("track_code",$bets->race_track)
             ->where("race_date",$bets->race_date)
             ->first();
-        $temp = json_decode($minimumContent->content)->wps;
+        $temp = $minimumContent != null ? json_decode($minimumContent->content)->wps : "";
         $minimum = $temp == null ? 2 : $temp;
         switch ($wps){
             case "w":

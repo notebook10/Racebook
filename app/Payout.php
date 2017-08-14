@@ -28,10 +28,12 @@ class Payout extends Model
         }
     }
     public function checkPayout($trkCode, $raceNum, $date){
-        return DB::table($this->table)
+        $temp = DB::table($this->table)
             ->where("track_code", $trkCode)
             ->where("race_number", $raceNum)
             ->where("race_date", $date)
+            ->orderBy("created_at","DESC")
             ->get();
+        return $temp;
     }
 }
