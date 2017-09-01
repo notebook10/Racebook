@@ -1,7 +1,7 @@
 <?php
 
 Route::get('/','HomeController@index')->name('/');
-Route::post('login','HomeController@login');
+Route::post('login','HomeController@login')->name('login');
 Route::get('register','HomeController@register');
 Route::post('insertuser','HomeController@insertuser');
 Route::get('logout','HomeController@logout');
@@ -30,6 +30,7 @@ Route::group(['middleware' => ['auth']],function(){
     Route::post('dashboard/getWagerForRace','HomeController@getWagerForRace');
     Route::get('dashboard/checkIfOpen','HomeController@checkIfOpen');
     Route::post('dashboard/getMinimum','HomeController@getMinimum');
+    Route::get('dashboard/weekly','HomeController@weekly');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');
@@ -68,8 +69,7 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('noShow','AdminController@noShow');
         Route::post('checkCancelled','AdminController@checkCancelled');
         Route::post('getTracksWithDate','AdminController@getTracksWithDate');
-        Route::post('login',function(){
-            return "test";
-        });
+        Route::post('getBetInfo','AdminController@getBetInfo');
+        Route::get('pendingBets','AdminController@pendingBets');
     });
 });

@@ -8,6 +8,7 @@ date_default_timezone_set('America/Los_Angeles');
     .tago{background: #ff6c64;color:#000;font-weight:900;}
     .addDiv{background: #faf7ed;color:#b6a361;border: 1px solid #b6a361;font-weight: bold;padding: 15px;text-align: center;}
     .addDiv:hover{background:#9c8948;color: #fff;cursor: pointer;}
+    .sa-errors-container{display: none !important;}
 </style>
 <div class="container">
     <input type="hidden" id="date" value="<?php echo date('mdy',time()); ?>">

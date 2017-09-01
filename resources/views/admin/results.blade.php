@@ -227,15 +227,18 @@
         });
         $("#frmResults").validate({
             rules : {
+                // required Removed!!!
                 racePerTrack : "required",
                 tracksToday : "required",
-                exactaPayout : {"required":true,number:true},
+//                exactaPayout : {"required":true,number:true},
+                exactaPayout : {number:true},
                 trifectaPayout : {number:true},
                 superfectaPayout : {number:true},
-                ddPayout : {"required":true,number:true},
-                wPayout : {"required":true,number:true},
-                "1pPayout" : {"required":true,number:true},
-                "2pPayout" : {"required":true,number:true},
+                ddPayout : {number:true},
+//                wPayout : {"required":true,number:true},
+                wPayout : {number:true},
+                "1pPayout" : {number:true},
+                "2pPayout" : {number:true},
 //                "1sPayout" : {"required":true,number:true},
 //                "2sPayout" : {"required":true,number:true},
 //                "3sPayout" : {"required":true,number:true},
@@ -254,6 +257,7 @@
         });
         var optionsResults = {
             success: function(response){
+                $("#payoutOperation").val("1"); // for suddeb=n update
                 var lastId = response;
                 swal("Success",lastId,"success");
                 // SUCCESSFULLY SAVED / UPDATED RESULT

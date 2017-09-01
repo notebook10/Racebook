@@ -10,6 +10,7 @@
     .null{color: #020202;background: #faf7ed !important;}
     .victory, .win{color: #000;background: #90de70 !important;}
     .scratched, .aborted{color:#fff;background: #000 !important;}
+    .nopayout{color:#fff;background: orange !important;}
     th,td{text-align: center;}
     thead{background: #e6efff;}
 </style>
@@ -47,6 +48,8 @@
                                     $resultVar = "Lose";
                                 }else if($value->result == 3){
                                     $resultVar = "Aborted";
+                                }else if($value->result == 4){
+                                    $resultVar = "NoPayout";
                                 }
                             ?>
                             <tr class="<?php echo strtolower($resultVar); ?>">

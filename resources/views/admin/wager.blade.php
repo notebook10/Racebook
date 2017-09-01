@@ -3,6 +3,7 @@
 ?>
 <style>
     th,td{text-align: center}
+    .sa-errors-container{display: none !important;}
 </style>
 <input type="hidden" name="_token" value="{{ csrf_token() }}">
 <input type="hidden" id="date" value="<?php echo date('mdy',time()); ?>">
@@ -22,7 +23,7 @@
                             <th>Race Number</th>
                             <th>Post Time</th>
                             <th>Wager</th>
-                            <th>Aksyon</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -183,7 +184,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">WAGERRRRRRRRRRRRRRRRRR!!!!!!!!!!!!!!!!!!!!!!!</h4>
+                <h4 class="modal-title">WAGER</h4>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="wagerOperation" name="wagerOperation" value="0">
@@ -196,7 +197,7 @@
                         </select>
                         <label for="raceNumber">Race Number:</label>
                         <input type="text" class="form-control" id="raceNumber" name="raceNumber">
-                        <p>Follow up date here <--</p>
+                        {{--<p>Follow up date here <--</p>--}}
                         <label>Wager:</label>
                         <div class="checkbox">
                             <label><input type="checkbox" value="exacta" id="exacta" name="exacta">Exacta</label>

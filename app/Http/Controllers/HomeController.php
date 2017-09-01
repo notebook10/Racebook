@@ -292,7 +292,7 @@ class HomeController extends Controller
     public function past(){
         $betsModel = new Bets();
         $data = [
-            'history' => $betsModel->getAllBets(Auth::id())
+            'history' => $betsModel->getAllBets2(Auth::id())
         ];
         $theme = Theme::uses('default')->layout('layout')->setTitle('History');
         return $theme->of('user/history', $data)->render();
@@ -379,5 +379,10 @@ class HomeController extends Controller
             ->where("code",$trkCode)
             ->where("date",$date)
             ->first();
+    }
+    public function weekly(){
+        $betsModel = new Bets();
+        $theme = Theme::uses('default')->layout('layout')->setTitle('WEEKLY');
+        return $theme->of('user/test')->render();
     }
 }

@@ -1,5 +1,11 @@
-
 $("document").ready(function(){
+    // window.console.log = function(){
+    //     console.error('DISABLED!');
+    //     window.console.log = function() {
+    //         return false;
+    //     }
+    // };
+    console.log('Start');
     var BASE_URL = $("#hiddenURL").val();
     var CURRENT_DATE = $("#date").data("date");
     var submitArray = []; // Array to be submitted to confirmation
@@ -73,6 +79,7 @@ $("document").ready(function(){
                                         for(var i = firstRace; i <= raceTimeArr.length; i++){
                                             if(respo[i-1] == "lt"){
                                                 // $(".panel-body."+ code).append("<div class='raceNum closed' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"'> Race "+ i +": CLOSED</div>");
+                                                // $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"' data-date='"+ raceDate +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
                                             }else if(respo[i-1] == "gt"){
                                                 $(".panel-body."+ code).append("<div class='raceNum' data-number='" + i + "' data-track='"+ code+"' data-post='"+ raceTimeArr[i-1] +"' data-date='"+ raceDate +"'>RACE "+ i +" : "+ raceTimeArr[i-1] +" </div>").addClass("on");
                                             }
@@ -403,6 +410,7 @@ $("document").ready(function(){
                     else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
                     else if($(this).data("key") == "2B"){$(this).css({"background":"#fff","color":"#000"});}
                     else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
+                    else if($(this).data("key") == "3C"){$(this).css({"background":"#0000FF","color":"#fff"});}
                     else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                     else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
                     else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
@@ -1220,6 +1228,7 @@ function ajaxGetHorsesPerRace($url,trk,currentDate, num){
                 else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
                 else if($(this).data("key") == "2B"){$(this).css({"background":"#fff","color":"#000"});}
                 else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
+                else if($(this).data("key") == "3C"){$(this).css({"background":"#0000FF","color":"#fff"});}
                 else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                 else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
                 else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}
@@ -1357,6 +1366,7 @@ function fooFunction($url,trk,date,num,wager){
                 else if($(this).data("key") == 2){$(this).css({"background":"#fff","color":"#000"});}
                 else if($(this).data("key") == "2B"){$(this).css({"background":"#fff","color":"#000"});}
                 else if($(this).data("key") == 3){$(this).css({"background":"#0000FF","color":"#fff"});}
+                else if($(this).data("key") == "3C"){$(this).css({"background":"#0000FF","color":"#fff"});}
                 else if($(this).data("key") == 4){$(this).css({"background":"#FFFF00","color":"#000"});}
                 else if($(this).data("key") == 5){$(this).css({"background":"#008000","color":"#fff"});}
                 else if($(this).data("key") == 6){$(this).css({"background":"#000","color":"#fff"});}

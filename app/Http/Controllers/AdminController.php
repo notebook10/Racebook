@@ -109,9 +109,10 @@ class AdminController extends Controller
     public function bets(){
         $betsModel = new Bets();
         $dataArray = [
-            'betsToday' => $betsModel->getAll()
+//            'betsToday' => $betsModel->getAll()
+            'betsToday' => $betsModel->getAllPastBets()
         ];
-        $theme = Theme::uses('admin')->layout('layout')->setTitle('BETS');
+        $theme = Theme::uses('admin')->layout('layout')->setTitle('PastBets');
         return $theme->of('admin/bets', $dataArray)->render();
     }
     public function results(){
@@ -220,7 +221,7 @@ class AdminController extends Controller
             foreach ($exeDD as $key => $value){
                 AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
             }
-            $ddRaceNum = $raceNum -1;
+            $ddRaceNum = $raceNum - 1;
             AdminController::gradeWrongBets($raceDate,$trkCode,$ddRaceNum);
         }
         if($ddSecondRaceRes == ""){
@@ -348,33 +349,69 @@ class AdminController extends Controller
         switch ($betType){
             case "exacta":
                 $payout = json_decode($payoutContent->content)->exactaPayout;
-                $minimum = $temp->exacta == null ? 2 : $temp->exacta;
-                $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+//                $minimum = $temp->exacta == null ? 2 : $temp->exacta;
+                if($payout != null){
+                    $minimum = $temp == null ? 2 : $temp->exacta;
+                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "exactabox":
                 $payout = json_decode($payoutContent->content)->exactaPayout;
-                $minimum = $temp->exacta == null ? 2 : $temp->exacta;
-                $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+//                $minimum = $temp->exacta == null ? 2 : $temp->exacta;
+                if($payout != null){
+                    $minimum = $temp == null ? 2 : $temp->exacta;
+                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "trifecta":
                 $payout = json_decode($payoutContent->content)->trifectaPayout;
-                $minimum = $temp->trifecta == null ? 2 : $temp->trifecta;
-                $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+//                $minimum = $temp->trifecta == null ? 2 : $temp->trifecta;
+                if($payout != null){
+                    $minimum = $temp == null ? 2 : $temp->trifecta;
+                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "trifectabox":
                 $payout = json_decode($payoutContent->content)->trifectaPayout;
-                $minimum = $temp->trifecta == null ? 2 : $temp->trifecta;
-                $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+//                $minimum = $temp->trifecta == null ? 2 : $temp->trifecta;
+                if($payout != null){
+                    $minimum = $temp == null ? 2 : $temp->trifecta;
+                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "superfecta":
                 $payout = json_decode($payoutContent->content)->superfectaPayout;
-                $minimum = $temp->superfecta == null ? 2 : $temp->superfecta;
-                $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+//                $minimum = $temp->superfecta == null ? 2 : $temp->superfecta;
+                if($payout != null){
+                    $minimum = $temp == null ? 2 : $temp->superfecta;
+                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "dailydouble":
                 $payout = json_decode($payoutContent->content)->ddPayout;
-                $minimum = $temp->dailydouble == null ? 2 : $temp->dailydouble;
-                $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+//                $minimum = $temp->dailydouble == null ? 2 : $temp->dailydouble;
+                if($payout != null){
+                    $minimum = $temp == null ? 2 : $temp->dailydouble;
+                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             default:
                 $dataArray["win_amount"] = 0;
@@ -489,27 +526,57 @@ class AdminController extends Controller
         switch ($wps){
             case "w":
                 $payout = json_decode($payoutContent->content)->wPayout;
-                $dataArray["win_amount"] = str_replace(',','',$payout - $minimum) * ($betAmount / $minimum);
+                if($payout != null){
+                    $dataArray["win_amount"] = str_replace(',','',$payout - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "p1":
                 $payout = json_decode($payoutContent->content, true);
-                $dataArray["win_amount"] = str_replace(',','',$payout["1pPayout"] - $minimum) * ($betAmount / $minimum);
+                if($payout != null){
+                    $dataArray["win_amount"] = str_replace(',','',$payout["1pPayout"] - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "p2":
                 $payout = json_decode($payoutContent->content, true);
-                $dataArray["win_amount"] = str_replace(',','',$payout["2pPayout"] - $minimum) * ($betAmount / $minimum);
+                if($payout != null){
+                    $dataArray["win_amount"] = str_replace(',','',$payout["2pPayout"] - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "s1":
                 $payout = json_decode($payoutContent->content, true);
-                $dataArray["win_amount"] = str_replace(',','',$payout["1sPayout"] - $minimum) * ($betAmount / $minimum);
+                if($payout != null){
+                    $dataArray["win_amount"] = str_replace(',','',$payout["1sPayout"] - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "s2":
                 $payout = json_decode($payoutContent->content, true);
-                $dataArray["win_amount"] = str_replace(',','',$payout["2sPayout"] - $minimum) * ($betAmount / $minimum);
+                if($payout != null){
+                    $dataArray["win_amount"] = str_replace(',','',$payout["2sPayout"] - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             case "s3":
                 $payout = json_decode($payoutContent->content, true);
-                $dataArray["win_amount"] = str_replace(',','',$payout["3sPayout"] - $minimum) * ($betAmount / $minimum);
+                if($payout != null){
+                    $dataArray["win_amount"] = str_replace(',','',$payout["3sPayout"] - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
                 break;
             default:
                 $dataArray["win_amount"] = 0;
@@ -662,7 +729,7 @@ class AdminController extends Controller
             $type = "w";
         }else if($request->input("wager") == "p"){
             $type = "p";
-        }else if($request->input("wager") == "w"){
+        }else if($request->input("wager") == "s"){
             $type = "s";
         }else{
             $type = "x";
@@ -681,7 +748,11 @@ class AdminController extends Controller
             'race_date' => $raceDate
         ];
         $betsModel = new Bets();
-        $res = $betsModel->saveNewBet($betArray);
+        if($request->input("betsOperation") == 0){
+            $res = $betsModel->saveNewBet($betArray);
+        }else if($request->input("betsOperation") == 1){
+            $res = $betsModel->updateBet($betArray,$request->input("betId"));
+        }
         if($res){
             return 0;
         }else{
@@ -826,5 +897,33 @@ class AdminController extends Controller
         $tracksModel = new Tracks();
         $tracks = $tracksModel->getAllTracks($selectedDate);
         return $tracks;
+    }
+    public function getBetInfo(Request $request){
+        $betsModel = new Bets();
+        $res = $betsModel->getBetInfo($request->input("id"));
+        $aArray = [
+            "id" => $res->id,
+            "player_id" => $res->player_id,
+            "bet_amount" => $res->bet_amount,
+            "race_track" => $res->race_track,
+            "race_number" => $res->race_number,
+            "bet_type" => $res->bet_type,
+            "type" => $res->type,
+            "bet" => $res->bet
+        ];
+        return $aArray;
+    }
+    public function pendingBets(){
+        $betsModel = new Bets();
+        $dataArray = [
+            'betsToday' => $betsModel->getAllPendingBets()
+        ];
+        $theme = Theme::uses('admin')->layout('layout')->setTitle('Pending Bets');
+        return $theme->of('admin/pending_bets',$dataArray)->render();
+    }
+    public static function getUsernameById($id){
+        return DB::table("users")
+            ->where("id",$id)
+            ->first();
     }
 }

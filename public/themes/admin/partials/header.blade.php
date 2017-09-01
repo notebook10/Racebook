@@ -28,10 +28,16 @@
                     <a href="wager">Wager</a>
                 </li>
                 <li>
-                    <a href="bets">Bets</a>
+                    <a href="bets">PastBets</a>
+                </li>
+                <li>
+                    <a href="pendingBets">PendingBets</a>
                 </li>
                 <li>
                     <a href="results">Results</a>
+                </li>
+                <li>
+                    <a href="http://58.69.12.117/racebookdata/" target="_blank">Download</a>
                 </li>
                 <li>
                     <a href="logout">Logout</a>

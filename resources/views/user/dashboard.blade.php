@@ -8,7 +8,8 @@
 <?php
     date_default_timezone_set('America/Los_Angeles');
     use App\Horses;
-    $currentDate = date('mdy',time());
+//    $currentDate = date('mdy',time());
+    $currentDate = date('mdy',time() + 86400);
 ?>
 
 <style>
@@ -46,7 +47,7 @@
                 @endforeach
                 <!-- Tracks Tomorrow -->
                 @foreach($tomorrow as $value)
-                    @if($value->date != $currentDate)
+                    @if($value->date == $currentDate)
                     <div class="panel panel-default">
                         <div class="panel-heading" role="tab" id="headingThree">
                             <h4 class="panel-title">
