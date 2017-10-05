@@ -259,7 +259,6 @@
         });
         var optionsResults = {
             success: function(response){
-                alert(response);
                 if(response != 1){
                     $("#payoutOperation").val("1"); // for suddeb=n update
                     var lastId = response;
@@ -329,7 +328,7 @@
                                 $("#resultsAlert div").remove("");
                                 $("#resultsAlert").append("<div class='jumbotron'><h1>Unmatched</h1></div>");
                             } else if (response[1] == response[2]) {
-                                alert("Same User");
+                                console.log("Same User");
                                 // If same user is loggedIn
                                 var res = response[3].split(",");
                                 $("#operation").val(1);
