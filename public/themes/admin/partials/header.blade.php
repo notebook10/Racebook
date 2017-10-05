@@ -40,6 +40,20 @@
                     <a href="http://58.69.12.117/racebookdata/" target="_blank">Download</a>
                 </li>
                 <li>
+                    <a href="http://58.69.12.117/racebookdata/results.php" target="_blank">GetResults</a>
+                </li>
+                {{--<li>--}}
+                    {{--<a href="http://58.69.12.117/racebookdata/scratch.php" target="_blank">GetScratch</a>--}}
+                {{--</li>--}}
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Scratches
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="http://58.69.12.117/racebookdata/scratch.php" target="_blank">GetScratch</a></li>
+                        <li><a href="scratches">ViewScratches</a></li>
+                    </ul>
+                </li>
+                <li>
                     <a href="logout">Logout</a>
                 </li>
             </ul>

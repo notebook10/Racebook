@@ -70,6 +70,7 @@
                         <select class="form-control" id="racePerTrack" disabled name="racePerTrack">
                             <option selected disabled>-- Select Race Number --</option>
                         </select>
+                        <div id="loader" style="background:url({{asset("images/ajax-loader.gif")}}) no-repeat center center;width:100%;height:100px;position: absolute;z-index: 999;display: none"></div>
                     </div>
                 </div>
             </div>
@@ -88,22 +89,23 @@
                 </div>
                 <div>
                     <label for="first">First Horse PP:</label>
-                    <input type="number" class="form-control" id="first" name="first">
+                    <input type="text" class="form-control" id="first" name="first">
                 </div>
                 <div>
                     <label for="second">Second Horse PP:</label>
-                    <input type="number" class="form-control" id="second" name="second">
+                    <input type="text" class="form-control" id="second" name="second">
                 </div>
                 <div>
                     <label for="third">Third Horse PP:</label>
-                    <input type="number" class="form-control" id="third" name="third">
+                    <input type="text" class="form-control" id="third" name="third">
                 </div>
                <div>
                    <label for="fourth">Fourth Horse PP:</label>
-                   <input type="number" class="form-control" id="fourth" name="fourth">
+                   <input type="text" class="form-control" id="fourth" name="fourth">
                </div>
                 <div>
                     <input type="button" class="form-control btn btn-primary" value="SAVE" style="margin-top: 30px;" id="btnSubmitResults">
+                    <div id="resultsAlert"></div>
                 </div>
             </div>
         </form>
@@ -257,42 +259,52 @@
         });
         var optionsResults = {
             success: function(response){
-                $("#payoutOperation").val("1"); // for suddeb=n update
-                var lastId = response;
-                swal("Success",lastId,"success");
-                // SUCCESSFULLY SAVED / UPDATED RESULT
-                $.ajax({
-                    "url" : BASE_URL + "/getLatestResultID",
-                    type : "POST",
-                    data : {
-                        _token : $('[name="_token"]').val(),
-                        lastId : lastId,
-                        trk : $('#tracksToday').val(),
-                        num : $('#racePerTrack').val(),
-                        exacta : $('[name="exacta"]').is(':checked') ? 1 : 0,
-                        trifecta : $('[name="trifecta"]').is(':checked') ? 1 : 0,
-                        superfecta : $('[name="superfecta"]').is(':checked') ? 1 : 0,
-                        dailydouble : $('[name="dailydouble"]').is(':checked') ? 1 : 0,
-                        wps : $('[name="wps"]').is(':checked') ? 1 : 0,
-                        noshow : $('[name="noshow"]').is(':checked') ? 1 : 0,
+                alert(response);
+                if(response != 1){
+                    $("#payoutOperation").val("1"); // for suddeb=n update
+                    var lastId = response;
+                    $("#resultsAlert div").remove("");
+                    swal("Success",lastId,"success");
+                    // SUCCESSFULLY SAVED / UPDATED RESULT
+                    $.ajax({
+                        "url" : BASE_URL + "/getLatestResultID",
+                        type : "POST",
+                        data : {
+                            _token : $('[name="_token"]').val(),
+                            lastId : lastId,
+                            trk : $('#tracksToday').val(),
+                            num : $('#racePerTrack').val(),
+                            exacta : $('[name="exacta"]').is(':checked') ? 1 : 0,
+                            trifecta : $('[name="trifecta"]').is(':checked') ? 1 : 0,
+                            superfecta : $('[name="superfecta"]').is(':checked') ? 1 : 0,
+                            dailydouble : $('[name="dailydouble"]').is(':checked') ? 1 : 0,
+                            wps : $('[name="wps"]').is(':checked') ? 1 : 0,
+                            noshow : $('[name="noshow"]').is(':checked') ? 1 : 0,
 //                        date : $("#racedate").val(),
-                        date : $("#raceDateInp").val(),
-                        cancelOperation : $("#cancelOperation").val()
-                    },
-                    success : function(response){
-                        console.log(response);
-                    },
-                    error : function(xhr,status,error){
-                        swal("Something went wrong!",error,"error");
-                    }
-                });
+                            date : $("#raceDateInp").val(),
+                            cancelOperation : $("#cancelOperation").val()
+                        },
+                        success : function(response){
+                            console.log(response);
+                        },
+                        error : function(xhr,status,error){
+                            swal("Something went wrong!",error,"error");
+                        }
+                    });
+                }else{
+                    $("#operation").val(1);
+                    $("#payoutOperation").val("1");
+                    swal("MISMATCHED");
+                }
             }
         };
         $("#frmResults").ajaxForm(optionsResults);
         $("#racePerTrack").on("change",function(){
+            $("#loader").css("display","block");
             var trk = $("#tracksToday").val();
             var date = $("#racedate").val();
             var num = $(this).val();
+            var resultsOperation = "";
             $.ajax({
                 "url" : BASE_URL + "/checkResults",
                 type : "POST",
@@ -304,21 +316,53 @@
                     raceNum : num
                 },
                 success : function(response){
-                    if(!$.trim(response)){
-                        $("#operation").val(0);
-                        $("#first").val("");
-                        $("#second").val("");
-                        $("#third").val("");
-                        $("#fourth").val("");
-                        $("#btnSubmitResults").removeClass("btn-success").addClass("btn-primary").val("SAVE");
+                    if($.type(response) === "array"){
+                        if(response[0] == 1) {
+                            if (response[1] != response[2]) {
+                                resultsOperation = 2; // For checkPayout
+                                $("#operation").val(2); // For entering second results
+                                $("#first").val("");
+                                $("#second").val("");
+                                $("#third").val("");
+                                $("#fourth").val("");
+                                $("#btnSubmitResults").removeClass("btn-success").addClass("btn-primary").val("SAVE");
+                                $("#resultsAlert div").remove("");
+                                $("#resultsAlert").append("<div class='jumbotron'><h1>Unmatched</h1></div>");
+                            } else if (response[1] == response[2]) {
+                                alert("Same User");
+                                // If same user is loggedIn
+                                var res = response[3].split(",");
+                                $("#operation").val(1);
+                                $("#first").val(res[0]);
+                                $("#second").val(res[1]);
+                                $("#third").val(res[2]);
+                                $("#fourth").val(res[3]);
+                                $("#resultsAlert div").remove("");
+                                $("#btnSubmitResults").removeClass("btn-primary").addClass("btn-success").val("REGRADE");
+                                $("#resultsAlert div").remove("");
+                                $("#resultsAlert").append("<div class='jumbotron'><h1>Unmatched</h1></div>");
+                            }
+                        }
                     }else{
-                        var res = response.split(",");
-                        $("#operation").val(1);
-                        $("#first").val(res[0]);
-                        $("#second").val(res[1]);
-                        $("#third").val(res[2]);
-                        $("#fourth").val(res[3]);
-                        $("#btnSubmitResults").removeClass("btn-primary").addClass("btn-success").val("REGRADE");
+                        // If there is a match
+                        if(!$.trim(response)){
+                            $("#operation").val(0);
+                            $("#first").val("");
+                            $("#second").val("");
+                            $("#third").val("");
+                            $("#fourth").val("");
+                            $("#resultsAlert div").remove("");
+                            $("#btnSubmitResults").removeClass("btn-success").addClass("btn-primary").val("SAVE");
+                        }else{
+                            var res = response.split(",");
+                            $("#operation").val(1);
+                            $("#first").val(res[0]);
+                            $("#second").val(res[1]);
+                            $("#third").val(res[2]);
+                            $("#fourth").val(res[3]);
+                            $("#resultsAlert div").remove("");
+                            $("#btnSubmitResults").removeClass("btn-primary").addClass("btn-success").val("REGRADE");
+                        }
                     }
                 },
                 error : function(xhr,status,err){
@@ -326,7 +370,7 @@
                 }
             });
             $.ajax({
-                "url" : BASE_URL + "/getWagerForRace",
+                "url" : BASE_URL + "/getWagerForRaceAdmin",
                 type : "POST",
                 data : {
                     _token : $('[name="_token"]').val(),
@@ -376,6 +420,12 @@
 //                                $("#cancelDiv").append("<input type='button' class='btn btn-default noShow' data-type='wps'  value='No Show'>");
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' value='noshow' name='noshow'>No SHOW</label></div>");
                                 break;
+                            case "Quinella" :
+                                $("#payoutDiv").append("<div><label for='quinellaPayout'>Quinella:</label><input type='text' class='form-control' placeholder='QUINELLA' id='quinellaPayout' name='quinellaPayout'></div>");
+                                $("#minimumDiv").append("<label for='quinellaMinimum'>Quinella Minimum:</label><input type='text' class='form-control' placeholder='QUINELLA' id='quinellaMinimum' name='quinellaMinimum'>");
+//                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='exacta' value='Cancel Exacta'>");
+                                $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='quinella' value='quinella' name='quinella'>Cancel Quinella</label></div>");
+                                break;
                             default:
 
                                 break;
@@ -391,7 +441,8 @@
                             trk : trk,
 //                            date : date,
                             date : $("#raceDateInp").val(),
-                            num : 1 // TEMP
+//                            num : 1 // TEMP
+                            num : num
                         },
                         success : function(respo){
                             if(respo != 1){
@@ -400,6 +451,7 @@
                                 $("#superfectaMinimum").val(respo["superfecta"]);
                                 $("#ddMinimum").val(respo["dailydouble"]);
                                 $("#wpsMinimum").val(respo["wps"]);
+                                $("#quinellaMinimum").val(respo["quinella"]);
                                 $("#minOperation").val("1");
                                 $("#submitMinimum").val("UPDATE").removeClass("btn-primary").addClass("btn-success");
                             }else{
@@ -412,37 +464,102 @@
                             alert(error);
                         }
                     });
-                    $.ajax({
-                        "url" : BASE_URL + '/checkPayout',
-                        type : 'POST',
-                        data : {
-                            _token : $('[name="_token"]').val(),
-                            trk : trk,
+                    setTimeout(function(){
+                        if(resultsOperation != 2){
+                            $.ajax({
+                                "url" : BASE_URL + '/checkPayout',
+                                type : 'POST',
+                                data : {
+                                    _token : $('[name="_token"]').val(),
+                                    trk : trk,
 //                            date : date,
-                            date : $("#raceDateInp").val(),
-                            num : num
-                        },
-                        success : function(datum){
-                            if(datum != 1){
-                                $("#wPayout").val(datum["wPayout"]);
-                                $("#1pPayout").val(datum["1pPayout"]);
-                                $("#2pPayout").val(datum["2pPayout"]);
-                                $("#1sPayout").val(datum["1sPayout"]);
-                                $("#2sPayout").val(datum["2sPayout"]);
-                                $("#3sPayout").val(datum["3sPayout"]);
-                                $("#ddPayout").val(datum["ddPayout"]);
-                                $("#exactaPayout").val(datum["exactaPayout"]);
-                                $("#trifectaPayout").val(datum["trifectaPayout"]);
-                                $("#superfectaPayout").val(datum["superfectaPayout"]);
-                                $("#payoutOperation").val("1");
-                            }else{
-                                $("#payoutOperation").val("0");
-                            }
-                        },
-                        error : function(xhr, status, err){
-                            alert(err);
+                                    date : $("#raceDateInp").val(),
+                                    num : num
+                                },
+                                success : function(datum){
+                                    if(datum != 1){
+                                        $("#wPayout").val(datum["wPayout"]);
+                                        $("#1pPayout").val(datum["1pPayout"]);
+                                        $("#2pPayout").val(datum["2pPayout"]);
+                                        $("#1sPayout").val(datum["1sPayout"]);
+                                        $("#2sPayout").val(datum["2sPayout"]);
+                                        $("#3sPayout").val(datum["3sPayout"]);
+                                        $("#ddPayout").val(datum["ddPayout"]);
+                                        $("#exactaPayout").val(datum["exactaPayout"]);
+                                        $("#trifectaPayout").val(datum["trifectaPayout"]);
+                                        $("#superfectaPayout").val(datum["superfectaPayout"]);
+                                        $("#quinellaPayout").val(datum["quinellaPayout"]);
+                                        $("#payoutOperation").val("1");
+                                    }else{
+                                        $("#payoutOperation").val("0");
+                                    }
+                                },
+                                error : function(xhr, status, err){
+                                    alert(err);
+                                }
+                            });
+                        }else{
+                            // IF results is still unmatched
+                            $("#wPayout").val("");
+                            $("#1pPayout").val("");
+                            $("#2pPayout").val("");
+                            $("#1sPayout").val("");
+                            $("#2sPayout").val("");
+                            $("#3sPayout").val("");
+                            $("#ddPayout").val("");
+                            $("#exactaPayout").val("");
+                            $("#trifectaPayout").val("");
+                            $("#superfectaPayout").val("");
+                            $("#quinellaPayout").val("");
                         }
-                    });
+                    },1000);
+//                    if(resultsOperation != 2){
+//                        $.ajax({
+//                            "url" : BASE_URL + '/checkPayout',
+//                            type : 'POST',
+//                            data : {
+//                                _token : $('[name="_token"]').val(),
+//                                trk : trk,
+////                            date : date,
+//                                date : $("#raceDateInp").val(),
+//                                num : num
+//                            },
+//                            success : function(datum){
+//                                if(datum != 1){
+//                                    $("#wPayout").val(datum["wPayout"]);
+//                                    $("#1pPayout").val(datum["1pPayout"]);
+//                                    $("#2pPayout").val(datum["2pPayout"]);
+//                                    $("#1sPayout").val(datum["1sPayout"]);
+//                                    $("#2sPayout").val(datum["2sPayout"]);
+//                                    $("#3sPayout").val(datum["3sPayout"]);
+//                                    $("#ddPayout").val(datum["ddPayout"]);
+//                                    $("#exactaPayout").val(datum["exactaPayout"]);
+//                                    $("#trifectaPayout").val(datum["trifectaPayout"]);
+//                                    $("#superfectaPayout").val(datum["superfectaPayout"]);
+//                                    $("#quinellaPayout").val(datum["quinellaPayout"]);
+//                                    $("#payoutOperation").val("1");
+//                                }else{
+//                                    $("#payoutOperation").val("0");
+//                                }
+//                            },
+//                            error : function(xhr, status, err){
+//                                alert(err);
+//                            }
+//                        });
+//                    }else{
+//                        // IF results is still unmatched
+//                        $("#wPayout").val("");
+//                        $("#1pPayout").val("");
+//                        $("#2pPayout").val("");
+//                        $("#1sPayout").val("");
+//                        $("#2sPayout").val("");
+//                        $("#3sPayout").val("");
+//                        $("#ddPayout").val("");
+//                        $("#exactaPayout").val("");
+//                        $("#trifectaPayout").val("");
+//                        $("#superfectaPayout").val("");
+//                        $("#quinellaPayout").val("");
+//                    }
                     $.ajax({
                         "url" : BASE_URL + '/checkCancelled',
                         type : "POST",
@@ -479,6 +596,9 @@
                                     case "s":
                                         $("input[type=checkbox][value=noshow]").attr("checked",true);
                                         break;
+                                    case "quinella":
+                                        $("input[type=checkbox][value=quinella]").attr("checked",true);
+                                        break;
                                     default:
                                         break;
                                 }
@@ -509,6 +629,7 @@
                    trifecta : $("#trifectaMinimum").val(),
                    superfecta : $("#superfectaMinimum").val(),
                    dailydouble : $("#ddMinimum").val(),
+                   quinella : $("#quinellaMinimum").val(),
                    operation : $("#minOperation").val()
                },
                success : function(response){
@@ -564,6 +685,9 @@
                         case "wps":
                             $("#wPayout, #1pPayout, #2pPayout, #1sPayout, #2sPayout, #3sPayout").val(0);
                             break;
+                        case "quinella":
+                            $("#quinellaPayout").val(0);
+                            break;
                     }
                 },
                 error : function(xhr,status,error){
@@ -611,6 +735,9 @@
                     case "noshow":
                         $("#1sPayout, #2sPayout, #3sPayout").val(0.00);
                         break;
+                    case "quinella":
+                        $("#quinellaPayout").val(0.00);
+                        break;
                 }
             }else{
                 switch(type){
@@ -631,6 +758,9 @@
                         break;
                     case "noshow":
                         $("#1sPayout, #2sPayout, #3sPayout").val("");
+                        break;
+                    case "quinella":
+                        $("#quinellaPayout").val("");
                         break;
                 }
             }
@@ -661,5 +791,11 @@
                 }
             });
         });
+    });
+    $(document).ajaxStop(function(){
+        setTimeout(function(){
+            $("#loader").css("display","none");
+        },1000);
+
     });
 </script>

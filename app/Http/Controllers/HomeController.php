@@ -28,6 +28,7 @@ class HomeController extends Controller
         }
     }
     public function login(Request $request){
+        HomeController::logout();
         $username = $request->input('username');
         $password = $request->input('password');
         $data = [
@@ -43,12 +44,13 @@ class HomeController extends Controller
             return Redirect::to('/');
         }else{
             if(Auth::attempt(['username' => $username, 'password' => $password])){
-                return Redirect::to('/');
+                return Redirect::to('/admin/dashboard');
             }else{
-                return Redirect::to('/')
-                    ->withErrors([
-                        'validate' => 'Wrong Email or Password!',
-                    ]);
+//                return Redirect::to('/')
+//                    ->withErrors([
+//                        'validate' => 'Wrong Email or Password!',
+//                    ]);
+                return "Who u?";
             }
         }
     }
@@ -69,6 +71,8 @@ class HomeController extends Controller
     }
     public function logout(){
         Auth::logout();
+        if (!isset($_SESSION)) session_start();
+        session_destroy();
         return Redirect::to('/');
     }
     public function dashboard(){
@@ -286,7 +290,7 @@ class HomeController extends Controller
     }
     public function insertBets(Request $request){
         $betsModel = new Bets();
-        $betsModel->insertBets($request->input("dataArray"));
+        $betsModel->insertBets($request->input("dataArray"),$request->input("date"));
         return "0";
     }
     public function past(){
@@ -294,7 +298,7 @@ class HomeController extends Controller
         $data = [
             'history' => $betsModel->getAllBets2(Auth::id())
         ];
-        $theme = Theme::uses('default')->layout('layout')->setTitle('History');
+        $theme = Theme::uses('default')->layout('layout')->setTitle('PastBets');
         return $theme->of('user/history', $data)->render();
     }
     public function pending(){
@@ -368,7 +372,28 @@ class HomeController extends Controller
             "date" => $request->input("date")
         ];
         if($minimumModel->getMinimum($arr)){
-            return response()->json(json_decode($minimumModel->getMinimum($arr)->content));
+            $minimumArray = [
+                "exacta" => "",
+                "trifecta" => "",
+                "superfecta" => "",
+                "dailydouble" => "",
+                "wps" => ""
+            ];
+            foreach ($minimumModel->getMinimum($arr) as $key => $value){
+                foreach(json_decode($value->content) as $index => $val){
+//                    echo $index . " " . $val . "<br/>";
+                    if($val == null){
+//                        echo "NULLLLLLLLLLLLLLLL" . "<br/>";
+                    }else{
+//                        if($minimumArray[$index] == null){
+                            $minimumArray[$index] = $val;
+//                        }
+                    }
+                }
+            }
+//            dd($minimumArray);
+//            return response()->json(json_decode($minimumModel->getMinimum($arr)->content));
+            return response()->json($minimumArray);
         }else{
             return 1;
         }
@@ -384,5 +409,72 @@ class HomeController extends Controller
         $betsModel = new Bets();
         $theme = Theme::uses('default')->layout('layout')->setTitle('WEEKLY');
         return $theme->of('user/test')->render();
+    }
+    public function getWeek(Request $request){
+        if (!isset($_SESSION)) session_start();
+        $selectedDate = $request->input('date');
+        date_default_timezone_set(date_default_timezone_get());
+        $dt = strtotime($selectedDate);
+        $res['start'] = date('N', $dt)==1 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('last monday', $dt));
+        $res['end'] = date('N', $dt)==7 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('next sunday', $dt));
+        $weekDays = [];
+        $weekDays['monday'] = $res['start'];
+        $weekDays['tuesday'] = date('Y-m-d',strtotime($res['start']) + 86400);
+        $weekDays['wednesday'] = date('Y-m-d',strtotime($weekDays['tuesday']) + 86400);
+        $weekDays['thursday'] = date('Y-m-d',strtotime($weekDays['wednesday']) + 86400);
+        $weekDays['friday'] = date('Y-m-d',strtotime($weekDays['thursday']) + 86400);
+        $weekDays['saturday'] = date('Y-m-d',strtotime($weekDays['friday']) + 86400);
+        $weekDays['sunday'] = $res['end'];
+        $mon = HomeController::totalBetsPerDay($weekDays["monday"]);
+        $tue = HomeController::totalBetsPerDay($weekDays["tuesday"]);
+        $wed = HomeController::totalBetsPerDay($weekDays["wednesday"]);
+        $thu = HomeController::totalBetsPerDay($weekDays["thursday"]);
+        $fri = HomeController::totalBetsPerDay($weekDays["friday"]);
+        $sat = HomeController::totalBetsPerDay($weekDays["saturday"]);
+        $sun =HomeController::totalBetsPerDay($weekDays["sunday"]);
+        $formattedBalance = number_format($mon + $tue + $wed + $thu + $fri + $sat + $sun,2);
+        $totalPerDay = [
+            'start' => $res['start'],
+            'end' => $res['end'],
+            'monday' => number_format($mon,2),
+            'tuesday' => number_format($tue,2),
+            'wednesday' => number_format($wed,2),
+            'thursday' => number_format($thu,2),
+            'friday' => number_format($fri,2),
+            'saturday' => number_format($sat,2),
+            'sunday' => number_format($sun,2),
+            'balance' => $formattedBalance
+        ];
+        return $totalPerDay;
+    }
+    public static function totalBetsPerDay($date){
+        $bets = DB::table("bets")
+            ->where("player_id",$_SESSION["username"])
+            ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59'])
+            ->where("result","!=",0)
+            ->where("result","!=",3)
+            ->where("result","!=",4)
+//            ->orWhere(function($query) use ($date){
+//                $query->where('result',1)
+//                    ->where("player_id",Auth::user()->id)
+//                    ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59']);
+//            })
+//            ->orWhere(function($query) use ($date){
+//                $query->where('result',2)
+//                    ->where("player_id",Auth::user()->id)
+//                    ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59']);
+//            })
+            ->get();
+        $total = 0;
+        foreach ($bets as $index => $value){
+            if($value->result == 1){
+                $total = $total + $value->win_amount;
+//                echo $total . " " . $value->id ."<br/>";
+            }else if($value->result == 2){
+                $total = $total - $value->bet_amount;
+//                echo $total . " " . $value->id . "<br/>";
+            }
+        }
+        return $total;
     }
 }

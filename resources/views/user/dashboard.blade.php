@@ -11,11 +11,28 @@
 //    $currentDate = date('mdy',time());
     $currentDate = date('mdy',time() + 86400);
 ?>
-
+<noscript>
+    <h1 class="noScript" style="text-align: center">Please enable the JavaScript in your web browser.</h1>
+</noscript>
 <style>
     .upcomingRace:hover{text-decoration: underline;cursor: pointer;}
 </style>
-
+<?php
+    if (!isset($_SESSION)) session_start();
+    echo "NAME: " . $_SESSION["username"];
+    // GET balance
+    $odbc = odbc_connect($_SESSION["dsn"],'','');
+    $query = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($_SESSION["username"]) ."'";
+    $queryResult = odbc_exec($odbc,$query);
+    echo "<br/>";
+    while($row = odbc_fetch_array($queryResult)){
+        var_dump($row["CURRENTBET"]);
+        $_SESSION["BALANCE"] = $row["BALANCE"] + $row["CAP"] + $row["CURRENTBET"] + $row["MON_RSLT"] + $row["TUE_RSLT"] + $row["WED_RSLT"] + $row["THU_RSLT"] + $row["FRI_RSLT"] + $row["SAT_RSLT"] + $row["SUN_RSLT"];
+//        $_SESSION["BALANCE"] = "QWe";
+    }
+//    echo \App\Http\Controllers\AdminController::findDSN($_SESSION["NAME"]);
+    echo "<br/>" . $_SESSION["BALANCE"];
+?>
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
 <input type="hidden" name="_token" value="{{csrf_token()}}">
 <div class="container">
@@ -115,12 +132,13 @@
                 <div id="tempRaces"></div>
                 <div id="submitBet" style="display: none;text-align: center;">
                     <input type="text" id="betAmount" class="form-control" placeholder="Put your bet">
-                    <button id="submitBetButton" class="btn btn-success">SUBMIT BET</button>
+                    <button id="submitBetButton" class="btn btn-success"><span class="glyphicon glyphicon-ok"></span> SUBMIT BET</button>
+                    {{--<button id="clearAll" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> CLEAR ALL</button>--}}
                 </div>
             </div>
             <div id="betTicket">
                 <!-- Confirm Bet -->
-                <div id="ticket">
+                <div id="ticket" class="loader2">
                     <table id="ticketTbl" class="table table-bordered table-striped ">
                         <thead>
                             <tr>
@@ -131,8 +149,9 @@
                         <tbody></tbody>
                     </table>
                     <div id="betActions">
-                        <button class="btn btn-success" id="confirmBet">CONFIRM BET</button>
-                        <a href="{{ URL::to('/') }}" class="btn btn-danger">ABORT BET</a>
+                        <div class="loader"></div>
+                            <button class="btn btn-success" id="confirmBet">CONFIRM BET</button>
+                            <a href="{{ URL::to('/') }}" class="btn btn-danger">ABORT BET</a>
                     </div>
                 </div>
             </div>

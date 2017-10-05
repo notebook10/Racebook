@@ -10,7 +10,14 @@
         <meta name="author" content="@get('author')">
 
         <title>@get('title')</title>
-        <input type="hidden" id="userId" value="{{ htmlspecialchars(Auth::id()) }}">
+        {{--<input type="hidden" id="userId" value="{{ htmlspecialchars(Auth::id()) }}">--}}
+        {{--<input type="hidden" id="userId" value="248">--}}
+        <input type="hidden" id="userId" value="<?php
+            if (!isset($_SESSION)) session_start();
+            echo $_SESSION["username"];
+        ?>">
+        <input type="hidden" id="hdnURL" value="{{ URL::to('/') }}">
+        <input type="hidden" name="_token" value="{{ csrf_token() }}">
         @styles()
         @scripts()
 

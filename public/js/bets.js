@@ -1,47 +1,53 @@
 $("document").ready(function(){
     var BASE_URL = $("#hiddenURL").val();
-    loadBetsDataTable();
+    // loadBetsDataTable();
+    loadTestDataTable(BASE_URL,$("#datepicker").val());
+    loadPendingDataTable(BASE_URL,$("#datepickerPending").val());
     $("#date").datepicker({
         dateFormat: "yy-mm-dd"
     });
-    $("#date").on("change", function(){
-        var date = $(this).val();
-        $.ajax({
-            "url" : BASE_URL + '/getBets',
-            type : "POST",
-            data : {
-                _token : $('[name="_token"]').val(),
-                date : date
-            },
-            success : function(response){
-                var t = $("#tblBets").DataTable();
-                if(!$.trim(response)){
-                    t.rows().remove().draw();
-                }else{
-                    t.rows().remove().draw();
-                    $.each(response, function(index, value){
-                        var status = response[index]["status"] == 0 ? "Pending" : "Graded";
-                        var result = response[index]["result"] == 0 ? "Defeat" : "Victory";
-                        t.row.add([
-                            response[index]["player_id"],
-                            response[index]["race_number"],
-                            response[index]["race_track"],
-                            response[index]["bet_type"],
-                            response[index]["bet"],
-                            response[index]["bet_amount"],
-                            response[index]["post_time"],
-                            status,
-                            result,
-                            response[index]["win_amount"]
-                        ]).draw(false);
-                    });
-                }
-            },
-            error : function(xhr, status, error){
-                alert(error);
-            }
-        });
+    $("#datepicker, #datepickerPending").datepicker({
+        dateFormat: "yy-mm-dd",
+        maxDate : -1
     });
+    // $("#date").on("change", function(){
+    //     var date = $(this).val();
+    //     $.ajax({
+    //         "url" : BASE_URL + '/getBets',
+    //         type : "POST",
+    //         data : {
+    //             _token : $('[name="_token"]').val(),
+    //             date : date
+    //         },
+    //         success : function(response){
+    //             var t = $("#tblBets").DataTable();
+    //             if(!$.trim(response)){
+    //                 t.rows().remove().draw();
+    //             }else{
+    //                 t.rows().remove().draw();
+    //                 $.each(response, function(index, value){
+    //                     var status = response[index]["status"] == 0 ? "Pending" : "Graded";
+    //                     var result = response[index]["result"] == 0 ? "Defeat" : "Victory";
+    //                     t.row.add([
+    //                         response[index]["player_id"],
+    //                         response[index]["race_number"],
+    //                         response[index]["race_track"],
+    //                         response[index]["bet_type"],
+    //                         response[index]["bet"],
+    //                         response[index]["bet_amount"],
+    //                         response[index]["post_time"],
+    //                         status,
+    //                         result,
+    //                         response[index]["win_amount"]
+    //                     ]).draw(false);
+    //                 });
+    //             }
+    //         },
+    //         error : function(xhr, status, error){
+    //             // alert(error);
+    //         }
+    //     });
+    // });
     $("#btnAddBet").on("click", function(evt){
         var date = $("#tempDate").val();
         $("#betsOperation").val(0);
@@ -116,9 +122,9 @@ $("document").ready(function(){
                         case "Exacta":
                             $("#wager").append("<option value='exacta'>Exacta</option>");
                             break;
-//                            case "Exacta Box":
-//                                $("#wager").append("<option value='exactabox'>Exacta Box</option>");
-//                                break;
+                       // case "Exacta Box":
+                       //     $("#wager").append("<option value='exactabox'>Exacta Box</option>");
+                       //     break;
                         case "Trifecta":
                             $("#wager").append("<option value='trifecta'>Trifecta</option>");
                             break;
@@ -213,6 +219,8 @@ $("document").ready(function(){
     $("#frmBets").ajaxForm(optionsBets);
     $("body").delegate(".editBet","click",function(){
         var id = $(this).data("id");
+        var resultVar = "";
+        var winAmountVar = "";
         $("#betsOperation").val(1);
         $("#betId").val(id);
         $.ajax({
@@ -223,6 +231,8 @@ $("document").ready(function(){
                 id : id
             },
             success : function(respo){
+                resultVar = respo["result"];
+                winAmountVar = respo["win_amount"];
                 $.ajax({
                     "url" : BASE_URL + '/getTracksToday',
                     type : "post",
@@ -238,6 +248,8 @@ $("document").ready(function(){
                         $("#player_id").val(respo["player_id"]);
                         $("#amount").val(respo["bet_amount"]);
                         $("#raceTrack").val(respo["race_track"]);
+                        // $("#result").val($.cookie("result"));
+                        // $("#winamount").val($.cookie("winamount"));
                         $.ajax({
                             "url" : BASE_URL + '/getRaces',
                             type : "POST",
@@ -285,9 +297,11 @@ $("document").ready(function(){
                                     switch(value){
                                         case "Exacta":
                                             $("#wager").append("<option value='exacta'>Exacta</option>");
+                                            $("#wager").append("<option value='exactabox'>Exacta Box</option>");
                                             break;
                                         case "Trifecta":
                                             $("#wager").append("<option value='trifecta'>Trifecta</option>");
+                                            $("#wager").append("<option value='trifectabox'>Trifecta Box</option>");
                                             break;
                                         case "Superfecta":
                                             $("#wager").append("<option value='superfecta'>Superfecta</option>");
@@ -340,12 +354,111 @@ $("document").ready(function(){
                 alert(error);
             }
         });
+        $(document).ajaxStop(function(){
+            $("#frmBets").find("div.tempDiv").remove();
+            $("#frmBets").append("<div class='tempDiv'><label for='result'>Result:</label><select id='result' name='result' class='form-control'><option disabled selected>-- RESULT --</option>" +
+                "<option value='0'>Pending</option><option value='1'>Win</option><option value='2'>Lose</option><option value='3'>Aborted</option></select>" +
+                "<label for='winamount'>WinAmount:</label><input type='text' name='winamount' id='winamount' class='form-control' placeholder='Win Amount'></div>");
+            $("#result").val(resultVar);
+            $("#winamount").val(winAmountVar);
+            // <div id="statusDiv">
+            //     <label for="result">Result:</label>
+            // <select id="result" name="result" class="form-control">
+            //     <option disabled selected>-- RESULT --</option>
+            // <option value="0">Pending</option>
+            //     <option value="1">Win</option>
+            //     <option value="2">Lose</option>
+            //     <option value="3">Aborted</option>
+            //     </select>
+            //     <label for="winamount">WinAmount:</label>
+            // <input type="text" name="winamount" id="winamount" class="form-control" placeholder="Win Amount">
+            //     </div>
+        });
+    });
+    $("#datepicker").on("change",function(){
+        var date = $(this).val();
+        $("#tempDate").val(formatDate(new Date(date)));
+        $("#tblBets").dataTable().fnClearTable();
+        loadTestDataTable(BASE_URL,date);
+    });
+    $("#datepickerPending").on("change",function(){
+        var date = $(this).val();
+        $("#tempDate").val(formatDate(new Date(date)));
+        $("#tblBets").dataTable().fnClearTable();
+        loadPendingDataTable(BASE_URL,date);
     });
 });
 function loadBetsDataTable(){
-    $("#tblBets").DataTable({
+    // $("#tblBets").DataTable({
+    //     "aaSorting": [],
+    //     "pageLength": 100
+    // });
+}
+function loadTestDataTable(url,date){
+    $("#tblPastBets").dataTable().fnDestroy();
+    $("#tblPastBets").DataTable({
         "aaSorting": [],
-        "pageLength": 100
+        "pageLength": 100,
+        "dom": '<"top"flp<"clear">>rt<"bottom"ifp<"clear">>',
+        "ajax": {
+            "url" : url + '/getPastBets',
+            "type" : "POST",
+            "data" : {
+                _token: $('[name="_token"]').val(),
+                date : date
+            }
+        },
+        "columns": [
+            { "data": "player_id" },
+            { "data": "race_number" },
+            { "data": "race_track" },
+            { "data": "bet_type" },
+            { "data": "bet" },
+            { "data": "bet_amount" },
+            { "data": "status" },
+            { "data": "result" },
+            { "data": "win_amount" },
+            { "data": "created_at" },
+            { "data": "action" }
+        ],
+        "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            console.log(aData["result"]);
+            $(nRow).addClass(aData["result"].toLowerCase());
+        }
+    });
+}
+function loadPendingDataTable(url,date){
+    $("#tblPendingBets").dataTable().fnDestroy();
+    $("#tblPendingBets").DataTable({
+        "aaSorting": [],
+        "pageLength": 100,
+        "dom": '<"top"flp<"clear">>rt<"bottom"ifp<"clear">>',
+        // "sDom": '<"top"<"actions">lfpi<"clear">><"clear">rt<"bottom">'
+        "ajax": {
+            "url" : url + '/getPendingBets',
+            "type" : "POST",
+            "data" : {
+                _token: $('[name="_token"]').val(),
+                date : date
+            }
+        },
+        "columns": [
+            { "data": "player_id" },
+            { "data": "race_number" },
+            { "data": "race_track" },
+            { "data": "bet_type" },
+            { "data": "bet" },
+            { "data": "bet_amount" },
+            { "data": "status" },
+            { "data": "result" },
+            { "data": "win_amount" },
+            { "data": "created_at" },
+            { "data": "action" }
+        ],
+        "fnRowCallback": function( nRow, aData, iDisplayIndex ) {
+            console.log(aData["result"]);
+            $(nRow).addClass(aData["result"].toLowerCase());
+        }
     });
 }
 function clearFrm(){
@@ -359,7 +472,16 @@ function wagerSwitch(wager){
             $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST' id='first' name='first'></div>");
             $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND' id='second' name='second'></div>");
             break;
+        case "exactabox":
+            $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST' id='first' name='first'></div>");
+            $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND' id='second' name='second'></div>");
+            break;
         case "trifecta":
+            $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST' id='first' name='first'></div>");
+            $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND' id='second' name='second'></div>");
+            $("#frmBets").append("<div><label for='third' class='horseLabel'>Third Horse:</label><input type='text' class='form-control horse' placeholder='THIRD' id='third' name='third'></div>");
+            break;
+        case "trifectabox":
             $("#frmBets").append("<div><label for='first' class='horseLabel'>First Horse:</label><input type='text' class='form-control horse' placeholder='FIRST' id='first' name='first'></div>");
             $("#frmBets").append("<div><label for='second' class='horseLabel'>Second Horse:</label><input type='text' class='form-control horse' placeholder='SECOND' id='second' name='second'></div>");
             $("#frmBets").append("<div><label for='third' class='horseLabel'>Third Horse:</label><input type='text' class='form-control horse' placeholder='THIRD' id='third' name='third'></div>");
@@ -386,4 +508,14 @@ function wagerSwitch(wager){
         default:
             break;
     }
+}
+function formatDate(date){
+    var day = date.getDate();
+    var month = date.getMonth();
+    var year = date.getFullYear().toString().substr(2,2);
+    // alert(minTwoDigits(day) + ' ' + minTwoDigits(month + 1) + ' ' + year);
+    return minTwoDigits(month + 1) + minTwoDigits(day) + year
+}
+function minTwoDigits(number){
+    return (number < 10 ? '0' : '') + number;
 }

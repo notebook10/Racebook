@@ -17,5 +17,5 @@
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
-    php_value max_input_vars 10000
+    php_value max_input_vars 100000
 </IfModule>

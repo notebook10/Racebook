@@ -18,7 +18,7 @@
             <input type="password" name="password" placeholder="password" required />
             <input type="submit" id="submit" class="submit-button" value="LOGIN">
 
-            {{--<p class="message">Not registered? <a href="#">Create an account</a></p>--}}
+            <p class="message" style="display: none;">Not registered? <a href="#">Create an account</a></p>
             <ul class="errormessage">
                 @foreach ($errors->all() as $error)
                     <li>{{ $error }}</li>

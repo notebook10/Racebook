@@ -36,4 +36,11 @@ class Payout extends Model
             ->get();
         return $temp;
     }
+    public static function getPayoutForVerification($trkCode, $raceNum, $date){
+        return DB::table("payout")
+            ->where("track_code", $trkCode)
+            ->where("race_number", $raceNum)
+            ->where("race_date", $date)
+            ->first();
+    }
 }

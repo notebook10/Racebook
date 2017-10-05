@@ -1,6 +1,21 @@
 <?php
+Route::match(array('GET','POST'),'/',function(){
+    if (!isset($_SESSION)) session_start();
+    if(isset($_POST["username"])){
+        $_SESSION["username"] = $_POST["username"];
+        echo $_SESSION["username"];
+        $url = $_POST["url"];
+        // Determine DSN
+        if(strpos($url,'floyd') !== false){
+            $_SESSION["dsn"] = "cust";
+        }else{
 
-Route::get('/','HomeController@index')->name('/');
+        }
+        return redirect()->action("HomeController@dashboard");
+    }
+})->name('/');
+//Route::any('/','HomeController@index')->name('/');
+Route::get('admin2','HomeController@index');
 Route::post('login','HomeController@login')->name('login');
 Route::get('register','HomeController@register');
 Route::post('insertuser','HomeController@insertuser');
@@ -8,33 +23,71 @@ Route::get('logout','HomeController@logout');
 Route::match(array('GET','POST'),'test',function(){
     return "<a href='dashboard'>". strtolower("TESTING") ."</a>";
 });
+Route::get('dashboard','HomeController@dashboard');
+Route::get('dashboard/logout','HomeController@logout');
+Route::post('dashboard/getRaces','HomeController@getRaces');
+Route::post('dashboard/getHorsesPerRace','HomeController@getHorsesPerRace');
+Route::post('dashboard/getRaceTime','HomeController@getRaceTime');
+Route::post('dashboard/getRaceTimeNew','HomeController@getRaceTimeNew');
+Route::post('dashboard/saveBet','HomeController@saveBet');
+Route::post('dashboard/insertBets','HomeController@insertBets');
+Route::post('dashboard/getTrackName','HomeController@getTrackName');
+Route::post('dashboard/getServerTime','HomeController@getServerTime');
+Route::post('dashboard/getUpcomingRaces','HomeController@getUpcomingRaces');
+Route::match(array('GET','POST'),'dashboard/appendUpcomingRaces','HomeController@appendUpcomingRaces');
+Route::match(array('GET','POST'),'dashboard/checkPostTime','HomeController@checkPostTime');
+Route::get('dashboard/past','HomeController@past');
+Route::get('dashboard/pending','HomeController@pending');
+Route::post('dashboard/validateTrackTmz','HomeController@validateTrackTmz');
+Route::post('dashboard/getTrackCode','HomeController@getTrackCode');
+Route::post('dashboard/getWagerForRace','HomeController@getWagerForRace');
+Route::get('dashboard/checkIfOpen','HomeController@checkIfOpen');
+Route::post('dashboard/getMinimum','HomeController@getMinimum');
+Route::get('dashboard/weekly','HomeController@weekly');
+Route::post('dashboard/getWeek','HomeController@getWeek');
+Route::post('dashboard/past/getWeek','HomeController@getWeek');
+Route::post('dashboard/getPendingHome','AdminController@getPendingBetsHome');
+Route::post('dashboard/getPastHome','AdminController@getPastHome');
+Route::post('dashboard/balanceInquiry','AdminController@balanceInquiry');
+Route::post('dashboard/updateCurrentBet','AdminController@updateCurrentBet');
 Route::group(['middleware' => ['auth']],function(){
     // User
-    Route::get('dashboard','HomeController@dashboard');
-    Route::get('dashboard/logout','HomeController@logout');
-    Route::post('dashboard/getRaces','HomeController@getRaces');
-    Route::post('dashboard/getHorsesPerRace','HomeController@getHorsesPerRace');
-    Route::post('dashboard/getRaceTime','HomeController@getRaceTime');
-    Route::post('dashboard/getRaceTimeNew','HomeController@getRaceTimeNew');
-    Route::post('dashboard/saveBet','HomeController@saveBet');
-    Route::post('dashboard/insertBets','HomeController@insertBets');
-    Route::post('dashboard/getTrackName','HomeController@getTrackName');
-    Route::post('dashboard/getServerTime','HomeController@getServerTime');
-    Route::post('dashboard/getUpcomingRaces','HomeController@getUpcomingRaces');
-    Route::match(array('GET','POST'),'dashboard/appendUpcomingRaces','HomeController@appendUpcomingRaces');
-    Route::match(array('GET','POST'),'dashboard/checkPostTime','HomeController@checkPostTime');
-    Route::get('dashboard/past','HomeController@past');
-    Route::get('dashboard/pending','HomeController@pending');
-    Route::post('dashboard/validateTrackTmz','HomeController@validateTrackTmz');
-    Route::post('dashboard/getTrackCode','HomeController@getTrackCode');
-    Route::post('dashboard/getWagerForRace','HomeController@getWagerForRace');
-    Route::get('dashboard/checkIfOpen','HomeController@checkIfOpen');
-    Route::post('dashboard/getMinimum','HomeController@getMinimum');
-    Route::get('dashboard/weekly','HomeController@weekly');
+//    Route::get('dashboard','HomeController@dashboard');
+//    Route::get('dashboard/logout','HomeController@logout');
+//    Route::post('dashboard/getRaces','HomeController@getRaces');
+//    Route::post('dashboard/getHorsesPerRace','HomeController@getHorsesPerRace');
+//    Route::post('dashboard/getRaceTime','HomeController@getRaceTime');
+//    Route::post('dashboard/getRaceTimeNew','HomeController@getRaceTimeNew');
+//    Route::post('dashboard/saveBet','HomeController@saveBet');
+//    Route::post('dashboard/insertBets','HomeController@insertBets');
+//    Route::post('dashboard/getTrackName','HomeController@getTrackName');
+//    Route::post('dashboard/getServerTime','HomeController@getServerTime');
+//    Route::post('dashboard/getUpcomingRaces','HomeController@getUpcomingRaces');
+//    Route::match(array('GET','POST'),'dashboard/appendUpcomingRaces','HomeController@appendUpcomingRaces');
+//    Route::match(array('GET','POST'),'dashboard/checkPostTime','HomeController@checkPostTime');
+//    Route::get('dashboard/past','HomeController@past');
+//    Route::get('dashboard/pending','HomeController@pending');
+//    Route::post('dashboard/validateTrackTmz','HomeController@validateTrackTmz');
+//    Route::post('dashboard/getTrackCode','HomeController@getTrackCode');
+//    Route::post('dashboard/getWagerForRace','HomeController@getWagerForRace');
+//    Route::get('dashboard/checkIfOpen','HomeController@checkIfOpen');
+//    Route::post('dashboard/getMinimum','HomeController@getMinimum');
+//    Route::get('dashboard/weekly','HomeController@weekly');
+//    Route::post('dashboard/getWeek','HomeController@getWeek');
+//    Route::post('dashboard/past/getWeek','HomeController@getWeek');
+//    Route::post('dashboard/getPendingHome','AdminController@getPendingBetsHome');
+//    Route::post('dashboard/getPastHome','AdminController@getPastHome');
+//    Route::post('dashboard/balanceInquiry','AdminController@balanceInquiry');
+//    Route::post('dashboard/updateCurrentBet','AdminController@updateCurrentBet');
     // Admin
     Route::group(['prefix' => 'admin'],function(){
         Route::get('dashboard','AdminController@dashboard');
-        Route::get('logout','HomeController@logout');
+//        Route::get('logout','HomeController@logout');
+        Route::get('logout',function(){
+            \Illuminate\Support\Facades\Auth::logout();
+//            return "Logged Out!";
+            return redirect('admin2');
+        });
         Route::get('tracks','AdminController@tracks');
         Route::get('timezones','AdminController@timezones');
         Route::post('getTmzValues','AdminController@getTmzValues');
@@ -49,6 +102,7 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('submitResults','AdminController@submitResults');
         Route::post('checkResults','AdminController@checkResults');
         Route::post('getLatestResultID','AdminController@getLatestResultID');
+        Route::post('getWagerForRaceAdmin','AdminController@getWagerForRaceAdmin'); // changed to adminController from homeController
         Route::post('getWagerForRace','HomeController@getWagerForRace');
         Route::post('saveMinimum','AdminController@saveMinimum');
         Route::post('checkMinimum','AdminController@checkMinimum');
@@ -71,5 +125,10 @@ Route::group(['middleware' => ['auth']],function(){
         Route::post('getTracksWithDate','AdminController@getTracksWithDate');
         Route::post('getBetInfo','AdminController@getBetInfo');
         Route::get('pendingBets','AdminController@pendingBets');
+        Route::post('getPastBets','AdminController@getPastBets');
+        Route::post('getPendingBets','AdminController@getPendingBets');
+        Route::any('odbc','AdminController@testODBC');
+        Route::get('scratches','AdminController@scratches');
+        Route::post('getScratchesToday','AdminController@getScratchesToday');
     });
 });

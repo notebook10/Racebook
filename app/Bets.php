@@ -21,14 +21,14 @@ class Bets extends Model
         $save->bet = $dataArray['bet'];
         $save->save();
     }
-    public function insertBets($dataArray){
+    public function insertBets($dataArray,$date){
         date_default_timezone_set('America/Los_Angeles');
         $pacificDate = date('Y-m-d H:i:s', time());
         $raceDate = date('mdy',time());
         foreach ($dataArray as $key => $value){
             $dataArray[$key]['created_at'] = $pacificDate;
             $dataArray[$key]['updated_at'] = $pacificDate;
-            $dataArray[$key]['race_date'] = $raceDate;
+            $dataArray[$key]['race_date'] = $date;
         }
         return DB::table($this->table)
             ->insert($dataArray);
@@ -66,15 +66,19 @@ class Bets extends Model
         $currentDate = date("Y-m-d", time());
         return DB::table($this->table)
             ->orderBy('created_at','desc')
-//            ->whereBetween('created_at',[$currentDate . ' 00:00:00',$currentDate . ' 23:59:59'])
+            ->whereBetween('created_at',[$currentDate . ' 00:00:00',$currentDate . ' 23:59:59'])
             ->where('status','!=',0)
             ->get();
     }
     public function getAllPendingBets(){
         date_default_timezone_set('America/Los_Angeles');
+        $currentDate = date("Y-m-d", time());
+        $currentRaceDate = date("mdy", time());
         return DB::table($this->table)
             ->orderBy('created_at','desc')
             ->where('status',0)
+//            ->whereBetween('created_at',[$currentDate . ' 00:00:00',$currentDate . ' 23:59:59'])
+            ->where('race_date',$currentRaceDate)
             ->get();
     }
     public function getBetsByDate($date){
@@ -391,6 +395,64 @@ class Bets extends Model
                     })
                     ->get();
                 break;
+            case "quinella":
+                return DB::table($this->table)
+                    ->where("race_track", $trkCode)
+                    ->where("race_number",$raceNum)
+                    ->where("race_date",$raceDate)
+                    ->where("bet",$combination)
+                    ->where("bet_type",$wagerType)
+                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
+                            ->where("race_date",$raceDate)
+                            ->where("bet_type",$wagerType)
+                            ->where("race_track", $trkCode)
+                            ->where("race_number",$raceNum);
+                    })
+                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                            ->where("race_date",$raceDate)
+                            ->where("bet_type",$wagerType)
+                            ->where("race_track", $trkCode)
+                            ->where("race_number",$raceNum);
+                    })
+                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                            ->where("race_date",$raceDate)
+                            ->where("bet_type",$wagerType)
+                            ->where("race_track", $trkCode)
+                            ->where("race_number",$raceNum);
+                    })
+                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // << START HERE REVERSED
+                        $query->where("bet",$strExplode[1] . "," . $strExplode[0])
+                            ->where("race_date",$raceDate)
+                            ->where("bet_type",$wagerType)
+                            ->where("race_track", $trkCode)
+                            ->where("race_number",$raceNum);
+                    })
+                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // <<<<<<<<<<<<
+                        $query->where("bet",$strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[0])
+                            ->where("race_date",$raceDate)
+                            ->where("bet_type",$wagerType)
+                            ->where("race_track", $trkCode)
+                            ->where("race_number",$raceNum);
+                    })
+                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                        $query->where("bet",$strExplode[1] . "," . $strExplode[0] . $this->appendAlpha($strExplode[0]))
+                            ->where("race_date",$raceDate)
+                            ->where("bet_type",$wagerType)
+                            ->where("race_track", $trkCode)
+                            ->where("race_number",$raceNum);
+                    })
+                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                        $query->where("bet",$strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[0] . $this->appendAlpha($strExplode[0]))
+                            ->where("race_date",$raceDate)
+                            ->where("bet_type",$wagerType)
+                            ->where("race_track", $trkCode)
+                            ->where("race_number",$raceNum);
+                    })
+                    ->get();
+                break;
             default:
 
                 break;
@@ -476,6 +538,8 @@ class Bets extends Model
             ]);
     }
     public function saveNewBet($betArray){
+        $betArray["win_amount"] = 0;
+        $betArray["result"] = 0;
         return DB::table($this->table)
             ->insert($betArray);
     }
@@ -594,11 +658,68 @@ class Bets extends Model
             ->first();
     }
     public function updateBet($dataArray,$id){
+        unset($dataArray["created_at"]);
+        unset($dataArray["updated_at"]);
+        $dataArray["status"] = 1;
         return DB::table($this->table)
             ->where("id",$id)
             ->update($dataArray);
     }
     public function getBetsThisWeek(){
         date_default_timezone_set('America/Los_Angeles');
+    }
+    public function getPastBetsBySelectedDate($date){
+        date_default_timezone_set('America/Los_Angeles');
+        $currentRaceDate = date('mdy',strtotime($date));
+        return DB::table($this->table)
+            ->orderBy('created_at','desc')
+//            ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59'])
+            ->where('race_date',$currentRaceDate)
+            ->where('status','!=',0)
+            ->get();
+    }
+    public function getPendingBetsBySelectedDate($date){
+        date_default_timezone_set('America/Los_Angeles');
+        $currentRaceDate = date('mdy',strtotime($date));
+        return DB::table($this->table)
+            ->orderBy('created_at','desc')
+//            ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59'])
+            ->where('race_date',$currentRaceDate)
+            ->where('status',0)
+            ->get();
+    }
+    public function getPendingBetsHome($date,$id){
+        date_default_timezone_set('America/Los_Angeles');
+        $currentRaceDate = date('mdy',strtotime($date));
+        return DB::table($this->table)
+            ->orderBy('created_at','desc')
+//            ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59'])
+            ->where('race_date',$currentRaceDate)
+            ->where('status',0)
+            ->where('player_id',$id)
+            ->get();
+    }
+    public function getPastBetsHome($date,$id){
+        date_default_timezone_set('America/Los_Angeles');
+        $currentRaceDate = date('mdy',strtotime($date));
+        return DB::table($this->table)
+            ->orderBy('created_at','desc')
+//            ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59'])
+            ->where('race_date',$currentRaceDate)
+            ->where('status','!=',0)
+            ->where('player_id',$id)
+            ->get();
+    }
+    public function gradePendingDD($dataArray){
+        DB::table($this->table)
+            ->where("race_track",$dataArray["track_code"])
+            ->where("race_date",$dataArray["race_date"])
+            ->where("race_number",$dataArray["race_number"])
+            ->where("bet_type","dailydouble")
+            ->update([
+                "status" => 0,
+                "result" => 0,
+                "win_amount" => 0
+            ]);
     }
 }

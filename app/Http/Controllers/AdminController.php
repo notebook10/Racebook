@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Bets;
 use App\Cancelled;
 use App\Horses;
+use App\Logs;
 use App\Minimum;
 use App\Payout;
 use App\Results;
+use App\Scratches;
 use App\Timezone;
 use App\Tracks;
 use App\Wager;
@@ -18,9 +20,13 @@ use DB;
 class AdminController extends Controller
 {
     public function dashboard(){
+        $resultsModel = new Results();
         if(Auth::check()){
             $theme = Theme::uses('admin')->layout('layout')->setTitle('Admin');
-            return $theme->of('admin/dashboard')->render();
+            $dataArray = [
+                "mismatched" => $resultsModel->getAllMismatchedResults()
+            ];
+            return $theme->of('admin/dashboard',$dataArray)->render();
         }else{
             return view('default/login');
         }
@@ -64,11 +70,17 @@ class AdminController extends Controller
     public function submitTmz(Request $request){
         $operation = $request->input("operation");
         $tmzModel = new Timezone();
+        $logsModel = new Logs();
         $id = $request->input("id");
         if($operation == 1){
             // EDIT
             $dataArray = ['time_zone' => $request->input("selectTmz")];
             $tmzModel->updateTimezoneById($id,$dataArray);
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'Update timezone of ' . $request->input("selectTmz") // replace $id; wala lumalabas ee
+            ];
+            $logsModel->saveLog($logsArray);
             return 1;
         }else if($operation == 0){
             // ADD
@@ -77,7 +89,12 @@ class AdminController extends Controller
                 'track_name' => " " . $request->input("name"),
                 'track_code' => $request->input("code")
             ];
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'Update timezone of ' . $id
+            ];
             $tmzModel->saveTimezone($dataArray);
+            $logsModel->saveLog($logsArray);
             return 0;
         }
     }
@@ -133,16 +150,6 @@ class AdminController extends Controller
     }
     public function submitResults(Request $request){
         date_default_timezone_set('America/Los_Angeles');
-        $dataArray = [
-            'track_code' => $request->input("tracksToday"),
-            'race_number' => $request->input("racePerTrack"),
-            'first' => $request->input("first"),
-            'second' => $request->input("second"),
-            'third' => $request->input("third"),
-            'fourth' => $request->input("fourth"),
-//            'race_date' => date('mdy', time())
-            'race_date' => $request->input("raceDateInp"),
-        ];
         $payoutArray = [
             'wPayout' => $request->input("wPayout"),
             '1pPayout' => $request->input("1pPayout"),
@@ -153,12 +160,32 @@ class AdminController extends Controller
             'exactaPayout' => $request->input("exactaPayout"),
             'trifectaPayout' => $request->input("trifectaPayout"),
             'superfectaPayout' => $request->input("superfectaPayout"),
-            'ddPayout' => $request->input("ddPayout")
+            'ddPayout' => $request->input("ddPayout"),
+            'quinellaPayout' => $request->input("quinellaPayout")
+        ];
+
+        $dataArray = [
+            'track_code' => $request->input("tracksToday"),
+            'race_number' => $request->input("racePerTrack"),
+            'first' => $request->input("first"),
+            'second' => $request->input("second"),
+            'third' => $request->input("third"),
+            'fourth' => $request->input("fourth"),
+//            'race_date' => date('mdy', time())
+            'race_date' => $request->input("raceDateInp"),
+            'payoutArray' => $payoutArray // For checking if matched to second entry
         ];
         $resultModel = new Results();
         $payoutModel = new Payout();
 //        $payoutModel->submitPayout($payoutArray, $request->input("payoutOperation"), $request->input("tracksToday"), $request->input("racePerTrack"), date('mdy', time()));
-        $payoutModel->submitPayout($payoutArray, $request->input("payoutOperation"), $request->input("tracksToday"), $request->input("racePerTrack"), $request->input("raceDateInp"));
+        // Temp : Block payout operation if results operation == 2
+        if($request->input('operation') == 2){
+            $payoutOperation = 2;
+        }else{
+            $payoutOperation = $request->input("payoutOperation");
+        }
+        // Temp
+        $payoutModel->submitPayout($payoutArray,$payoutOperation, $request->input("tracksToday"), $request->input("racePerTrack"), $request->input("raceDateInp"));
 //        if($request->input("exacta") != NULL){
 //            AdminController::newCancelWager($dataArray,"exacta");
 //        }
@@ -170,7 +197,16 @@ class AdminController extends Controller
     public function checkResults(Request $request){
         $resultModel = new Results();
         $results = $resultModel->checkResults($request->input("trkCode"), $request->input("raceDate"), $request->input("raceNum"));
-        return $results ? $results->race_winners : "";
+        if($results){
+            if($results->status == 0){
+                // Not matched
+                return [1,Auth::id(),$results->graded_by,$results->race_winners]; // Results entered not match
+            }else{
+                return $results ? $results->race_winners : "";
+            }
+        }else{
+            return "";
+        }
     }
     public function getLatestResultID(Request $request){
         $resultModel = new Results();
@@ -192,7 +228,12 @@ class AdminController extends Controller
         $execExactaBox = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$exacta,"exactabox");
         $execTrifecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifecta");
         $execTrifectaBox = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifectabox");
-        $execSuperfecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$superfecta,"superfecta");
+        if($explode[3] != ""){
+            $execSuperfecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$superfecta,"superfecta");
+            foreach ($execSuperfecta as $key => $value){
+                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
+            }
+        }
         $execW = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$w,"wps","w");
         $exeP1 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[0],"wps","p");
         $exeP2 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[1],"wps","p");
@@ -201,16 +242,17 @@ class AdminController extends Controller
         $exeS3 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[2],"wps","s");
         $ddSecondRaceRes = $resultModel->getSecondRaceRes($trkCode,$raceNum,$raceDate);
         $ddFirstRaceRes = $resultModel->getFirstRaceRes($trkCode,$raceNum,$raceDate);
-//        if(empty($ddSecondRaceRes)){
-//
-//        }else{
-//            $secondRaceWinner = explode(",",$ddSecondRaceRes->race_winners);
-//            $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
-//            $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
-//            foreach ($exeDD as $key => $value){
-//                AdminController::updateBetStatus($value->id);
-//            }
-//        }
+        $execQuinella = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$exacta,"quinella"); // explode $exacta
+                            //        if(empty($ddSecondRaceRes)){
+                            //
+                            //        }else{
+                            //            $secondRaceWinner = explode(",",$ddSecondRaceRes->race_winners);
+                            //            $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
+                            //            $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
+                            //            foreach ($exeDD as $key => $value){
+                            //                AdminController::updateBetStatus($value->id);
+                            //            }
+                            //        }
         if(empty($ddFirstRaceRes)){
 
         }else{
@@ -247,9 +289,9 @@ class AdminController extends Controller
         foreach ($execTrifectaBox as $key => $value){
             AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
         }
-        foreach ($execSuperfecta as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
-        }
+//        foreach ($execSuperfecta as $key => $value){
+//            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
+//        }
         foreach ($execW as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
             AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"w",$value->race_number);
@@ -274,8 +316,19 @@ class AdminController extends Controller
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
             AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s3",$value->race_number);
         }
+        foreach ($execQuinella as $key => $value){
+            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
+        }
         // Set Defeat
         AdminController::gradeWrongBets($raceDate,$trkCode,$raceNum);
+        // Grade pending DD bETS
+        if(empty($ddFirstRaceRes)){
+            $betsModel->gradePendingDD([
+                "track_code" => $trkCode,
+                "race_date" => $raceDate,
+                "race_number" => $raceNum
+            ]);
+        }
         // For Cancelling Wager
         $cancelArray = [
             "trk" => $request->input("trk"),
@@ -322,6 +375,12 @@ class AdminController extends Controller
         }else{
             AdminController::deleteCancel($cancelArray,"s");
         }
+        if($request->input("quinella") == 1){
+            AdminController::newCancelWager($cancelArray,"quinella");
+            AdminController::saveCancel($cancelArray,"quinella");
+        }else{
+            AdminController::deleteCancel($cancelArray,"quinella");
+        }
     }
     public static function updateBetStatus($id, $betAmount, $betType, $raceNum){
         $dataArray = [
@@ -338,6 +397,7 @@ class AdminController extends Controller
         $minimumContent = DB::table("minimum")
             ->where("track_code",$bets->race_track)
             ->where("race_date",$bets->race_date)
+            ->where("race_number",$raceNum)
             ->first();
 //        $temp = $minimumContent->content != null ? json_decode($minimumContent->content) : "";
         if($minimumContent != null){
@@ -403,10 +463,37 @@ class AdminController extends Controller
                 }
                 break;
             case "dailydouble":
+                // Daily Double Special <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+                $racePlusOne = $raceNum + 1;
+                $payoutContent = DB::table("payout")
+                    ->where("track_code",$bets->race_track)
+                    ->where("race_date",$bets->race_date)
+                    ->where("race_number",$racePlusOne)
+                    ->first();
+                $minimumContent = DB::table("minimum")
+                    ->where("track_code",$bets->race_track)
+                    ->where("race_date",$bets->race_date)
+                    ->where("race_number",$racePlusOne)
+                    ->first();
+                if($minimumContent != null){
+                    $temp = json_decode($minimumContent->content);
+                }else{
+                    $temp = null;
+                }
+                // Daily Double Special <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
                 $payout = json_decode($payoutContent->content)->ddPayout;
-//                $minimum = $temp->dailydouble == null ? 2 : $temp->dailydouble;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->dailydouble;
+                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                }else{
+                    $dataArray["win_amount"] = 0;
+                    $dataArray["result"] = 4;
+                }
+                break;
+            case "quinella":
+                $payout = json_decode($payoutContent->content)->quinellaPayout;
+                if($payout != null){
+                    $minimum = $temp == null ? 2 : $temp->quinella;
                     $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
                 }else{
                     $dataArray["win_amount"] = 0;
@@ -417,6 +504,7 @@ class AdminController extends Controller
                 $dataArray["win_amount"] = 0;
                 break;
         }
+//        AdminController::returnBalance($bets->player_id,$betAmount);
         return DB::table("bets")
             ->where("id", $id)
             ->update($dataArray);
@@ -453,7 +541,8 @@ class AdminController extends Controller
             'exacta' => $request->input('exacta'),
             'trifecta' => $request->input('trifecta'),
             'superfecta' => $request->input('superfecta'),
-            'dailydouble' => $request->input('dailydouble')
+            'dailydouble' => $request->input('dailydouble'),
+            'quinella' => $request->input('quinella')
         ];
 //        $trk = $request->input("trk");
 //        $num = $request->input("num");
@@ -461,7 +550,7 @@ class AdminController extends Controller
         $dataArray = [
             'min' => json_encode($minimumArray),
             'trk' => $request->input("trk"),
-//            'num' => $request->input("num"),
+            'num' => $request->input("num"),
             'date' => $request->input("date"),
             'operation' => $request->input("operation")
         ];
@@ -472,7 +561,7 @@ class AdminController extends Controller
         $minModel = new Minimum();
         $dataArray = [
             'trk' => $request->input("trk"),
-//            'num' => $request->input("num"),
+            'num' => $request->input("num"),
             'date' => $request->input("date")
         ];
         $result = $minModel->checkMinimum($dataArray)->first();
@@ -582,6 +671,7 @@ class AdminController extends Controller
                 $dataArray["win_amount"] = 0;
                 break;
         }
+//        AdminController::returnBalance($bets->player_id,$betAmount);
         return DB::table("bets")
             ->where("id", $id)
             ->update($dataArray);
@@ -592,6 +682,12 @@ class AdminController extends Controller
         $num = $request->input("num");
         $date = $request->input("date");
         $betsModel = new Bets();
+        $logsModel = new Logs();
+        $logsArray = [
+            'user_id' => Auth::id(),
+            'action' => 'Scratch => ' . $request->input('id')
+        ];
+        $logsModel->saveLog($logsArray);
         $dataArray = [
             'trk' => $trk,
             'num' => $num,
@@ -621,7 +717,13 @@ class AdminController extends Controller
         $date = $request->input("date");
         $trkName = $request->input("trkName");
         $trkModel = new Tracks();
+        $logsModel = new Logs();
         if($trkModel->submitNewTrack($trkName,$trkCode,$date)){
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'ADD TRACK'
+            ];
+            $logsModel->saveLog($logsArray);
             return 0;
         }else{
             return 1;
@@ -634,6 +736,7 @@ class AdminController extends Controller
     public function submitHorse(Request $request){
         $formData = $request->input("frm");
         $horseModel = new Horses();
+        $logsModel = new Logs();
         $dataArray = [
             "pp" => $formData[0]["value"],
             "horse" => $formData[1]["value"],
@@ -645,10 +748,19 @@ class AdminController extends Controller
         ];
         if($request->input("operation") == 0){
             $res = $horseModel->insertNewHorse($dataArray);
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'Add Horse'
+            ];
         }else if($request->input("operation") == 1){
             $id = $request->input("id");
             $res = $horseModel->updateHorse($id, $dataArray);
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'Update Horse => ' . $id
+            ];
         }
+        $logsModel->saveLog($logsArray);
         if($res){
             return 0;
         }else{
@@ -745,14 +857,26 @@ class AdminController extends Controller
             'status' => '0',
             'created_at' => $pacificDate,
             'updated_at' => $pacificDate,
-            'race_date' => $raceDate
+            'race_date' => $raceDate,
+            'result' => $request->input("result"),
+            'win_amount' => $request->input("winamount")
         ];
         $betsModel = new Bets();
+        $logsModel = new Logs();
         if($request->input("betsOperation") == 0){
             $res = $betsModel->saveNewBet($betArray);
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'Save new Bet'
+            ];
         }else if($request->input("betsOperation") == 1){
             $res = $betsModel->updateBet($betArray,$request->input("betId"));
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'Update Bet => ' . $request->input("betId")
+            ];
         }
+        $logsModel->saveLog($logsArray);
         if($res){
             return 0;
         }else{
@@ -771,6 +895,12 @@ class AdminController extends Controller
         ];
         $betsModel = new Bets();
         $horseModel = new Horses();
+        $logsModel = new Logs();
+        $logsArray = [
+            'user_id' => Auth::id(),
+            'action' => 'Undo Scratch => ' . $request->input("id")
+        ];
+        $logsModel->saveLog($logsArray);
         $undo = $horseModel->undoScratch($request->input("id"),$pnum);
         if($undo){
             $bets = $betsModel->getBetsForScratch($dataArray);
@@ -792,7 +922,13 @@ class AdminController extends Controller
     public function removeTrack(Request $request){
         date_default_timezone_set('America/Los_Angeles');
         $trkModel = new Tracks();
+        $logsModel = new Logs();
         $res = $trkModel->removeTrack($request->input("trk"),date("mdy",time()),$request->input("operation"));
+        $logsArray = [
+            'user_id' => Auth::id(),
+            'action' => 'Remove/Show Track Temporarily'
+        ];
+        $logsModel->saveLog($logsArray);
         if($res){
             return 0;
         }else{
@@ -803,8 +939,14 @@ class AdminController extends Controller
         date_default_timezone_set('America/Los_Angeles');
         $dateTomorrow = date('mdy', strtotime('+1 day', time()));
         $trkModel = new Tracks();
+        $logsModel = new Logs();
         $res = $trkModel->showTemp($dateTomorrow,$request->input('trk'),$request->input('operation'));
         if($res){
+            $logsArray = [
+                'user_id' => Auth::id(),
+                'action' => 'Show/Show Track Temporarily'
+            ];
+            $logsModel->saveLog($logsArray);
             return 0;
         }else{
             return 1;
@@ -909,7 +1051,9 @@ class AdminController extends Controller
             "race_number" => $res->race_number,
             "bet_type" => $res->bet_type,
             "type" => $res->type,
-            "bet" => $res->bet
+            "bet" => $res->bet,
+            "result" => $res->result,
+            "win_amount" => $res->win_amount
         ];
         return $aArray;
     }
@@ -925,5 +1069,319 @@ class AdminController extends Controller
         return DB::table("users")
             ->where("id",$id)
             ->first();
+    }
+    public function getPastBets(Request $request){
+        $selectedDate = $request->input("date");
+        $betsModel = new Bets();
+        $betsBySelectedDate = $betsModel->getPastBetsBySelectedDate($selectedDate);
+        $tempArr = [];
+        $tempObj = [
+            'data' => []
+        ];
+        foreach ($betsBySelectedDate as $index => $value){
+            if($value->result == 0){
+                $res = "Null";
+            }elseif($value->result == 1){
+                $res = "Win";
+            }elseif($value->result == 2){
+                $res = "Lose";
+            }elseif($value->result == 3){
+                $res = "Aborted";
+            }elseif($value->result == 4){
+                $res = "NoPayout";
+            }
+            $tempArr = [
+//                'player_id' => AdminController::getUsernameById($value->player_id)->firstname,
+                'player_id' => $value->player_id,
+                'race_number' => "Race " . $value->race_number,
+                'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
+                'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
+                'bet_amount' => $value->bet_amount,
+                'bet' => str_replace(',','-',$value->bet),
+                'status' => $value->status === 0 ? "Pending" : "Graded",
+                'result' => $res,
+                'win_amount' => number_format($value->win_amount,2),
+                'created_at' => $value->created_at,
+                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
+            ];
+            array_push($tempObj["data"],$tempArr);
+        }
+        return json_encode($tempObj);
+    }
+    public function getPendingBets(Request $request){
+        $selectedDate = $request->input("date");
+        $betsModel = new Bets();
+        $betsBySelectedDate = $betsModel->getPendingBetsBySelectedDate($selectedDate);
+        $tempArr = [];
+        $tempObj = [
+            'data' => []
+        ];
+        foreach ($betsBySelectedDate as $index => $value){
+            if($value->result == 0){
+                $res = "Null";
+            }elseif($value->result == 1){
+                $res = "Win";
+            }elseif($value->result == 2){
+                $res = "Lose";
+            }elseif($value->result == 3){
+                $res = "Aborted";
+            }elseif($value->result == 4){
+                $res = "NoPayout";
+            }
+            $tempArr = [
+//                'player_id' => AdminController::getUsernameById($value->player_id)->firstname,
+                'player_id' => $value->player_id,
+                'race_number' => "Race " . $value->race_number,
+                'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
+                'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
+                'bet_amount' => $value->bet_amount,
+                'bet' => str_replace(',','-',$value->bet),
+                'status' => $value->status === 0 ? "Pending" : "Graded",
+                'result' => $res,
+                'win_amount' => number_format($value->win_amount,2),
+                'created_at' => $value->created_at,
+                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
+            ];
+            array_push($tempObj["data"],$tempArr);
+        }
+        return json_encode($tempObj);
+    }
+    public function getPendingBetsHome(Request $request){
+        $selectedDate = $request->input("date");
+        $id = $request->input('id');
+        $betsModel = new Bets();
+        $betsBySelectedDate = $betsModel->getPendingBetsHome($selectedDate,$id);
+        $tempArr = [];
+        $tempObj = [
+            'data' => []
+        ];
+        foreach ($betsBySelectedDate as $index => $value){
+            if($value->result == 0){
+                $res = "Null";
+            }elseif($value->result == 1){
+                $res = "Win";
+            }elseif($value->result == 2){
+                $res = "Lose";
+            }elseif($value->result == 3){
+                $res = "Aborted";
+            }elseif($value->result == 4){
+                $res = "NoPayout";
+            }
+            $tempArr = [
+//                'player_id' => AdminController::getUsernameById($value->player_id)->firstname,
+                'player_id' => $value->player_id,
+                'race_number' => "Race " . $value->race_number,
+                'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
+                'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
+                'bet_amount' => $value->bet_amount,
+                'bet' => str_replace(',','-',$value->bet),
+                'status' => $value->status === 0 ? "Pending" : "Graded",
+                'result' => $res,
+                'win_amount' => number_format($value->win_amount,2),
+                'created_at' => $value->created_at,
+                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
+            ];
+            array_push($tempObj["data"],$tempArr);
+        }
+        return json_encode($tempObj);
+    }
+    public function getPastHome(Request $request){
+        $selectedDate = $request->input("date");
+        $id = $request->input('id');
+        $betsModel = new Bets();
+        $betsBySelectedDate = $betsModel->getPastBetsHome($selectedDate,$id);
+        $tempArr = [];
+        $tempObj = [
+            'data' => []
+        ];
+        foreach ($betsBySelectedDate as $index => $value){
+            if($value->result == 0){
+                $res = "Null";
+            }elseif($value->result == 1){
+                $res = "Win";
+            }elseif($value->result == 2){
+                $res = "Lose";
+            }elseif($value->result == 3){
+                $res = "Aborted";
+            }elseif($value->result == 4){
+                $res = "NoPayout";
+            }
+            $tempArr = [
+//                'player_id' => AdminController::getUsernameById($value->player_id)->firstname,
+                'player_id' => $value->player_id,
+                'race_number' => "Race " . $value->race_number,
+                'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
+                'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
+                'bet_amount' => $value->bet_amount,
+                'bet' => str_replace(',','-',$value->bet),
+                'status' => $value->status === 0 ? "Pending" : "Graded",
+                'result' => $res,
+                'win_amount' => number_format($value->win_amount,2),
+                'created_at' => $value->created_at,
+                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
+            ];
+            array_push($tempObj["data"],$tempArr);
+        }
+        return json_encode($tempObj);
+    }
+    public static function comparePayout($firstEntry, $secondEntry){
+        $decodedFirst = json_decode($firstEntry->content,true);
+        // If $aCompare array have 1 => mismatched; 0 => matched
+        $aCompare = [];
+        $aCompare["wPayout"] = $decodedFirst["wPayout"] == $secondEntry["wPayout"] ? 0 : 1;
+        $aCompare["1pPayout"] = $decodedFirst["1pPayout"] == $secondEntry["1pPayout"] ? 0 : 1;
+        $aCompare["2pPayout"] = $decodedFirst["2pPayout"] == $secondEntry["2pPayout"] ? 0 : 1;
+        $aCompare["1sPayout"] = $decodedFirst["1sPayout"] == $secondEntry["1sPayout"] ? 0 : 1;
+        $aCompare["2sPayout"] = $decodedFirst["2sPayout"] == $secondEntry["2sPayout"] ? 0 : 1;
+        $aCompare["3sPayout"] = $decodedFirst["3sPayout"] == $secondEntry["3sPayout"] ? 0 : 1;
+        $aCompare["exactaPayout"] = $decodedFirst["exactaPayout"] == $secondEntry["exactaPayout"] ? 0 : 1;
+        $aCompare["trifectaPayout"] = $decodedFirst["trifectaPayout"] == $secondEntry["trifectaPayout"] ? 0 : 1;
+        $aCompare["superfectaPayout"] = $decodedFirst["superfectaPayout"] == $secondEntry["superfectaPayout"] ? 0 : 1;
+        $aCompare["ddPayout"] = $decodedFirst["ddPayout"] == $secondEntry["ddPayout"] ? 0 : 1;
+        $aCompare["quinellaPayout"] = $decodedFirst["quinellaPayout"] == $secondEntry["quinellaPayout"] ? 0 : 1;
+        $logsModel = new Logs();
+        foreach ($aCompare as $key => $value){
+            if($value == 1){
+                $logsModel->saveLog(["user_id" => Auth::id(),"action"=>"Mismatched Payout: " . $key]);
+            }
+        }
+        return $aCompare;
+    }
+    public function getWagerForRaceAdmin(Request $request){
+        $wagerModel = new Wager();
+        if($request->input('num') != 1){
+            $checkDDinFirstRace = $wagerModel->getWagerForRaceFirstRace($request->input('trk'),$request->input('num'),$request->input('date'));
+        }else{
+            $checkDDinFirstRace = 0;
+        }
+        $wager = $wagerModel->getWagerForRace($request->input('trk'),$request->input('num'),$request->input('date'));
+        if(in_array("Daily Double",unserialize($wager->extracted))){
+            $checkDDinArray = unserialize($wager->extracted);
+            if($request->input('num') == 1){
+                $ddKey = array_search("Daily Double",$checkDDinArray);
+                unset($checkDDinArray[$ddKey]);
+            }
+            return $checkDDinArray;
+        }else{
+            $checkDDinArray = unserialize($wager->extracted);
+            if($checkDDinFirstRace == 1){
+                array_push($checkDDinArray,"Daily Double");
+            }else{
+
+            }
+            return $checkDDinArray;
+        }
+    }
+    public function testODBC(){
+        $odbc = odbc_connect('cust','','');
+        $query = "select * from cust.dbf";
+        $res = odbc_exec($odbc,$query);
+        while($row = odbc_fetch_array($res)){
+            echo $row["NAME"] . "<br/>";
+        }
+        $insert = "update cust.dbf as a set CODE = '120' where uname(NAME) = 'TEST'";
+        echo $insert;
+        $in = odbc_exec($odbc,$insert);
+        echo odbc_error($odbc);
+        odbc_close($odbc);
+    }
+    public function scratches(){
+        $theme = Theme::uses('admin')->layout('layout')->setTitle('Admin');
+        return $theme->of('admin/scratches')->render();
+    }
+    public function getScratchesToday(Request $request){
+        $selectedDate = $request->input("date");
+        $scratchesModel = new Scratches();
+        $betsBySelectedDate = $scratchesModel->getScratchesByDate($selectedDate);
+        $tempArr = [];
+        $tempObj = [
+            'data' => []
+        ];
+        foreach ($betsBySelectedDate as $index => $value){
+            $tempArr = [
+                'race_number' => "Race " . $value->race_number,
+                'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
+                'race_date' => $value->race_date,
+                'pnumber' => $value->pnumber,
+                'horsename' => $value->horsename
+            ];
+            array_push($tempObj["data"],$tempArr);
+        }
+        return json_encode($tempObj);
+    }
+    public function balanceInquiry(Request $request){
+        if (!isset($_SESSION)) session_start();
+        $NAME = $request->input("name");
+        $odbc = odbc_connect($_SESSION['dsn'],'','');
+        $query = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($NAME) ."'";
+
+        $queryResult = odbc_exec($odbc,$query);
+        while($row = odbc_fetch_array($queryResult)){
+            $balance = $row["BALANCE"] + $row["CAP"] + $row["CURRENTBET"] + $row["MON_RSLT"] + $row["TUE_RSLT"] + $row["WED_RSLT"] + $row["THU_RSLT"] + $row["FRI_RSLT"] + $row["SAT_RSLT"] + $row["SUN_RSLT"];
+        }
+        odbc_close($odbc);
+        if($balance){
+            return $balance;
+        }else{
+            return "NULL";
+        }
+    }
+    public function updateCurrentBet(Request $request){
+        if (!isset($_SESSION)) session_start();
+        $NAME = $request->input("name");
+        $betTotal = $request->input("betTotal");
+        $odbc = odbc_connect($_SESSION['dsn'],'','');
+        $getCurrentBetQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($NAME) ."'";
+        $queryResult = odbc_exec($odbc,$getCurrentBetQuery);
+        while($row = odbc_fetch_array($queryResult)){
+            $CURRENTBET = $row["CURRENTBET"];
+        }
+        $newCURRENTBET = $CURRENTBET - $betTotal;
+        $updateCURRENTBETQuery = "update cust.dbf as a set a.CURRENTBET = '". $newCURRENTBET ."' where ucase(NAME) = '". strtoupper($NAME) ."'";
+        $updateResult = odbc_exec($odbc,$updateCURRENTBETQuery);
+//        odbc_close($odbc);
+        if($updateResult){
+            return 0;
+        }else{
+            return 1; // failed updated
+        }
+    }
+    public static function findDSN($NAME){
+//        $findQuery = "select * from cust.dbf as a where a.NAME = '". $NAME ."'";
+//        $defaultODBC = odbc_connect("cust","","");
+//        $defaultExec = odbc_exec($defaultODBC,$findQuery);
+//        $items = 0;
+//        while ($row = odbc_fetch_array($defaultExec)) {
+//            $items++;
+//        }
+//        if($items == 0){
+//            $defaultODBC = odbc_connect("Bcust","","");
+//            $defaultExec = odbc_exec($defaultODBC,$findQuery);
+//            while ($row = odbc_fetch_array($defaultExec)) {
+//                $items++;
+//            }
+//            if($items == 0){
+//
+//            }else{
+//                echo "Bcust";
+//            }
+//        }else{
+//            echo "cust";
+//        }
+        return "cust";
+    }
+    public static function returnBalance($id,$betAmount){
+//        $odbc = odbc_connect(AdminController::findDSN($_SESSION["NAME"]),'','');
+        if (!isset($_SESSION)) session_start();
+        $odbc = odbc_connect($_SESSION['dsn'],'','');
+        $getCurrentBetQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($id) ."'";
+        $queryResult = odbc_exec($odbc,$getCurrentBetQuery);
+        while($row = odbc_fetch_array($queryResult)){
+            $CURRENTBET = $row["CURRENTBET"];
+        }
+        $newCurrentBet = $CURRENTBET + $betAmount;
+        $updateCURRENTBETQuery = "update cust.dbf as a set a.CURRENTBET = '". $newCurrentBet ."' where ucase(NAME) = '". strtoupper($id) ."'";
+        odbc_exec($odbc,$updateCURRENTBETQuery);
+        odbc_close($odbc);
     }
 }
