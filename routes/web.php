@@ -1,5 +1,5 @@
 <?php
-Route::match(array('GET','POST'),'/',function(){
+Route::match(array('GET','POST'),'/',function(\Illuminate\Http\Request $request){
     if (!isset($_SESSION)) session_start();
     if(isset($_POST["username"])){
         $_SESSION["username"] = $_POST["username"];
@@ -7,7 +7,7 @@ Route::match(array('GET','POST'),'/',function(){
         $url = $_POST["url"];
         // Determine DSN
         if(strpos($url,'floyd') !== false){
-            $_SESSION["dsn"] = "cust";
+            $_SESSION["dsn"] = "floyd";
         }else{
 
         }

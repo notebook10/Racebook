@@ -386,7 +386,8 @@ class AdminController extends Controller
         $dataArray = [
             "status" => 1,
             "result" => 1, // 1 for win
-            "win_amount" => ""
+            "win_amount" => 0,
+            "grading_status" => 1 // for returning balance
         ];
         $bets = DB::table("bets")->where("id",$id)->first();
         $payoutContent = DB::table("payout")
@@ -504,7 +505,8 @@ class AdminController extends Controller
                 $dataArray["win_amount"] = 0;
                 break;
         }
-//        AdminController::returnBalance($bets->player_id,$betAmount);
+        AdminController::returnBalance($bets->player_id,$betAmount,$bets->grading_status,$bets->dsn);
+        AdminController::computerRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
         return DB::table("bets")
             ->where("id", $id)
             ->update($dataArray);
@@ -512,14 +514,28 @@ class AdminController extends Controller
     public static function gradeWrongBets($raceDate,$trackCode, $raceNum){
         $dataArray = [
             "status" => 1,
-            "result" => 2 // 2 for defeat
+            "result" => 2, // 2 for lose
+            "grading_status" => 1
         ];
-        return DB::table("bets")
+//        return DB::table("bets")
+//            ->where("race_track",$trackCode)
+//            ->where("race_date",$raceDate)
+//            ->where("race_number", $raceNum)
+//            ->where("status",0)
+//            ->update($dataArray);
+        $loseBets =  DB::table("bets")
             ->where("race_track",$trackCode)
             ->where("race_date",$raceDate)
             ->where("race_number", $raceNum)
             ->where("status",0)
-            ->update($dataArray);
+            ->get();
+        foreach ($loseBets as $index => $value){
+            if($value->grading_status == 0){
+                AdminController::returnBalance($value->player_id,$value->bet_amount,$value->grading_status,$value->dsn);
+                AdminController::computerRSLT($value->player_id,$value->bet_amount,$value->grading_status,$value->race_date,"subtract",$value->dsn);
+            }
+            DB::table("bets")->where('id',$value->id)->update($dataArray);
+        }
 
     }
     public static function refreshResultsForRegrade($raceDate,$trackCode, $raceNum){
@@ -598,7 +614,8 @@ class AdminController extends Controller
         $dataArray = [
             "status" => 1,
             "result" => 1, // 1 for win
-            "win_amount" => ""
+            "win_amount" => "",
+            "grading_status" => 1
         ];
         $bets = DB::table("bets")->where("id",$id)->first();
         $payoutContent = DB::table("payout")
@@ -671,7 +688,8 @@ class AdminController extends Controller
                 $dataArray["win_amount"] = 0;
                 break;
         }
-//        AdminController::returnBalance($bets->player_id,$betAmount);
+        AdminController::returnBalance($bets->player_id,$betAmount,$bets->grading_status,$bets->dsn);
+        AdminController::computerRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
         return DB::table("bets")
             ->where("id", $id)
             ->update($dataArray);
@@ -1370,18 +1388,63 @@ class AdminController extends Controller
 //        }
         return "cust";
     }
-    public static function returnBalance($id,$betAmount){
-//        $odbc = odbc_connect(AdminController::findDSN($_SESSION["NAME"]),'','');
-        if (!isset($_SESSION)) session_start();
-        $odbc = odbc_connect($_SESSION['dsn'],'','');
-        $getCurrentBetQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($id) ."'";
-        $queryResult = odbc_exec($odbc,$getCurrentBetQuery);
-        while($row = odbc_fetch_array($queryResult)){
-            $CURRENTBET = $row["CURRENTBET"];
+    public static function returnBalance($id,$betAmount,$gradingStatus,$dsn){
+        if($gradingStatus == 0){
+            $odbc = odbc_connect($dsn,'','');
+            $getCurrentBetQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($id) ."'";
+            $queryResult = odbc_exec($odbc,$getCurrentBetQuery);
+            while($row = odbc_fetch_array($queryResult)){
+                $CURRENTBET = $row["CURRENTBET"];
+            }
+            $newCurrentBet = $CURRENTBET + $betAmount;
+            $updateCURRENTBETQuery = "update cust.dbf as a set a.CURRENTBET = '". $newCurrentBet ."' where ucase(NAME) = '". strtoupper($id) ."'";
+            odbc_exec($odbc,$updateCURRENTBETQuery);
+            odbc_close($odbc);
         }
-        $newCurrentBet = $CURRENTBET + $betAmount;
-        $updateCURRENTBETQuery = "update cust.dbf as a set a.CURRENTBET = '". $newCurrentBet ."' where ucase(NAME) = '". strtoupper($id) ."'";
-        odbc_exec($odbc,$updateCURRENTBETQuery);
-        odbc_close($odbc);
+    }
+    public static function computerRSLT($id,$winAmount,$gradingStatus,$date,$operation,$dsn){
+        if($gradingStatus == 0){
+            $odbc = odbc_connect($dsn,'','');
+            $splitStr = str_split($date,2);
+            $newDateStr = $splitStr[2] . $splitStr[0] . $splitStr[1];
+            $date = date('N',strtotime(implode('-',str_split($newDateStr,2))));
+            $RSLT = "";
+            switch ($date){
+                case 1:
+                    $RSLT = "MON_RSLT";
+                    break;
+                case 2:
+                    $RSLT = "TUE_RSLT";
+                    break;
+                case 3:
+                    $RSLT = "WED_RSLT";
+                    break;
+                case 4:
+                    $RSLT = "THU_RSLT";
+                    break;
+                case 5:
+                    $RSLT = "FRI_RSLT";
+                    break;
+                case 6:
+                    $RSLT = "SAT_RSLT";
+                    break;
+                case 7:
+                    $RSLT = "SUN_RSLT";
+                    break;
+            }
+            $selectQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($id) ."'";
+            $selectResult = odbc_exec($odbc,$selectQuery);
+            while($row = odbc_fetch_array($selectResult)){
+                $oldRSLT = $row[$RSLT];
+            }
+            if($operation == "add"){
+                $newRSLT = $oldRSLT + $winAmount;
+            }elseif ($operation == "subtract"){
+                $newRSLT = $oldRSLT - $winAmount;
+            }
+            $updateQuery = "update cust.dbf as a set ". $RSLT ." = '". $newRSLT ."' where ucase(NAME) = '". strtoupper($id) ."' ";
+            odbc_exec($odbc,$updateQuery);
+            odbc_close($odbc);
+        }
     }
 }

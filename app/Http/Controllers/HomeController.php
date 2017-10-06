@@ -73,7 +73,8 @@ class HomeController extends Controller
         Auth::logout();
         if (!isset($_SESSION)) session_start();
         session_destroy();
-        return Redirect::to('/');
+        return view('user/landing');
+//        return Redirect::to('/');
     }
     public function dashboard(){
         date_default_timezone_set('America/Los_Angeles');

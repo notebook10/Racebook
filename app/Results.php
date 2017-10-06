@@ -51,8 +51,8 @@ class Results extends Model
             $result->race_number = $dataArray["race_number"];
             $result->race_date = $dataArray["race_date"];
             $result->race_winners = $dataArray["first"] . "," . $dataArray["second"] . "," . $dataArray["third"] . "," . $dataArray["fourth"];
-//            $result->graded_by = Auth::id();
-            $result->graded_by = $firstResultGradedById;
+            $result->graded_by = Auth::id();
+//            $result->graded_by = $firstResultGradedById;
             $result->save();
             return 1;
         }else if($operation == 2){
