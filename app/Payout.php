@@ -43,4 +43,10 @@ class Payout extends Model
             ->where("race_date", $date)
             ->first();
     }
+    public function getPayout($dataArray){
+        return DB::table($this->table)
+            ->where("track_code",$dataArray["trk"])
+            ->where("race_date",$dataArray["date"])
+            ->get();
+    }
 }

@@ -1,10 +1,3 @@
-{{--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">--}}
-{{--<link rel="stylesheet" href="{{ asset('css/sweetalert.css') }}">--}}
-{{--<link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">--}}
-{{--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>--}}
-{{--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>--}}
-{{--<script src="{{ asset('js/sweetalert.min.js') }}"></script>--}}
-{{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
 <?php date_default_timezone_set('America/Los_Angeles'); ?>
 <style>
     .defeat, .lose{color: #fff;background: #ff4d28 !important;}
@@ -12,16 +5,24 @@
     .victory, .win{color: #fff;background: #00724b  !important;}
     th,td{text-align: center;white-space: nowrap;}
     thead{background: #e6efff;}
+    #datepickerPending{text-align: center;cursor: pointer;}
 </style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="jumbotron text-center">
-                <h1>Pending Bets</h1>
+                <?php
+                    if (!isset($_SESSION)) session_start();
+                    if(!isset($_SESSION["username"])){
+                        echo "<h1>Session Expired! Please login again.</h1>";
+                    }else{
+                        echo "<h1>Pending Bets</h1>";
+                    }
+                ?>
             </div>
             <div>
                 <div style="text-align: center">
-                    <input type="text" id="datepickerPending" value="<?php echo date('Y-m-d',time()) ?>">
+                    View pending bets for : <input type="text" id="datepickerPending" value="<?php echo date('Y-m-d',time()) ?>">
                 </div>
                 <table class="table table-responsive table-bordered table-striped" id="tblNewPending">
                     <thead>
@@ -43,7 +44,6 @@
 
 <script>
     $("document").ready(function(){
-//        loadPendingDataTable();
         var BASE_URL = $("#hdnURL").val();
         var userID = $("#userId").val();
         var CURRENT_DATE = $("#datepickerPending").val();
@@ -56,11 +56,6 @@
             var date = $(this).val();
             loadNewPendingDataTable(date,BASE_URL,userID);
         });
-//        function loadPendingDataTable(){
-//            $("#tblPending").DataTable({
-//                "aaSorting": []
-//            });
-//        }
         function loadNewPendingDataTable(date,url,id){
             $("#tblNewPending").dataTable().fnDestroy();
             $("#tblNewPending").DataTable({

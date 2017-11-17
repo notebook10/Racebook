@@ -1,6 +1,7 @@
 <?php
 date_default_timezone_set('America/Los_Angeles');
 ?>
+<script src="{{ asset("js/homeHeader.js") }}"></script>
 <header>
     <nav class="navbar navbar-inverse">
         <div class="container">
@@ -16,18 +17,49 @@ date_default_timezone_set('America/Los_Angeles');
                     <li><a href="{{ URL::to('dashboard') }}">HOME</a></li>
                     <li><a href="{{ URL::to('dashboard') }}/past">PAST BETS</a></li>
                     <li><a href="{{ URL::to('dashboard') }}/pending">PENDING</a></li>
+                    <li><a href="{{ URL::to('dashboard') }}/results">RESULTS</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     <li>
                         <?php
                             if (!isset($_SESSION)) session_start();
-                            echo "<a>Balance: $" . htmlspecialchars(number_format($_SESSION["BALANCE"],2)) . "</a>";
+                            if (!isset($_SESSION["username"])){
+                                echo "<a>Current Bet: $<small class='red'> 0.00</small></a>";
+                            }else{
+                                $odbc = odbc_connect($_SESSION["dsn"],'','');
+                                $query = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($_SESSION["username"]) ."'";
+                                $queryResult = odbc_exec($odbc,$query);
+                                while($row = odbc_fetch_array($queryResult)){
+                                    $_SESSION["CURRENTBET"] = $row["CURRENTBET"];
+                                }
+                                echo "<a>Current Bet: <small class='gold'>" . htmlspecialchars(number_format($_SESSION["CURRENTBET"],2)) . "</small></a>";
+                            }
+                        ?>
+                    </li>
+                    <li>
+                        <?php
+                        if (!isset($_SESSION)) session_start();
+                        if (!isset($_SESSION["username"])){
+                            echo "<a>Balance: $<small class='red'> 0.00</small></a>";
+                        }else{
+                            $odbc = odbc_connect($_SESSION["dsn"],'','');
+                            $query = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($_SESSION["username"]) ."'";
+                            $queryResult = odbc_exec($odbc,$query);
+                            while($row = odbc_fetch_array($queryResult)){
+                                $_SESSION["BALANCE"] = $row["BALANCE"] + $row["CAP"] + $row["CURRENTBET"] + $row["MON_RSLT"] + $row["TUE_RSLT"] + $row["WED_RSLT"] + $row["THU_RSLT"] + $row["FRI_RSLT"] + $row["SAT_RSLT"] + $row["SUN_RSLT"];
+                            }
+                            echo "<a> Balance: $ <small class='gold'>" . htmlspecialchars(number_format($_SESSION["BALANCE"],2)) . "</small></a>";
+                        }
                         ?>
                     </li>
                     <li class="dropdown">
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">Welcome
                             <?php
-                                echo htmlspecialchars($_SESSION["username"]);
+                                if (!isset($_SESSION["username"])){
+                                    echo "<small class='red'>???</small>";
+                                }else{
+                                    echo "<small class='gold'>" . htmlspecialchars($_SESSION["username"]) . "</small>";
+                                }
                             ?><span class="caret"></span></a>
                         <ul class="dropdown-menu">
                             <li><a href="#" id="btnHistory"><span class="glyphicon glyphicon-list-alt"></span> Weekly Record</a> </li>
@@ -41,6 +73,8 @@ date_default_timezone_set('America/Los_Angeles');
 </header>
 
 <style>
+    small.red{color:red;}
+    small.gold{color:gold;}
     nav.navbar.navbar-inverse {
         background: #00724b !important;
         border: none !important;
@@ -107,62 +141,43 @@ date_default_timezone_set('America/Los_Angeles');
     </div>
 </div>
 
-<script>
-    $("document").ready(function(){
-        var BASE_URL = $("#hdnURL").val();
-        var CURRENT_DATE = $("#historyDatePicker").val();
-        $("#historyDatePicker").datepicker({
-            dateFormat: "yy-mm-dd",
-            maxDate : -1
-        });
-        loadHistory(BASE_URL,CURRENT_DATE);
-        $("#btnHistory").on("click",function(){
-            $("#historyModal").modal("show");
-        });
-        $("#historyDatePicker").on("change",function(){
-            var selectedDate = $(this).val();
-            loadHistory(BASE_URL,selectedDate);
-//            $.ajax({
-//                "url" : BASE_URL + '/dashboard/getWeek',
-//                type : "POST",
-//                data : {
-//                    _token : $('[name="_token"]').val(),
-//                    date : selectedDate
-//                },
-//                success : function (response) {
-//                    console.log(response);
-//                    $("#week").text("WEEK SUMMARY: " +response['start'] + " TO " +response['end']);
-//                    $("#monday").text(response["monday"]);
-//                    $("#tuesday").text(response["tuesday"]);
-//                    $("#wednesday").text(response["wednesday"]);
-//                    $("#thursday").text(response["thursday"]);
-//                    $("#friday").text(response["friday"]);
-//                    $("#saturday").text(response["saturday"]);
-//                    $("#sunday").text(response["sunday"]);
-//                }
-//            });
-        });
-        function loadHistory(url,date){
-            $.ajax({
-                "url" : url + '/dashboard/getWeek',
-                type : "POST",
-                data : {
-                    _token : $('[name="_token"]').val(),
-                    date : date
-                },
-                success : function (response) {
-                    console.log(response);
-                    $("#week").text("WEEK SUMMARY: FROM " +response['start'] + " TO " +response['end']);
-                    $("#monday").text(response["monday"]);
-                    $("#tuesday").text(response["tuesday"]);
-                    $("#wednesday").text(response["wednesday"]);
-                    $("#thursday").text(response["thursday"]);
-                    $("#friday").text(response["friday"]);
-                    $("#saturday").text(response["saturday"]);
-                    $("#sunday").text(response["sunday"]);
-                    $("#balance").text("WEEKLY BALANCE: " + response["balance"]);
-                }
-            });
-        }
-    });
-</script>
+{{--<script>--}}
+    {{--$("document").ready(function(){--}}
+        {{--var BASE_URL = $("#hdnURL").val();--}}
+        {{--var CURRENT_DATE = $("#historyDatePicker").val();--}}
+        {{--$("#historyDatePicker").datepicker({--}}
+            {{--dateFormat: "yy-mm-dd",--}}
+            {{--maxDate : -1--}}
+        {{--});--}}
+        {{--loadHistory(BASE_URL,CURRENT_DATE);--}}
+        {{--$("#btnHistory").on("click",function(){--}}
+            {{--$("#historyModal").modal("show");--}}
+        {{--});--}}
+        {{--$("#historyDatePicker").on("change",function(){--}}
+            {{--var selectedDate = $(this).val();--}}
+            {{--loadHistory(BASE_URL,selectedDate);--}}
+        {{--});--}}
+        {{--function loadHistory(url,date){--}}
+            {{--$.ajax({--}}
+                {{--"url" : url + '/dashboard/getWeek',--}}
+                {{--type : "POST",--}}
+                {{--data : {--}}
+                    {{--_token : $('[name="_token"]').val(),--}}
+                    {{--date : date--}}
+                {{--},--}}
+                {{--success : function (response) {--}}
+                    {{--console.log(response);--}}
+                    {{--$("#week").text("WEEK SUMMARY: FROM " +response['start'] + " TO " +response['end']);--}}
+                    {{--$("#monday").text(response["monday"]);--}}
+                    {{--$("#tuesday").text(response["tuesday"]);--}}
+                    {{--$("#wednesday").text(response["wednesday"]);--}}
+                    {{--$("#thursday").text(response["thursday"]);--}}
+                    {{--$("#friday").text(response["friday"]);--}}
+                    {{--$("#saturday").text(response["saturday"]);--}}
+                    {{--$("#sunday").text(response["sunday"]);--}}
+                    {{--$("#balance").text("WEEKLY BALANCE: " + response["balance"]);--}}
+                {{--}--}}
+            {{--});--}}
+        {{--}--}}
+    {{--});--}}
+{{--</script>--}}

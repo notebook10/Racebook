@@ -22,6 +22,7 @@ class Bets extends Model
         $save->save();
     }
     public function insertBets($dataArray,$date){
+        if (!isset($_SESSION)) session_start();
         date_default_timezone_set('America/Los_Angeles');
         $pacificDate = date('Y-m-d H:i:s', time());
         $raceDate = date('mdy',time());
@@ -29,6 +30,7 @@ class Bets extends Model
             $dataArray[$key]['created_at'] = $pacificDate;
             $dataArray[$key]['updated_at'] = $pacificDate;
             $dataArray[$key]['race_date'] = $date;
+            $dataArray[$key]['dsn'] = $_SESSION["dsn"];
         }
         return DB::table($this->table)
             ->insert($dataArray);
@@ -118,340 +120,761 @@ class Bets extends Model
         $strExplode = explode(",",$combination);
         switch ($wagerType){
             case "exacta":
-                return DB::table($this->table)
-                    ->where("race_track", $trkCode)
-                    ->where("race_number",$raceNum)
-                    ->where("race_date",$raceDate)
-                    ->where("bet",$combination)
-                    ->where("bet_type",$wagerType)
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->get();
+                if($strExplode[1] != "ALL"){
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet",$combination)
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }else{
+                    // IF second horse is ALL
+                    $beforeALL = strlen($strExplode[0]) + 1;
+                    $strlen = strlen($strExplode[0]);
+                    $withoutALL = substr($combination,$strlen -1,$beforeALL);
+                    $beforeALLwAplha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0])) + 1;
+                    $strlenwAlpha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0]));
+                    $combinationwAll = substr_replace($combination, $this->appendAlpha($strExplode[0]), 1, 0);
+                    $withoutALLwAplha = substr($combinationwAll,$strlenwAlpha -2,$beforeALLwAplha); // -2 for (, && Alpha)
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet","like", $withoutALL . "%")
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$withoutALLwAplha){
+                            $query->where("bet","like", $withoutALLwAplha . "%")
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$withoutALLwAplha){
+                            $query->where("bet","like", $strExplode[0] . "X,%")
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }
                 break;
             case "exactabox":
-                return DB::table($this->table)
-                    ->where("race_track", $trkCode)
-                    ->where("race_number",$raceNum)
-                    ->where("race_date",$raceDate)
-                    ->where("bet",$combination)
-                    ->where("bet_type",$wagerType)
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->get();
+                if($strExplode[1] != "ALL"){
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet",$combination)
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }else{
+                    // IF second horse is ALL
+                    $beforeALL = strlen($strExplode[0]) + 1;
+                    $strlen = strlen($strExplode[0]);
+                    $withoutALL = substr($combination,$strlen -1,$beforeALL);
+                    $beforeALLwAplha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0])) + 1;
+                    $strlenwAlpha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0]));
+                    $combinationwAll = substr_replace($combination, $this->appendAlpha($strExplode[0]), 1, 0);
+                    $withoutALLwAplha = substr($combinationwAll,$strlenwAlpha -2,$beforeALLwAplha); // -2 for (, && Alpha)
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet","like", $withoutALL . "%")
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$withoutALLwAplha){
+                            $query->where("bet","like", $withoutALLwAplha . "%")
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$withoutALLwAplha){ // $withoutALLwAplha useless
+                            $query->where("bet","like", $strExplode[0] . "X,%")
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }
                 break;
             case "trifecta":
-                return DB::table($this->table)
-                    ->where("race_track", $trkCode)
-                    ->where("race_number",$raceNum)
-                    ->where("race_date",$raceDate)
-                    ->where("bet",$combination)
-                    ->where("bet_type",$wagerType)
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 3
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B 3
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 C
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A B C
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]). "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B C
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 C
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A B 3
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->get();
+                if($strExplode[2] != "ALL") {
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number", $raceNum)
+                        ->where("race_date", $raceDate)
+                        ->where("bet", $combination)
+                        ->where("bet_type", $wagerType)
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A 2 3
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2])
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // 1 B 3
+                            $query->where("bet", $strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // 1 2 C
+                            $query->where("bet", $strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A B C
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // 1 B C
+                            $query->where("bet", $strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A 2 C
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A B 3
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->get();
+                }else{
+                    // 1,2,ALL
+                    $beforeALL = strlen($strExplode[0] . strlen($strExplode[1])) + 2;
+                    $strlen = strlen($strExplode[0] . $strExplode[1]);
+                    $withoutALL = substr($combination, $strlen  - $strlen,$beforeALL);
+                    $beforeALLwAplha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0]) . $strExplode[1] . $this->appendAlpha($strExplode[1])) + 2;
+                    $strlenwAlpha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0]) . $strExplode[1] . $this->appendAlpha($strExplode[1]));
+                    $appendAlphaFirst = substr_replace($combination,$this->appendAlpha($strExplode[0]),strlen($strExplode[0]),0);
+                    $appendAlphaSecond = substr_replace($combination,$this->appendAlpha($strExplode[1]),$strlenwAlpha -1,0);
+                    $appendAlphaWhole = substr_replace($appendAlphaFirst,$this->appendAlpha($strExplode[1]),$strlenwAlpha,0);
+                    $withoutALLfirst = substr($appendAlphaFirst,0,strlen($strExplode[0] . $this->appendAlpha($strExplode[0]) . $strExplode[1]) + 2);
+                    $withoutALLsecond = substr($appendAlphaSecond,0,strlen($strExplode[0] . $strExplode[1]  . $this->appendAlpha($strExplode[1])) + 2);
+                    $withoutALLwAplhaTri = substr($appendAlphaWhole,0,strlen($appendAlphaWhole) - 3); // less 3 to remove 'ALL'
+                    return  DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number", $raceNum)
+                        ->where("race_date", $raceDate)
+                        ->where("bet", "like", $withoutALL . "%")
+                        ->where("bet_type", $wagerType)
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // A 2 3
+                            $query->where("bet","like", $withoutALLfirst . '%' )
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLsecond) { // A 2 3
+                            $query->where("bet","like", $withoutALLsecond . '%' )
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLwAplhaTri) { // A 2 3
+                            $query->where("bet","like", $withoutALLwAplhaTri . '%' )
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // X 2 ALL
+                            $query->where("bet","like", $strExplode[0] . "X," . $strExplode[1] . ',%')
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // 1 X ALL
+                            $query->where("bet","like", $strExplode[0] . "," . $strExplode[1] . 'X,%')
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // X X ALL
+                            $query->where("bet","like", $strExplode[0] . "X," . $strExplode[1] . 'X,%')
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->get();
+                }
                 break;
             case "trifectabox":
-                return DB::table($this->table)
-                    ->where("race_track", $trkCode)
-                    ->where("race_number",$raceNum)
-                    ->where("race_date",$raceDate)
-                    ->where("bet",$combination)
-                    ->where("bet_type",$wagerType)
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 3
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B 3
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 C
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A B C
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]). "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B C
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 C
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A B 3
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->get();
+                if($strExplode[2] != "ALL") {
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number", $raceNum)
+                        ->where("race_date", $raceDate)
+                        ->where("bet", $combination)
+                        ->where("bet_type", $wagerType)
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A 2 3
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2])
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // 1 B 3
+                            $query->where("bet", $strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // 1 2 C
+                            $query->where("bet", $strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A B C
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // 1 B C
+                            $query->where("bet", $strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A 2 C
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]))
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode) { // A B 3
+                            $query->where("bet", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2])
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->get();
+                }else{
+                    // 1,2,ALL
+                    $beforeALL = strlen($strExplode[0] . strlen($strExplode[1])) + 2;
+                    $strlen = strlen($strExplode[0] . $strExplode[1]);
+                    $withoutALL = substr($combination, $strlen  - $strlen,$beforeALL);
+                    $beforeALLwAplha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0]) . $strExplode[1] . $this->appendAlpha($strExplode[1])) + 2;
+                    $strlenwAlpha = strlen($strExplode[0] . $this->appendAlpha($strExplode[0]) . $strExplode[1] . $this->appendAlpha($strExplode[1]));
+                    $appendAlphaFirst = substr_replace($combination,$this->appendAlpha($strExplode[0]),strlen($strExplode[0]),0);
+                    $appendAlphaSecond = substr_replace($combination,$this->appendAlpha($strExplode[1]),$strlenwAlpha -1,0);
+                    $appendAlphaWhole = substr_replace($appendAlphaFirst,$this->appendAlpha($strExplode[1]),$strlenwAlpha,0);
+                    $withoutALLfirst = substr($appendAlphaFirst,0,strlen($strExplode[0] . $this->appendAlpha($strExplode[0]) . $strExplode[1]) + 2);
+                    $withoutALLsecond = substr($appendAlphaSecond,0,strlen($strExplode[0] . $strExplode[1]  . $this->appendAlpha($strExplode[1])) + 2);
+                    $withoutALLwAplhaTri = substr($appendAlphaWhole,0,strlen($appendAlphaWhole) - 3); // less 3 to remove 'ALL'
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number", $raceNum)
+                        ->where("race_date", $raceDate)
+                        ->where("bet", "like", $withoutALL . "%")
+                        ->where("bet_type", $wagerType)
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // A 2 3
+                            $query->where("bet","like", $withoutALLfirst . '%' )
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLsecond) { // A 2 3
+                            $query->where("bet","like", $withoutALLsecond . '%' )
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLwAplhaTri) { // A 2 3
+                            $query->where("bet","like", $withoutALLwAplhaTri . '%' )
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // X 2 ALL
+                            $query->where("bet","like", $strExplode[0] . "X," . $strExplode[1] . ',%')
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // 1 X ALL
+                            $query->where("bet","like", $strExplode[0] . "," . $strExplode[1] . 'X,%')
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->orWhere(function ($query) use ($raceDate, $trkCode, $raceNum, $wagerType, $strExplode,$withoutALLfirst) { // X X ALL
+                            $query->where("bet","like", $strExplode[0] . "X," . $strExplode[1] . 'X,%')
+                                ->where("race_date", $raceDate)
+                                ->where("bet_type", $wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number", $raceNum);
+                        })
+                        ->get();
+                }
                 break;
             case "dailydouble":
-                return DB::table($this->table)
-                    ->where("race_track", $trkCode)
-                    ->where("race_number",$raceNum)
-                    ->where("race_date",$raceDate)
-                    ->where("bet",$combination)
-                    ->where("bet_type",$wagerType)
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->get();
+                if($strExplode[1] != "ALL"){
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet",$combination)
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . "X," . $strExplode[1])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "X")
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }else{
+                    // IF second horse is ALL
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number", $raceNum)
+                        ->where("race_date", $raceDate)
+                        ->where("bet", "like", $strExplode[0] . "," . "%")
+                        ->where("bet_type", $wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet","like",$strExplode[0] . $this->appendAlpha($strExplode[0]) . ',%')
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet","like",$strExplode[0] . 'X,%')
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }
                 break;
             case "superfecta":
-                return DB::table($this->table)
-                    ->where("race_track", $trkCode)
-                    ->where("race_number",$raceNum)
-                    ->where("race_date",$raceDate)
-                    ->where("bet",$combination)
-                    ->where("bet_type",$wagerType)
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 3 4
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . "," . $strExplode[3])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
+                if(in_array("ALL",$strExplode) == false){
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet",$combination)
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 3 4
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . "," . $strExplode[3])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B 3 4
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1]. $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . "," . $strExplode[3])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 C 4
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 3 D
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . "," . $strExplode[3] . $this->appendAlpha($strExplode[3]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A B 3 4
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . "," . $strExplode[3])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B C 4
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2]  . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 C D
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2]  . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3]  . $this->appendAlpha($strExplode[3]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 3 D
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . "," . $strExplode[3]  . $this->appendAlpha($strExplode[3]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B C 4
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }else{
+
+                    $strlenSuper = strlen($strExplode[0] . $strExplode[1]) + 2;
+                    $withoutAllsuper = substr($combination,0,$strlenSuper);
+                    $replaceFirstSuper = $strExplode[0] . $this->appendAlpha($strExplode[0]) . ',' . $strExplode[1] . ',';
+                    $replaceSecondSuper = $strExplode[0] . ',' . $strExplode[1] . $this->appendAlpha($strExplode[1]) . ',';
+                    $replaceWholeSuper = $strExplode[0] . $this->appendAlpha($strExplode[0]) . ',' . $strExplode[1] . $this->appendAlpha($strExplode[1]) . ',';
+
+                    $withoutAllsuperForLast = $strExplode[0] . ',' . $strExplode[1] . ',' . $strExplode[2] . ',';
+                    $replaceFirstSuperForLast = $strExplode[0] . $this->appendAlpha($strExplode[0]) . ',' . $strExplode[1] . ',' . $strExplode[2];
+                    $replaceSecondSuperForLast = $strExplode[0] . ',' . $strExplode[1] . $this->appendAlpha($strExplode[1]) . ',' . $strExplode[2];
+                    $replaceThirdSuperForLast = $strExplode[0] . ',' . $strExplode[1] . ',' . $strExplode[2] . $this->appendAlpha($strExplode[2]);
+                    // A 2 C
+                    $atwoc = $strExplode[0] . $this->appendAlpha($strExplode[0]) . ',' . $strExplode[1] . ',' . $strExplode[2] . $this->appendAlpha($strExplode[2]);
+                    // A B 3
+                    $abthree = $strExplode[0] . $this->appendAlpha($strExplode[0]) . ',' . $strExplode[1] . $this->appendAlpha($strExplode[1]) . ',' . $strExplode[2];
+                    // 1 B C
+                    $onebc = $strExplode[0] . ',' . $strExplode[1] . $this->appendAlpha($strExplode[1]) . ',' . $strExplode[2] . $this->appendAlpha($strExplode[2]);
+                    $replaceWholeForLastOnly = $strExplode[0] . $this->appendAlpha($strExplode[0]) . ',' . $strExplode[1] . $this->appendAlpha($strExplode[1]) . ',' . $strExplode[2] . $this->appendAlpha($strExplode[2]);
+                    if($strExplode[2] == "ALL"){
+                        return DB::table($this->table)
                             ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B 3 4
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1]. $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . "," . $strExplode[3])
+                            ->where("race_number",$raceNum)
                             ->where("race_date",$raceDate)
+                            ->where("bet","like",$withoutAllsuper . "%")
                             ->where("bet_type",$wagerType)
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceFirstSuper){
+                                $query->where("bet","like",$replaceFirstSuper . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceSecondSuper){
+                                $query->where("bet","like",$replaceSecondSuper . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceWholeSuper){
+                                $query->where("bet","like",$replaceWholeSuper . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceWholeSuper){ // X 2 ALL ALL
+                                $query->where("bet","like", $strExplode[0] . "X," . $strExplode[1] . ",%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceWholeSuper){ // 1 X ALL ALL
+                                $query->where("bet","like", $strExplode[0] . "," . $strExplode[1] . "X,%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceWholeSuper){ // X X ALL ALL
+                                $query->where("bet","like", $strExplode[0] . "X," . $strExplode[1] . "X,%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceWholeSuper){ // A X ALL ALL
+                                $query->where("bet","like", $strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "X,%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceWholeSuper){ // X B ALL ALL
+                                $query->where("bet","like", $strExplode[0] . "X," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . ",%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->get();
+                    }else{
+                        // LASTTTTTTTTT
+                        return DB::table($this->table)
                             ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 C 4
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3])
+                            ->where("race_number",$raceNum)
                             ->where("race_date",$raceDate)
+                            ->where("bet","like",$withoutAllsuperForLast . "%")
                             ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 3 D
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2] . "," . $strExplode[3] . $this->appendAlpha($strExplode[3]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A B 3 4
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . "," . $strExplode[3])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B C 4
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2]  . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 2 C D
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . "," . $strExplode[2]  . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3]  . $this->appendAlpha($strExplode[3]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // A 2 3 D
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . "," . $strExplode[2] . "," . $strExplode[3]  . $this->appendAlpha($strExplode[3]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // 1 B C 4
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[2] . $this->appendAlpha($strExplode[2]) . "," . $strExplode[3])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->get();
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceFirstSuperForLast){
+                                $query->where("bet","like",$replaceFirstSuperForLast . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceSecondSuperForLast){
+                                $query->where("bet","like",$replaceSecondSuperForLast . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceThirdSuperForLast){
+                                $query->where("bet","like",$replaceThirdSuperForLast . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$atwoc){
+                                $query->where("bet","like",$atwoc . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$abthree){
+                                $query->where("bet","like",$abthree . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$onebc){
+                                $query->where("bet","like",$onebc . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode,$replaceWholeForLastOnly){
+                                $query->where("bet","like",$replaceWholeForLastOnly . "%")
+                                    ->where("race_date",$raceDate)
+                                    ->where("bet_type",$wagerType)
+                                    ->where("race_track", $trkCode)
+                                    ->where("race_number",$raceNum);
+                            })
+                            ->get();
+                    }
+                }
                 break;
             case "quinella":
-                return DB::table($this->table)
-                    ->where("race_track", $trkCode)
-                    ->where("race_number",$raceNum)
-                    ->where("race_date",$raceDate)
-                    ->where("bet",$combination)
-                    ->where("bet_type",$wagerType)
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
+                if($strExplode[1] != "ALL"){
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet",$combination)
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // << START HERE REVERSED
+                            $query->where("bet",$strExplode[1] . "," . $strExplode[0])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // <<<<<<<<<<<<
+                            $query->where("bet",$strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[0])
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[1] . "," . $strExplode[0] . $this->appendAlpha($strExplode[0]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet",$strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[0] . $this->appendAlpha($strExplode[0]))
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }else{
+                    // Quinella ALL
+                    return DB::table($this->table)
+                        ->where("race_track", $trkCode)
+                        ->where("race_number",$raceNum)
+                        ->where("race_date",$raceDate)
+                        ->where("bet","like",$strExplode[0] . ",%") // 1 ALL
+                        ->where("bet_type",$wagerType)
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet","like",$strExplode[0] . $this->appendAlpha($strExplode[0]) . ",%") // ALL A
                             ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet","like",$strExplode[0] . "X,%") // X ALL
                             ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[0] . $this->appendAlpha($strExplode[0]) . "," . $strExplode[1] . $this->appendAlpha($strExplode[1]))
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet","like","%," . $strExplode[0]) // ALL 1
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet","like","%," . $strExplode[0] . $this->appendAlpha($strExplode[0])) // ALL A
+                                ->where("race_date",$raceDate)
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
+                            $query->where("bet","like","%,",$strExplode[0] . "X") // ALL X
                             ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // << START HERE REVERSED
-                        $query->where("bet",$strExplode[1] . "," . $strExplode[0])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){ // <<<<<<<<<<<<
-                        $query->where("bet",$strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[0])
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[1] . "," . $strExplode[0] . $this->appendAlpha($strExplode[0]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->orWhere(function($query) use ($raceDate,$trkCode,$raceNum,$wagerType,$strExplode){
-                        $query->where("bet",$strExplode[1] . $this->appendAlpha($strExplode[1]) . "," . $strExplode[0] . $this->appendAlpha($strExplode[0]))
-                            ->where("race_date",$raceDate)
-                            ->where("bet_type",$wagerType)
-                            ->where("race_track", $trkCode)
-                            ->where("race_number",$raceNum);
-                    })
-                    ->get();
+                                ->where("bet_type",$wagerType)
+                                ->where("race_track", $trkCode)
+                                ->where("race_number",$raceNum);
+                        })
+                        ->get();
+                }
                 break;
             default:
 
@@ -648,7 +1071,7 @@ class Bets extends Model
                 return "T";
                 break;
             default:
-                dd("Switch Default");
+                var_dump("Switch Default");
                 break;
         }
     }
@@ -660,7 +1083,15 @@ class Bets extends Model
     public function updateBet($dataArray,$id){
         unset($dataArray["created_at"]);
         unset($dataArray["updated_at"]);
-        $dataArray["status"] = 1;
+        if($dataArray["result"] == 0){
+            $dataArray["status"] = 0; // pending still
+        }else{
+            $dataArray["status"] = 1; // graded
+            $dataArray["grading_status"] = 1;
+        }
+        if($dataArray["result"] == 2 || $dataArray["result"] == 3){
+            $dataArray["win_amount"] = 0; // win_amount to 0 if lose or aborted
+        }
         return DB::table($this->table)
             ->where("id",$id)
             ->update($dataArray);
@@ -721,5 +1152,10 @@ class Bets extends Model
                 "result" => 0,
                 "win_amount" => 0
             ]);
+    }
+    public static function getBetInfoById($id){
+        return DB::table("bets")
+            ->where("id",$id)
+            ->first();
     }
 }

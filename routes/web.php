@@ -3,14 +3,34 @@ Route::match(array('GET','POST'),'/',function(\Illuminate\Http\Request $request)
     if (!isset($_SESSION)) session_start();
     if(isset($_POST["username"])){
         $_SESSION["username"] = $_POST["username"];
-        echo $_SESSION["username"];
         $url = $_POST["url"];
         // Determine DSN
-        if(strpos($url,'floyd') !== false){
-            $_SESSION["dsn"] = "floyd";
-        }else{
-
+        if(strpos($url,'webbet') !== false){
+            $_SESSION["dsn"] = "webbet";
+        }elseif(strpos($url,'floyd') !== false){
+            $_SESSION["dsn"] = "floyd";        // FLOYD
+        }elseif(strpos($url,'123confirm') !== false){
+            $_SESSION["dsn"] = "nanc";
+        }elseif(strpos($url,'myqualitychoice') !== false){
+            $_SESSION["dsn"] = "mqc";
+        }elseif(strpos($url,'abconfirm') !== false){
+            $_SESSION["dsn"] = "abc";
+        }elseif(strpos($url,'myoptions123') !== false){
+            $_SESSION["dsn"] = "myoptions";
+        }elseif(strpos($url,'backdoorbets') !== false){
+            $_SESSION["dsn"] = "backdoor";
+        }elseif(strpos($url,'daveyk') !== false){
+            $_SESSION["dsn"] = "daveyk";
+        }elseif(strpos($url,'luckspeed') !== false){
+            $_SESSION["dsn"] = "luck";
+        }elseif(strpos($url,'playlowpro') !== false){
+            $_SESSION["dsn"] = "lowpro";
+        }elseif(strpos($url,'duckhook365') !== false){
+            $_SESSION["dsn"] = "duckhook";
         }
+        echo $_SESSION["username"] . " " . $_SESSION["dsn"];
+        return redirect()->action("HomeController@dashboard");
+    }else{
         return redirect()->action("HomeController@dashboard");
     }
 })->name('/');
@@ -50,6 +70,9 @@ Route::post('dashboard/getPendingHome','AdminController@getPendingBetsHome');
 Route::post('dashboard/getPastHome','AdminController@getPastHome');
 Route::post('dashboard/balanceInquiry','AdminController@balanceInquiry');
 Route::post('dashboard/updateCurrentBet','AdminController@updateCurrentBet');
+Route::get('dashboard/results','HomeController@displayResults');
+Route::post('dashboard/getTracksByDate','HomeController@getTracksByDate');
+Route::post('dashboard/getResultsForDisplay','HomeController@getResultsForDisplay');
 Route::group(['middleware' => ['auth']],function(){
     // User
 //    Route::get('dashboard','HomeController@dashboard');

@@ -48,7 +48,7 @@
             <input type="hidden" name="operation" id="operation" value="0">
             <div class="col-md-3">
                 <div class="jumbotron text-center">
-                    <h1>TRACKS</h1>
+                    <h2>Step 1: TRACKS</h2>
                 </div>
                 <div class="form-group">
                     <div class="col-md-12">
@@ -70,13 +70,13 @@
                         <select class="form-control" id="racePerTrack" disabled name="racePerTrack">
                             <option selected disabled>-- Select Race Number --</option>
                         </select>
-                        <div id="loader" style="background:url({{asset("images/ajax-loader.gif")}}) no-repeat center center;width:100%;height:100px;position: absolute;z-index: 999;display: none"></div>
+                        <div id="loader" style="background:url({{asset("images/ajax-loaderred.gif")}}) no-repeat;position: fixed;top: 0;left: 0; bottom: 0;right: 0;z-index: 999;height: 8em; width: 8em;margin: auto;overflow: show;display: none"></div>
                     </div>
                 </div>
             </div>
             <div class="col-md-3">
                 <div class="jumbotron text-center">
-                    <h1>PAYOUT</h1>
+                    <h2>Step 3: PAYOUT</h2>
                 </div>
                 <div class="" id="payoutDiv">
                 </div>
@@ -85,24 +85,25 @@
             </div>
             <div class="col-md-3">
                 <div class="jumbotron text-center">
-                    <h1>HORSES</h1>
+                    <h2>Step 4: HORSES</h2>
                 </div>
-                <div>
-                    <label for="first">First Horse PP:</label>
-                    <input type="text" class="form-control" id="first" name="first">
-                </div>
-                <div>
-                    <label for="second">Second Horse PP:</label>
-                    <input type="text" class="form-control" id="second" name="second">
-                </div>
-                <div>
-                    <label for="third">Third Horse PP:</label>
-                    <input type="text" class="form-control" id="third" name="third">
-                </div>
-               <div>
-                   <label for="fourth">Fourth Horse PP:</label>
-                   <input type="text" class="form-control" id="fourth" name="fourth">
-               </div>
+                {{--<div>--}}
+                    {{--<label for="first">First Horse PP:</label>--}}
+                    {{--<input type="text" class="form-control" id="first" name="first">--}}
+                {{--</div>--}}
+                {{--<div>--}}
+                    {{--<label for="second">Second Horse PP:</label>--}}
+                    {{--<input type="text" class="form-control" id="second" name="second">--}}
+                {{--</div>--}}
+                {{--<div>--}}
+                    {{--<label for="third">Third Horse PP:</label>--}}
+                    {{--<input type="text" class="form-control" id="third" name="third">--}}
+                {{--</div>--}}
+               {{--<div>--}}
+                   {{--<label for="fourth">Fourth Horse PP:</label>--}}
+                   {{--<input type="text" class="form-control" id="fourth" name="fourth">--}}
+               {{--</div>--}}
+                <div id="resultDiv"></div>
                 <div>
                     <input type="button" class="form-control btn btn-primary" value="SAVE" style="margin-top: 30px;" id="btnSubmitResults">
                     <div id="resultsAlert"></div>
@@ -111,7 +112,7 @@
         </form>
         <div class="col-md-3">
             <div class="jumbotron text-center">
-                <h1>MINIMUM</h1>
+                <h2>Step 2: DIVIDEND</h2>
             </div>
             <div class="" id="minimumDiv">
 
@@ -239,8 +240,8 @@
                 ddPayout : {number:true},
 //                wPayout : {"required":true,number:true},
                 wPayout : {number:true},
-                "1pPayout" : {number:true},
-                "2pPayout" : {number:true},
+//                "1pPayout" : {number:true},
+//                "2pPayout" : {number:true},
 //                "1sPayout" : {"required":true,number:true},
 //                "2sPayout" : {"required":true,number:true},
 //                "3sPayout" : {"required":true,number:true},
@@ -255,15 +256,17 @@
             }
         });
         $("#btnSubmitResults").on("click", function(){
+            $("#loader").css("display","block");
             $("#frmResults").submit();
         });
         var optionsResults = {
             success: function(response){
                 if(response != 1){
-                    $("#payoutOperation").val("1"); // for suddeb=n update
                     var lastId = response;
                     $("#resultsAlert div").remove("");
-                    swal("Success",lastId,"success");
+                    swal("Success","Please don't CLOSE or REFRESH this tab while grading.","success");
+                    $("#payoutOperation").val("1"); // for suddeb=n update
+                    $("#operation").val(1);
                     // SUCCESSFULLY SAVED / UPDATED RESULT
                     $.ajax({
                         "url" : BASE_URL + "/getLatestResultID",
@@ -299,6 +302,7 @@
         };
         $("#frmResults").ajaxForm(optionsResults);
         $("#racePerTrack").on("change",function(){
+            $("#resultDiv").html(""); // clear result div
             $("#loader").css("display","block");
             var trk = $("#tracksToday").val();
             var date = $("#racedate").val();
@@ -336,11 +340,66 @@
                                 $("#second").val(res[1]);
                                 $("#third").val(res[2]);
                                 $("#fourth").val(res[3]);
+                                // New results here
+                                setTimeout(function(){
+                                    $.each(response[4],function(i,v){
+                                        switch(response[4][i]["wager"]){
+                                            case "exacta":
+                                                $("#exactaRes").val(v.race_winners);
+                                                break;
+                                            case "trifecta":
+                                                $("#trifectaRes").val(v.race_winners);
+                                                break;
+                                            case "superfecta":
+                                                $("#superfectaRes").val(v.race_winners);
+                                                break;
+                                            case "dailydouble":
+                                                $("#ddRes").val(v.race_winners);
+                                                break;
+                                            case "quinella":
+                                                $("#quinellaRes").val(v.race_winners);
+                                                break;
+                                            case "wps":
+                                                $("#wpsRes").val(v.race_winners);
+                                                break;
+                                        }
+                                    });
+                                },2000);
+                                // New results here
                                 $("#resultsAlert div").remove("");
                                 $("#btnSubmitResults").removeClass("btn-primary").addClass("btn-success").val("REGRADE");
                                 $("#resultsAlert div").remove("");
                                 $("#resultsAlert").append("<div class='jumbotron'><h1>Unmatched</h1></div>");
                             }
+                        }else{
+                            // if return is array and matched || result status = 1
+                            setTimeout(function(){
+                                $.each(response,function(i,v){
+                                    switch(response[i]["wager"]){
+                                        case "exacta":
+                                            $("#exactaRes").val(v.race_winners);
+                                            break;
+                                        case "trifecta":
+                                            $("#trifectaRes").val(v.race_winners);
+                                            break;
+                                        case "superfecta":
+                                            $("#superfectaRes").val(v.race_winners);
+                                            break;
+                                        case "dailydouble":
+                                            $("#ddRes").val(v.race_winners);
+                                            break;
+                                        case "quinella":
+                                            $("#quinellaRes").val(v.race_winners);
+                                            break;
+                                        case "wps":
+                                            $("#wpsRes").val(v.race_winners);
+                                            break;
+                                    }
+                                });
+                            },2000);
+                            $("#operation").val(1);
+                            $("#resultsAlert div").remove("");
+                            $("#btnSubmitResults").removeClass("btn-primary").addClass("btn-success").val("REGRADE");
                         }
                     }else{
                         // If there is a match
@@ -387,24 +446,28 @@
                                 $("#minimumDiv").append("<label for='exactaMinimum'>Exacta Minimum:</label><input type='text' class='form-control' placeholder='EXACTA' id='exactaMinimum' name='exactaMinimum'>");
 //                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='exacta' value='Cancel Exacta'>");
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='exacta' value='exacta' name='exacta'>Cancel Exacta</label></div>");
+                                $("#resultDiv").append("<div><label for='exactaRes'>Exacta Result:</label><input type='text' class='form-control' placeholder='EXACTA RESULT' id='exactaRes' name='exactaRes'></div>");
                                 break;
                             case "Trifecta":
                                 $("#payoutDiv").append("<div><label for='trifectaPayout'>Trifecta:</label><input type='text' class='form-control' placeholder='TRIFECTA' id='trifectaPayout' name='trifectaPayout'></div>");
                                 $("#minimumDiv").append("<label for='trifectaMinimum'>Trifecta Minimum:</label><input type='text' class='form-control' placeholder='TRIFECTA' id='trifectaMinimum' name='trifectaMinimum'>");
 //                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='trifecta' value='Cancel Trifecta'>");
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='trifecta' value='trifecta' name='trifecta'>Cancel Trifecta</label></div>");
+                                $("#resultDiv").append("<div><label for='trifectaRes'>Trifecta Result:</label><input type='text' class='form-control' placeholder='TRIFECTA RESULT' id='trifectaRes' name='trifectaRes'></div>");
                                 break;
                             case "Superfecta":
                                 $("#payoutDiv").append("<div><label for='superfectaPayout'>Superfecta:</label><input type='text' class='form-control' placeholder='SUPERFECTA' id='superfectaPayout' name='superfectaPayout'></div>");
                                 $("#minimumDiv").append("<label for='superfectaMinimum'>Superfecta Minimum:</label><input type='text' class='form-control' placeholder='SUPERFECTA' id='superfectaMinimum' name='superfectaMinimum'>");
 //                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='superfecta' value='Cancel Superfecta'>");
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='superfecta' value='superfecta' name='superfecta'>Cancel Superfecta</label></div>");
+                                $("#resultDiv").append("<div><label for='superfectaRes'>Superfecta Result:</label><input type='text' class='form-control' placeholder='SUPERFECTA RESULT' id='superfectaRes' name='superfectaRes'></div>");
                                 break;
                             case "Daily Double":
                                 $("#payoutDiv").append("<div><label for='ddPayout'>Daily Double:</label><input type='text' class='form-control' placeholder='DAILY DOUBLE' id='ddPayout' name='ddPayout'></div>");
                                 $("#minimumDiv").append("<label for='ddMinimum'>Daily Double Minimum:</label><input type='text' class='form-control' placeholder='DAILY DOUBLE' id='ddMinimum' name='ddMinimum'>");
 //                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='dailydouble'  value='Cancel DD'>");
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='dailydouble' value='dailydouble' name='dailydouble'>Cancel Daily Double</label></div>");
+                                $("#resultDiv").append("<div><label for='ddRes'>Daily Double Result:</label><input type='text' class='form-control' placeholder='DAILY DOUBLE RESULT' id='ddRes' name='ddRes'></div>");
                                 break;
                             case "WPS":
                                 $("#minimumDiv").append("<label for='wpsMinimum'>WPS Minimum:</label><input type='text' class='form-control' placeholder='WPS MINIMUM' id='wpsMinimum' name='wpsMinimum'>");
@@ -418,12 +481,14 @@
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='wps' value='wps' name='wps'>Cancel WPS</label></div>");
 //                                $("#cancelDiv").append("<input type='button' class='btn btn-default noShow' data-type='wps'  value='No Show'>");
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' value='noshow' name='noshow'>No SHOW</label></div>");
+                                $("#resultDiv").append("<div><label for='wpsRes'>WPS Result:</label><input type='text' class='form-control' placeholder='WPS RESULT' id='wpsRes' name='wpsRes'></div>");
                                 break;
                             case "Quinella" :
                                 $("#payoutDiv").append("<div><label for='quinellaPayout'>Quinella:</label><input type='text' class='form-control' placeholder='QUINELLA' id='quinellaPayout' name='quinellaPayout'></div>");
                                 $("#minimumDiv").append("<label for='quinellaMinimum'>Quinella Minimum:</label><input type='text' class='form-control' placeholder='QUINELLA' id='quinellaMinimum' name='quinellaMinimum'>");
 //                                $("#cancelDiv").append("<input type='button' class='btn btn-danger cancelWager' data-type='exacta' value='Cancel Exacta'>");
                                 $("#cancelDiv").append("<div class='checkbox'><label><input type='checkbox' class='checkbox' data-type='quinella' value='quinella' name='quinella'>Cancel Quinella</label></div>");
+                                $("#resultDiv").append("<div><label for='ddRes'>Quinella Result:</label><input type='text' class='form-control' placeholder='QUINELLA RESULT' id='quinellaRes' name='quinellaRes'></div>");
                                 break;
                             default:
 

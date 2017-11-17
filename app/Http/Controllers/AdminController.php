@@ -91,7 +91,8 @@ class AdminController extends Controller
             ];
             $logsArray = [
                 'user_id' => Auth::id(),
-                'action' => 'Update timezone of ' . $id
+//                'action' => 'Update timezone of ' . $id
+                'action' => 'Update timezone of ' . $request->input("name") . " to " . $request->input("selectTmz")
             ];
             $tmzModel->saveTimezone($dataArray);
             $logsModel->saveLog($logsArray);
@@ -163,7 +164,15 @@ class AdminController extends Controller
             'ddPayout' => $request->input("ddPayout"),
             'quinellaPayout' => $request->input("quinellaPayout")
         ];
-
+        // NEW UPATE
+        $resultArray = [
+            'exacta' => $request->input('exactaRes') != null ? $request->input('exactaRes') : '',
+            'trifecta' => $request->input('trifectaRes') != null ? $request->input('trifectaRes') : '',
+            'superfecta' => $request->input('superfectaRes') != null ? $request->input('superfectaRes') : '',
+            'dailydouble' => $request->input('ddRes') != null ? $request->input('ddRes') : '',
+            'quinella' => $request->input('quinellaRes') != null ? $request->input('quinellaRes') : '',
+            'wps' => $request->input('wpsRes') != null ? $request->input('wpsRes') : '',
+        ];
         $dataArray = [
             'track_code' => $request->input("tracksToday"),
             'race_number' => $request->input("racePerTrack"),
@@ -173,7 +182,8 @@ class AdminController extends Controller
             'fourth' => $request->input("fourth"),
 //            'race_date' => date('mdy', time())
             'race_date' => $request->input("raceDateInp"),
-            'payoutArray' => $payoutArray // For checking if matched to second entry
+            'payoutArray' => $payoutArray, // For checking if matched to second entry
+            'resultsArray' => $resultArray
         ];
         $resultModel = new Results();
         $payoutModel = new Payout();
@@ -197,12 +207,12 @@ class AdminController extends Controller
     public function checkResults(Request $request){
         $resultModel = new Results();
         $results = $resultModel->checkResults($request->input("trkCode"), $request->input("raceDate"), $request->input("raceNum"));
-        if($results){
-            if($results->status == 0){
+        if($results->count() > 0){
+            if($results[0]->status == 0){
                 // Not matched
-                return [1,Auth::id(),$results->graded_by,$results->race_winners]; // Results entered not match
+                return [1,Auth::id(),$results[0]->graded_by,$results[0]->race_winners,$results]; // Results entered not match
             }else{
-                return $results ? $results->race_winners : "";
+                return $results->count() > 0 ? $results : "";
             }
         }else{
             return "";
@@ -211,71 +221,114 @@ class AdminController extends Controller
     public function getLatestResultID(Request $request){
         $resultModel = new Results();
         $betsModel = new Bets();
-        $latestRecord = $resultModel->getLatestResult($request->input("lastId"));
-        $winningCombination = $latestRecord->first()->race_winners;
-        $trkCode = $latestRecord->first()->track_code;
-        $raceNum = $latestRecord->first()->race_number;
-        $raceDate = $latestRecord->first()->race_date;
+        $latestRecord = $request->input("lastId");
+//        $latestRecord = $resultModel->getLatestResult($request->input("lastId"));
+//        $winningCombination = $latestRecord->first()->race_winners;
+        $trkCode = $latestRecord[0]["track_code"];
+        $raceNum = $latestRecord[0]["race_number"];
+        $raceDate = $latestRecord[0]["race_date"];
+//        $trkCode = $latestRecord->first()->track_code;
+//        $raceNum = $latestRecord->first()->race_number;
+//        $raceDate = $latestRecord->first()->race_date;
         // Refresh
         AdminController::refreshResultsForRegrade($raceDate,$trkCode,$raceNum);
-        $explode = explode(",",$winningCombination);
-        $exacta = $explode[0] . "," . $explode[1];
-        $trifecta = $explode[0] . "," . $explode[1] . "," . $explode[2];
-        $superfecta = $winningCombination;
-        $w = $explode[0];
-        $p = [$explode[0],$explode[1]];
+        $explode = explode(",",$latestRecord["wps"]);
+//        $exacta = $explode[0] . "," . $explode[1];
+        $exacta = $latestRecord["exacta"];
+        $quinella = $latestRecord["quinella"];
+//        $trifecta = $explode[0] . "," . $explode[1] . "," . $explode[2];
+        $trifecta = $latestRecord["trifecta"];
+        $superfecta = $latestRecord["superfecta"];
+        $dailydouble = $latestRecord["dailydouble"];
+        $wps = $latestRecord["wps"];
         $execExacta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$exacta,"exacta");
         $execExactaBox = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$exacta,"exactabox");
-        $execTrifecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifecta");
-        $execTrifectaBox = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifectabox");
-        if($explode[3] != ""){
+
+        if($superfecta != ""){
             $execSuperfecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$superfecta,"superfecta");
             foreach ($execSuperfecta as $key => $value){
                 AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
             }
         }
-        $execW = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$w,"wps","w");
-        $exeP1 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[0],"wps","p");
-        $exeP2 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[1],"wps","p");
-        $exeS1 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[0],"wps","s");
-        $exeS2 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[1],"wps","s");
-        $exeS3 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[2],"wps","s");
-        $ddSecondRaceRes = $resultModel->getSecondRaceRes($trkCode,$raceNum,$raceDate);
-        $ddFirstRaceRes = $resultModel->getFirstRaceRes($trkCode,$raceNum,$raceDate);
-        $execQuinella = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$exacta,"quinella"); // explode $exacta
-                            //        if(empty($ddSecondRaceRes)){
-                            //
-                            //        }else{
-                            //            $secondRaceWinner = explode(",",$ddSecondRaceRes->race_winners);
-                            //            $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
-                            //            $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
-                            //            foreach ($exeDD as $key => $value){
-                            //                AdminController::updateBetStatus($value->id);
-                            //            }
-                            //        }
-        if(empty($ddFirstRaceRes)){
-
-        }else{
-            AdminController::refreshResultsForRegradeDD($raceDate,$trkCode,$raceNum);
-            $firstRaceWinner = explode(",",$ddFirstRaceRes->race_winners);
-            $ddCombination = $firstRaceWinner[0] . "," . $explode[0];
-            $exeDD = $betsModel->checkWinnersForDD($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
-            foreach ($exeDD as $key => $value){
+        if($trifecta != ""){
+            $execTrifecta = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifecta");
+            $execTrifectaBox = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$trifecta,"trifectabox");
+            foreach ($execTrifecta as $key => $value){
                 AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
             }
-            $ddRaceNum = $raceNum - 1;
-            AdminController::gradeWrongBets($raceDate,$trkCode,$ddRaceNum);
-        }
-        if($ddSecondRaceRes == ""){
-
-        }else{
-            $secondRaceWinner = explode(",",$ddSecondRaceRes->race_winners);
-            $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
-            $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
-            foreach ($exeDD as $key => $value){
+            foreach ($execTrifectaBox as $key => $value){
                 AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
             }
         }
+        if($wps != ""){
+            $w = $explode[0];
+            $p = [$explode[0],$explode[1]];
+
+            $execW = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$w,"wps","w");
+            $exeP1 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[0],"wps","p");
+            $exeP2 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$p[1],"wps","p");
+            $exeS1 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[0],"wps","s");
+            $exeS2 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[1],"wps","s");
+            $exeS3 = $betsModel->checkWps($trkCode,$raceDate,$raceNum,$explode[2],"wps","s");
+
+            foreach ($execW as $key => $value){
+                AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"w",$value->race_number);
+            }
+            foreach ($exeP1 as $key => $value){
+                AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p1",$value->race_number);
+            }
+            foreach ($exeP2 as $key => $value){
+                AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p2",$value->race_number);
+            }
+            foreach ($exeS1 as $key => $value){
+                AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s1",$value->race_number);
+            }
+            foreach ($exeS2 as $key => $value){
+                AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s2",$value->race_number);
+            }
+            foreach ($exeS3 as $key => $value){
+                AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s3",$value->race_number);
+            }
+        }
+//        $ddSecondRaceRes = $resultModel->getSecondRaceRes($trkCode,$raceNum,$raceDate);
+//        $ddFirstRaceRes = $resultModel->getFirstRaceRes($trkCode,$raceNum,$raceDate);
+        if($quinella != null){
+            $execQuinella = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$quinella,"quinella"); // explode $exacta
+            foreach ($execQuinella as $key => $value){
+                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
+            }
+        }
+        if($dailydouble != null){
+            $raceNumLessOne = $raceNum - 1; // Less One
+            $execDailyDouble = $betsModel->checkWinners($trkCode,$raceDate,$raceNumLessOne,$dailydouble,"dailydouble");
+            foreach ($execDailyDouble as $key => $value){
+                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
+            }
+            AdminController::gradeWrongBetsDD($raceDate,$trkCode,$raceNumLessOne);
+        }
+//        if(empty($ddFirstRaceRes)){
+//
+//        }else{
+//            AdminController::refreshResultsForRegradeDD($raceDate,$trkCode,$raceNum);
+//            $firstRaceWinner = explode(",",$ddFirstRaceRes->race_winners);
+//            $ddCombination = $firstRaceWinner[0] . "," . $explode[0];
+//            $exeDD = $betsModel->checkWinnersForDD($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
+//            foreach ($exeDD as $key => $value){
+//                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
+//            }
+//            $ddRaceNum = $raceNum - 1;
+//            AdminController::gradeWrongBets($raceDate,$trkCode,$ddRaceNum); ########################################################### <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+//        }
+//        if($ddSecondRaceRes == ""){
+//
+//        }else{
+//            $secondRaceWinner = explode(",",$ddSecondRaceRes->race_winners);
+//            $ddCombination = $explode[0] . "," . $secondRaceWinner[0];
+//            $exeDD = $betsModel->checkWinners($trkCode,$raceDate,$raceNum,$ddCombination,"dailydouble");
+//            foreach ($exeDD as $key => $value){
+//                AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
+//            }
+//        }
         // Set Results -------------------------------------------------------------------------------------------------
         foreach ($execExacta as $key => $value){
             AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
@@ -283,44 +336,13 @@ class AdminController extends Controller
         foreach ($execExactaBox as $key => $value){
             AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
         }
-        foreach ($execTrifecta as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
-        }
-        foreach ($execTrifectaBox as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
-        }
 //        foreach ($execSuperfecta as $key => $value){
 //            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
 //        }
-        foreach ($execW as $key => $value){
-//            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"w",$value->race_number);
-        }
-        foreach ($exeP1 as $key => $value){
-//            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p1",$value->race_number);
-        }
-        foreach ($exeP2 as $key => $value){
-//            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"p2",$value->race_number);
-        }
-        foreach ($exeS1 as $key => $value){
-//            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s1",$value->race_number);
-        }
-        foreach ($exeS2 as $key => $value){
-//            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s2",$value->race_number);
-        }
-        foreach ($exeS3 as $key => $value){
-//            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type);
-            AdminController::updateBetStatusWPS($value->id,$value->bet_amount,"s3",$value->race_number);
-        }
-        foreach ($execQuinella as $key => $value){
-            AdminController::updateBetStatus($value->id,$value->bet_amount,$value->bet_type,$value->race_number);
-        }
         // Set Defeat
         AdminController::gradeWrongBets($raceDate,$trkCode,$raceNum);
+        AdminController::totalBalance();
+        AdminController::totalRSLT();
         // Grade pending DD bETS
         if(empty($ddFirstRaceRes)){
             $betsModel->gradePendingDD([
@@ -413,7 +435,7 @@ class AdminController extends Controller
 //                $minimum = $temp->exacta == null ? 2 : $temp->exacta;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->exacta;
-                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round((str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -424,7 +446,7 @@ class AdminController extends Controller
 //                $minimum = $temp->exacta == null ? 2 : $temp->exacta;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->exacta;
-                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round((str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -435,7 +457,7 @@ class AdminController extends Controller
 //                $minimum = $temp->trifecta == null ? 2 : $temp->trifecta;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->trifecta;
-                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round((str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -446,7 +468,7 @@ class AdminController extends Controller
 //                $minimum = $temp->trifecta == null ? 2 : $temp->trifecta;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->trifecta;
-                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round((str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -457,7 +479,7 @@ class AdminController extends Controller
 //                $minimum = $temp->superfecta == null ? 2 : $temp->superfecta;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->superfecta;
-                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round((str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -485,7 +507,7 @@ class AdminController extends Controller
                 $payout = json_decode($payoutContent->content)->ddPayout;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->dailydouble;
-                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round((str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -495,7 +517,7 @@ class AdminController extends Controller
                 $payout = json_decode($payoutContent->content)->quinellaPayout;
                 if($payout != null){
                     $minimum = $temp == null ? 2 : $temp->quinella;
-                    $dataArray["win_amount"] = (str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round((str_replace(',','',$payout) - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -505,8 +527,10 @@ class AdminController extends Controller
                 $dataArray["win_amount"] = 0;
                 break;
         }
-        AdminController::returnBalance($bets->player_id,$betAmount,$bets->grading_status,$bets->dsn);
-        AdminController::computerRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
+//        AdminController::returnBalance($bets->player_id,$betAmount,$bets->grading_status,$bets->dsn);
+        AdminController::collectBalance($bets->player_id,$bets->bet_amount,$bets->grading_status,$bets->dsn);
+        AdminController::collectRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
+//        AdminController::computerRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
         return DB::table("bets")
             ->where("id", $id)
             ->update($dataArray);
@@ -530,11 +554,17 @@ class AdminController extends Controller
             ->where("status",0)
             ->get();
         foreach ($loseBets as $index => $value){
-            if($value->grading_status == 0){
-                AdminController::returnBalance($value->player_id,$value->bet_amount,$value->grading_status,$value->dsn);
-                AdminController::computerRSLT($value->player_id,$value->bet_amount,$value->grading_status,$value->race_date,"subtract",$value->dsn);
+            if($value->bet_type != "dailydouble" and $value->race_number == $raceNum){
+                if($value->grading_status == 0){
+//                    AdminController::returnBalance($value->player_id,$value->bet_amount,$value->grading_status,$value->dsn);
+                    AdminController::collectBalance($value->player_id,$value->bet_amount,$value->grading_status,$value->dsn);
+                    AdminController::collectRSLT($value->player_id,$value->bet_amount,$value->grading_status,$value->race_date,"subtract",$value->dsn);
+//                    AdminController::computerRSLT($value->player_id,$value->bet_amount,$value->grading_status,$value->race_date,"subtract",$value->dsn);
+                }
+                DB::table("bets")->where('id',$value->id)->update($dataArray);
+            }else{
+//                echo $value->race_number . " " . $value->id . " " . $value->bet_type . " " . $value->player_id;
             }
-            DB::table("bets")->where('id',$value->id)->update($dataArray);
         }
 
     }
@@ -614,7 +644,7 @@ class AdminController extends Controller
         $dataArray = [
             "status" => 1,
             "result" => 1, // 1 for win
-            "win_amount" => "",
+            "win_amount" => 0,
             "grading_status" => 1
         ];
         $bets = DB::table("bets")->where("id",$id)->first();
@@ -633,7 +663,7 @@ class AdminController extends Controller
             case "w":
                 $payout = json_decode($payoutContent->content)->wPayout;
                 if($payout != null){
-                    $dataArray["win_amount"] = str_replace(',','',$payout - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round(str_replace(',','',$payout - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -642,7 +672,7 @@ class AdminController extends Controller
             case "p1":
                 $payout = json_decode($payoutContent->content, true);
                 if($payout != null){
-                    $dataArray["win_amount"] = str_replace(',','',$payout["1pPayout"] - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round(str_replace(',','',$payout["1pPayout"] - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -651,7 +681,7 @@ class AdminController extends Controller
             case "p2":
                 $payout = json_decode($payoutContent->content, true);
                 if($payout != null){
-                    $dataArray["win_amount"] = str_replace(',','',$payout["2pPayout"] - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round(str_replace(',','',$payout["2pPayout"] - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -660,7 +690,7 @@ class AdminController extends Controller
             case "s1":
                 $payout = json_decode($payoutContent->content, true);
                 if($payout != null){
-                    $dataArray["win_amount"] = str_replace(',','',$payout["1sPayout"] - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round(str_replace(',','',$payout["1sPayout"] - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -669,7 +699,7 @@ class AdminController extends Controller
             case "s2":
                 $payout = json_decode($payoutContent->content, true);
                 if($payout != null){
-                    $dataArray["win_amount"] = str_replace(',','',$payout["2sPayout"] - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round(str_replace(',','',$payout["2sPayout"] - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -678,7 +708,7 @@ class AdminController extends Controller
             case "s3":
                 $payout = json_decode($payoutContent->content, true);
                 if($payout != null){
-                    $dataArray["win_amount"] = str_replace(',','',$payout["3sPayout"] - $minimum) * ($betAmount / $minimum);
+                    $dataArray["win_amount"] = round(str_replace(',','',$payout["3sPayout"] - $minimum) * ($betAmount / $minimum));
                 }else{
                     $dataArray["win_amount"] = 0;
                     $dataArray["result"] = 4;
@@ -688,8 +718,10 @@ class AdminController extends Controller
                 $dataArray["win_amount"] = 0;
                 break;
         }
-        AdminController::returnBalance($bets->player_id,$betAmount,$bets->grading_status,$bets->dsn);
-        AdminController::computerRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
+//        AdminController::returnBalance($bets->player_id,$betAmount,$bets->grading_status,$bets->dsn);
+        AdminController::collectBalance($bets->player_id,$bets->bet_amount,$bets->grading_status,$bets->dsn);
+        AdminController::collectRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
+//        AdminController::computerRSLT($bets->player_id,$dataArray["win_amount"],$bets->grading_status,$bets->race_date,"add",$bets->dsn);
         return DB::table("bets")
             ->where("id", $id)
             ->update($dataArray);
@@ -841,64 +873,159 @@ class AdminController extends Controller
         date_default_timezone_set('America/Los_Angeles');
         $pacificDate = date('Y-m-d H:i:s', time());
         $raceDate = date('mdy',time());
-        if($request->input("fourth") != null){
-            $betString = $request->input("first") . ',' . $request->input("second") . ',' . $request->input("third") . ',' . $request->input("fourth");
-        }else if($request->input("third") != null){
-            $betString = $request->input("first") . ',' . $request->input("second") . ',' . $request->input("third");
-        }else if($request->input("second") != null){
-            $betString = $request->input("first") . ',' . $request->input("second");
-        }else if($request->input("first") != null){
-            $betString = $request->input("first");
-        }
-        if($request->input("wager") == "w" || $request->input("wager") == "p" || $request->input("wager") == "s"){
-            $wager = "wps";
+        $username = $request->input("player_id");
+        $betAmount = $request->input("amount");
+        $dsn = $request->input("dsn");
+        $currentBalance = AdminController::balanceInquiryAdmin($username,$dsn);
+        if($betAmount < $currentBalance) {
+            if ($request->input("fourth") != null) {
+                $betString = $request->input("first") . ',' . $request->input("second") . ',' . $request->input("third") . ',' . $request->input("fourth");
+            } else if ($request->input("third") != null) {
+                $betString = $request->input("first") . ',' . $request->input("second") . ',' . $request->input("third");
+            } else if ($request->input("second") != null) {
+                $betString = $request->input("first") . ',' . $request->input("second");
+            } else if ($request->input("first") != null) {
+                $betString = $request->input("first");
+            }
+            if ($request->input("wager") == "w" || $request->input("wager") == "p" || $request->input("wager") == "s") {
+                $wager = "wps";
+            } else {
+                $wager = $request->input("wager");
+            }
+            if ($request->input("wager") == "w") {
+                $type = "w";
+            } else if ($request->input("wager") == "p") {
+                $type = "p";
+            } else if ($request->input("wager") == "s") {
+                $type = "s";
+            } else {
+                $type = "x";
+            }
+//            $betArray = [
+//                'player_id' => $username,
+//                'race_number' => $request->input("raceNum"),
+//                'race_track' => $request->input("raceTrack"),
+//                'bet_type' => $wager,
+//                'bet_amount' => $betAmount,
+//                'type' => $type,
+//                'bet' => $betString,
+//                'status' => '0',
+//                'created_at' => $pacificDate,
+//                'updated_at' => $pacificDate,
+//                'race_date' => $raceDate,
+//                'result' => $request->input("result"),
+//                'win_amount' => $request->input("winamount"),
+//                'dsn' => $request->dsn,
+//            ];
+            $betsModel = new Bets();
+            $logsModel = new Logs();
+            if ($request->input("betsOperation") == 0){
+                $betArray = [
+                    'player_id' => $username,
+                    'race_number' => $request->input("raceNum"),
+                    'race_track' => $request->input("raceTrack"),
+                    'bet_type' => $wager,
+                    'bet_amount' => $betAmount,
+                    'type' => $type,
+                    'bet' => $betString,
+                    'status' => '0',
+                    'created_at' => $pacificDate,
+                    'updated_at' => $pacificDate,
+                    'race_date' => $raceDate,
+                    'result' => $request->input("result"),
+                    'win_amount' => $request->input("winamount"),
+                    'dsn' => $request->dsn,
+                ];
+                $res = $betsModel->saveNewBet($betArray);
+                $negativeBetAmount = $betAmount - ($betAmount * 2);
+                AdminController::updateOdbc($negativeBetAmount,$username,"addBet","worthless",$dsn);
+                $logsArray = [
+                    'user_id' => Auth::id(),
+                    'action' => 'Save new Bet: Race'. $request->input("raceNum") . $request->input("raceTrack") . $betAmount . $username . $dsn
+                ];
+            } else if ($request->input("betsOperation") == 1){
+                $betArray = [
+                    'player_id' => $username,
+                    'race_number' => $request->input("raceNum"),
+                    'race_track' => $request->input("raceTrack"),
+                    'bet_type' => $wager,
+                    'bet_amount' => $betAmount,
+                    'type' => $type,
+                    'bet' => $betString,
+                    'status' => '0',
+                    'created_at' => $pacificDate,
+                    'updated_at' => $pacificDate,
+                    'race_date' => $request->input("race_date"),
+                    'result' => $request->input("result"),
+                    'win_amount' => $request->input("winamount"),
+                    'dsn' => $request->dsn,
+                ];
+                $logsArray = [
+                    'user_id' => Auth::id(),
+                    'action' => 'Update Bet => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " " . $request->input("winamount") . " " . $dsn
+                ];
+                $betInfo = Bets::getBetInfoById($request->input("betId"));
+                if($betInfo->bet_amount != $betArray["bet_amount"]){
+                    // if bet_amount is changed || must update cust.dbf
+                    // $betInfo->bet_amount = previous bet &&  $betArray["bet_amount"] = new betAmount
+                    $newBet = $betInfo->bet_amount - $betArray["bet_amount"];
+                    AdminController::updateOdbc($newBet,$username,"addBet","worthless",$dsn);
+                }
+                $res = $betsModel->updateBet($betArray, $request->input("betId"));
+                if($betInfo->status == 0 && $request->input("result") == 1 && $betInfo->grading_status == 0){
+                    // Pending to Win
+                    AdminController::updateOdbc($request->input("winamount"),$username,"pendingToWin",$betInfo->race_date,$dsn);
+                    AdminController::updateOdbc($betAmount,$username,"addBet","worthless",$dsn);
+                    $logsArray["action"] = 'Update Bet : Pending to Win => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " +" . $request->input("winamount") . " " . $dsn;
+                }else if($betInfo->status == 0 && $request->input("result") == 2  && $betInfo->grading_status == 0){
+                    // Pending to Lose
+                    AdminController::updateOdbc($betAmount,$username,"pendingToLose",$betInfo->race_date,$dsn);
+                    AdminController::updateOdbc($betAmount,$username,"addBet","worthless",$dsn);
+                    $logsArray["action"] = 'Update Bet : Pending to Lose => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " -" . $betAmount . " " . $dsn;
+                }
+                else if($betInfo->status == 1 && $betInfo->result == 2 && $request->input("result") == 1  && $betInfo->grading_status == 1){
+                    // Lose to win
+                    $arr = [$betAmount,$request->input("winamount")];
+                    AdminController::updateOdbc($arr,$username,"loseToWin",$betInfo->race_date,$dsn);
+                    $logsArray["action"] = 'Update Bet : Lose to Win => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " +" . $request->input("winamount") ." +". $betAmount . " " . $dsn;
+                }
+                else if($betInfo->status == 1 && $betInfo->result == 1 && $request->input("result") == 2  && $betInfo->grading_status == 1){
+                    // Win to lose
+                    $arr = [$betAmount,$betInfo->win_amount];
+                    AdminController::updateOdbc($arr,$username,"winToLose",$betInfo->race_date,$dsn);
+                    $logsArray["action"] = 'Update Bet : Win to Lose => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " -" . $request->input("winamount") . " -" . $betAmount . " " . $dsn;
+                }
+                else if($betInfo->status == 1 && $betInfo->result == 1 && $request->input("result") == 3  && $betInfo->grading_status == 1){
+                    // Win to Aborted
+                    $arr = [$betAmount,$betInfo->win_amount];
+                    AdminController::updateOdbc($arr,$username,"winToAborted",$betInfo->race_date,$dsn);
+                    $logsArray["action"] = 'Update Bet : Win to Abort => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " -" . $request->input("winamount") . " " . $dsn;
+                }
+                else if($betInfo->status == 1 && $betInfo->result == 2 && $request->input("result") == 3  && $betInfo->grading_status == 1){
+                    // Lose to Aborted
+                    $arr = [$betAmount,$betInfo->win_amount];
+                    AdminController::updateOdbc($arr,$username,"loseToAborted",$betInfo->race_date,$dsn);
+                    $logsArray["action"] = 'Update Bet : Lose to Abort => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " +" . $betAmount . " " . $dsn;
+                }
+                else if($betInfo->status == 1 && $betInfo->result == 4 && $request->input("result") == 3  && $betInfo->grading_status == 0){
+                    // NoPayout to Aborted
+                    AdminController::updateOdbc($betAmount,$username,"noPayoutToAborted",$betInfo->race_date,$dsn);
+                }
+                else if($betInfo->status == 1 && $betInfo->result == 3 && $request->input("result") == 1  && $betInfo->grading_status == 1){
+                    // Aborted to Win
+                    $arr = [$betAmount,$request->input("winamount")];
+                    AdminController::updateOdbc($arr,$username,"AbortedToWin",$betInfo->race_date,$dsn);
+                    $logsArray["action"] = 'Update Bet : Abort to Win => ' . $request->input("betId") . " " . $request->input("raceTrack") . " Race " . $request->input("raceNum") . "; " . $username . " +" . $request->input("winamount") . " " . $dsn;
+                }
+            }
+            $logsModel->saveLog($logsArray);
+            if ($res) {
+                return 0;
+            } else {
+                return 1;
+            }
         }else{
-            $wager = $request->input("wager");
-        }
-        if($request->input("wager") == "w"){
-            $type = "w";
-        }else if($request->input("wager") == "p"){
-            $type = "p";
-        }else if($request->input("wager") == "s"){
-            $type = "s";
-        }else{
-            $type = "x";
-        }
-        $betArray = [
-            'player_id' => $request->input("player_id"),
-            'race_number' => $request->input("raceNum"),
-            'race_track' => $request->input("raceTrack"),
-            'bet_type' => $wager,
-            'bet_amount' => $request->input("amount"),
-            'type' => $type,
-            'bet' => $betString,
-            'status' => '0',
-            'created_at' => $pacificDate,
-            'updated_at' => $pacificDate,
-            'race_date' => $raceDate,
-            'result' => $request->input("result"),
-            'win_amount' => $request->input("winamount")
-        ];
-        $betsModel = new Bets();
-        $logsModel = new Logs();
-        if($request->input("betsOperation") == 0){
-            $res = $betsModel->saveNewBet($betArray);
-            $logsArray = [
-                'user_id' => Auth::id(),
-                'action' => 'Save new Bet'
-            ];
-        }else if($request->input("betsOperation") == 1){
-            $res = $betsModel->updateBet($betArray,$request->input("betId"));
-            $logsArray = [
-                'user_id' => Auth::id(),
-                'action' => 'Update Bet => ' . $request->input("betId")
-            ];
-        }
-        $logsModel->saveLog($logsArray);
-        if($res){
-            return 0;
-        }else{
-            return 1;
+            return 2; // balance not enough
         }
     }
     public function undoScratch(Request $request){
@@ -1071,7 +1198,10 @@ class AdminController extends Controller
             "type" => $res->type,
             "bet" => $res->bet,
             "result" => $res->result,
-            "win_amount" => $res->win_amount
+            "win_amount" => $res->win_amount,
+            "grading_status" => $res->grading_status,
+            "dsn" => $res->dsn,
+            "race_date" => $res->race_date
         ];
         return $aArray;
     }
@@ -1099,14 +1229,19 @@ class AdminController extends Controller
         foreach ($betsBySelectedDate as $index => $value){
             if($value->result == 0){
                 $res = "Null";
+                $winAmount = number_format($value->win_amount,2);
             }elseif($value->result == 1){
                 $res = "Win";
+                $winAmount = number_format($value->win_amount,2);
             }elseif($value->result == 2){
                 $res = "Lose";
+                $winAmount = '-' . number_format($value->bet_amount,2);
             }elseif($value->result == 3){
                 $res = "Aborted";
+                $winAmount = number_format($value->win_amount,2);
             }elseif($value->result == 4){
                 $res = "NoPayout";
+                $winAmount = number_format($value->win_amount,2);
             }
             $tempArr = [
 //                'player_id' => AdminController::getUsernameById($value->player_id)->firstname,
@@ -1114,11 +1249,12 @@ class AdminController extends Controller
                 'race_number' => "Race " . $value->race_number,
                 'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
                 'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
-                'bet_amount' => $value->bet_amount,
+                'bet_amount' => number_format($value->bet_amount,2),
                 'bet' => str_replace(',','-',$value->bet),
                 'status' => $value->status === 0 ? "Pending" : "Graded",
                 'result' => $res,
-                'win_amount' => number_format($value->win_amount,2),
+//                'win_amount' => number_format($value->win_amount,2),
+                'win_amount' => $winAmount,
                 'created_at' => $value->created_at,
                 'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
             ];
@@ -1152,7 +1288,7 @@ class AdminController extends Controller
                 'race_number' => "Race " . $value->race_number,
                 'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
                 'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
-                'bet_amount' => $value->bet_amount,
+                'bet_amount' => number_format($value->bet_amount,2),
                 'bet' => str_replace(',','-',$value->bet),
                 'status' => $value->status === 0 ? "Pending" : "Graded",
                 'result' => $res,
@@ -1191,7 +1327,7 @@ class AdminController extends Controller
                 'race_number' => "Race " . $value->race_number,
                 'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
                 'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
-                'bet_amount' => $value->bet_amount,
+                'bet_amount' => number_format($value->bet_amount,2),
                 'bet' => str_replace(',','-',$value->bet),
                 'status' => $value->status === 0 ? "Pending" : "Graded",
                 'result' => $res,
@@ -1215,14 +1351,19 @@ class AdminController extends Controller
         foreach ($betsBySelectedDate as $index => $value){
             if($value->result == 0){
                 $res = "Null";
+                $winAmount = number_format($value->win_amount,2);
             }elseif($value->result == 1){
                 $res = "Win";
+                $winAmount = number_format($value->win_amount,2);
             }elseif($value->result == 2){
                 $res = "Lose";
+                $winAmount = '-' . number_format($value->bet_amount,2);
             }elseif($value->result == 3){
                 $res = "Aborted";
+                $winAmount = number_format($value->win_amount,2);
             }elseif($value->result == 4){
                 $res = "NoPayout";
+                $winAmount = number_format($value->win_amount,2);
             }
             $tempArr = [
 //                'player_id' => AdminController::getUsernameById($value->player_id)->firstname,
@@ -1230,11 +1371,12 @@ class AdminController extends Controller
                 'race_number' => "Race " . $value->race_number,
                 'race_track' => Tracks::getTrackNameWithCode($value->race_track)->name,
                 'bet_type' => $value->bet_type === "wps" ? $value->type : $value->bet_type,
-                'bet_amount' => $value->bet_amount,
+                'bet_amount' => number_format($value->bet_amount,2),
                 'bet' => str_replace(',','-',$value->bet),
                 'status' => $value->status === 0 ? "Pending" : "Graded",
                 'result' => $res,
-                'win_amount' => number_format($value->win_amount,2),
+//                'win_amount' => number_format($value->win_amount,2),
+                'win_amount' => $winAmount,
                 'created_at' => $value->created_at,
                 'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
             ];
@@ -1365,27 +1507,6 @@ class AdminController extends Controller
         }
     }
     public static function findDSN($NAME){
-//        $findQuery = "select * from cust.dbf as a where a.NAME = '". $NAME ."'";
-//        $defaultODBC = odbc_connect("cust","","");
-//        $defaultExec = odbc_exec($defaultODBC,$findQuery);
-//        $items = 0;
-//        while ($row = odbc_fetch_array($defaultExec)) {
-//            $items++;
-//        }
-//        if($items == 0){
-//            $defaultODBC = odbc_connect("Bcust","","");
-//            $defaultExec = odbc_exec($defaultODBC,$findQuery);
-//            while ($row = odbc_fetch_array($defaultExec)) {
-//                $items++;
-//            }
-//            if($items == 0){
-//
-//            }else{
-//                echo "Bcust";
-//            }
-//        }else{
-//            echo "cust";
-//        }
         return "cust";
     }
     public static function returnBalance($id,$betAmount,$gradingStatus,$dsn){
@@ -1404,6 +1525,7 @@ class AdminController extends Controller
     }
     public static function computerRSLT($id,$winAmount,$gradingStatus,$date,$operation,$dsn){
         if($gradingStatus == 0){
+            $office = "Office";
             $odbc = odbc_connect($dsn,'','');
             $splitStr = str_split($date,2);
             $newDateStr = $splitStr[2] . $splitStr[0] . $splitStr[1];
@@ -1433,18 +1555,280 @@ class AdminController extends Controller
                     break;
             }
             $selectQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($id) ."'";
+            $officeSelectQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($office) ."'";
             $selectResult = odbc_exec($odbc,$selectQuery);
+            $officeSelectResult = odbc_exec($odbc,$officeSelectQuery);
             while($row = odbc_fetch_array($selectResult)){
                 $oldRSLT = $row[$RSLT];
             }
+            while($row = odbc_fetch_array($officeSelectResult)){
+                $officeOldRSLT = $row[$RSLT];
+            }
             if($operation == "add"){
                 $newRSLT = $oldRSLT + $winAmount;
+                $officeNewRSLT = $officeOldRSLT + ($winAmount * -1);
+//                $newBALANCE = $oldBALANCE + $winAmount;
             }elseif ($operation == "subtract"){
                 $newRSLT = $oldRSLT - $winAmount;
+//                $newBALANCE = $oldBALANCE - $winAmount;
             }
             $updateQuery = "update cust.dbf as a set ". $RSLT ." = '". $newRSLT ."' where ucase(NAME) = '". strtoupper($id) ."' ";
+            $officeUpdateQuery = "update cust.dbf as a set ". $RSLT ." = '". $officeNewRSLT ."' where ucase(NAME) = '". strtoupper($office) ."' ";
             odbc_exec($odbc,$updateQuery);
+            odbc_exec($odbc,$officeUpdateQuery);
+//            if($operation == "subtract"){
+//                $test = odbc_exec($odbc,"select * from cust.dbf as a where ucase(NAME) = '". strtoupper($id) ."'");
+//                while($row = odbc_fetch_array($test)){
+//                    dd($row["BALANCE"]);
+//                }
+//            }
             odbc_close($odbc);
+        }
+    }
+    public static function gradeWrongBetsDD($raceDate,$trackCode, $raceNumLessOne){
+        $dataArray = [
+            "status" => 1,
+            "result" => 2, // 2 for lose
+            "grading_status" => 1
+        ];
+        $loseBets =  DB::table("bets")
+            ->where("race_track",$trackCode)
+            ->where("race_date",$raceDate)
+            ->where("race_number", $raceNumLessOne)
+            ->where("status",0)
+            ->where("bet_type","dailydouble")
+            ->get();
+        foreach ($loseBets as $index => $value){
+            if($value->grading_status == 0){
+//                AdminController::returnBalance($value->player_id,$value->bet_amount,$value->grading_status,$value->dsn);
+                AdminController::collectBalance($value->player_id,$value->bet_amount,$value->grading_status,$value->dsn);
+                AdminController::collectRSLT($value->player_id,$value->bet_amount,$value->grading_status,$value->race_date,"subtract",$value->dsn);
+//                AdminController::computerRSLT($value->player_id,$value->bet_amount,$value->grading_status,$value->race_date,"subtract",$value->dsn);
+            }
+            DB::table("bets")->where('id',$value->id)->update($dataArray);
+
+        }
+
+    }
+    public static $usernameArray = [];
+    public static $usernameArrayForRSLT = [];
+    public static function collectBalance($player_id,$betAmount,$grading_status,$dsn){
+        if($grading_status == 0){
+            array_push(self::$usernameArray,["name" => $player_id,"betAmount" => $betAmount,"dsn" => $dsn]);
+        }
+    }
+    public static function collectRSLT($player_id,$betAmount,$grading_status,$date,$operation,$dsn){
+        if($grading_status == 0){
+            array_push(self::$usernameArrayForRSLT,["name" => $player_id,"betAmount" => $betAmount,"dsn" => $dsn,"date" => $date, "operation" => $operation]);
+        }
+    }
+    public static function totalBalance(){
+//        $names = ["shawn" => 0,"test" => 0];
+        $names = [];
+        foreach(self::$usernameArray as $index => $value){
+            if (array_key_exists($value["name"],$names)) {
+//                echo "Key exists!" . $value["name"] . "<br/>";
+            }
+            else {
+                $names[$value["name"]] = [0,$value["dsn"]];
+            }
+        }
+        foreach(self::$usernameArray as $index => $value){
+//            echo $names[$value["name"]] . $value["name"] . "+" . $value["betAmount"] . "<br/>";
+            $names[$value["name"]][0] += $value["betAmount"];
+        }
+//        dd(self::$usernameArray);
+//        dd($names);
+        foreach ($names as $key => $val){
+            AdminController::returnBalance($key,$val[0],0,$val[1]);
+        }
+    }
+    public static function totalRSLT(){
+        $names = [];
+        foreach(self::$usernameArrayForRSLT as $index => $value){
+            if (array_key_exists($value["name"],$names)) {
+
+            }
+            else {
+                $names[$value["name"]] = [0,$value["dsn"],$value["date"]];
+            }
+        }
+        foreach(self::$usernameArrayForRSLT as $index => $value){
+            echo $value["operation"] . $value["betAmount"] . $value["name"] . "<br/>";
+            if($value["operation"] == "add"){
+                $names[$value["name"]][0] += $value["betAmount"];
+//                echo $names[$value["name"]][0] . " PLUS " . "<br/>";
+            }elseif ($value["operation"] == "subtract"){
+                $names[$value["name"]][0] -= $value["betAmount"];
+//                echo $names[$value["name"]][0] . " Substract " . "<br/>";
+            }
+        }
+        foreach ($names as $key => $val){
+            var_dump($val[0]);
+            AdminController::computerRSLT($key,$val[0],0,$val[2],"add",$val[1]);
+        }
+    }
+    public static function balanceInquiryAdmin($sUsername,$dsn){
+        $odbc = odbc_connect($dsn,'','');
+        $query = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($sUsername) ."'";
+        $queryResult = odbc_exec($odbc,$query);
+        while($row = odbc_fetch_array($queryResult)){
+            $balance = $row["BALANCE"] + $row["CAP"] + $row["CURRENTBET"] + $row["MON_RSLT"] + $row["TUE_RSLT"] + $row["WED_RSLT"] + $row["THU_RSLT"] + $row["FRI_RSLT"] + $row["SAT_RSLT"] + $row["SUN_RSLT"];
+        }
+        odbc_close($odbc);
+        if($balance){
+            return $balance;
+        }else{
+            return "NULL";
+        }
+    }
+    public static function updateOdbc($money,$username,$operation,$date,$dsn){
+        $office = "Office";
+        $odbc = odbc_connect($dsn,'','');
+        $getCurrentBetQuery = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($username) ."'";
+        $getOfficeQuery = "select * from cust.dbf as a where a.NAME = 'Office'";
+        if($date != "worthless"){
+            $splitStr = str_split($date,2);
+            $newDateStr = $splitStr[2] . $splitStr[0] . $splitStr[1];
+            $date = date('N',strtotime(implode('-',str_split($newDateStr,2))));
+            $RSLT = "";
+            switch ($date){
+                case 1:
+                    $RSLT = "MON_RSLT";
+                    break;
+                case 2:
+                    $RSLT = "TUE_RSLT";
+                    break;
+                case 3:
+                    $RSLT = "WED_RSLT";
+                    break;
+                case 4:
+                    $RSLT = "THU_RSLT";
+                    break;
+                case 5:
+                    $RSLT = "FRI_RSLT";
+                    break;
+                case 6:
+                    $RSLT = "SAT_RSLT";
+                    break;
+                case 7:
+                    $RSLT = "SUN_RSLT";
+                    break;
+            }
+            $queryResult = odbc_exec($odbc,$getCurrentBetQuery);
+            $officeResult = odbc_exec($odbc,$getOfficeQuery);
+            while($row = odbc_fetch_array($queryResult)){
+                $CURRENTBET = $row["CURRENTBET"];
+                $rsltToday  = $row[$RSLT];
+            }
+            while($row = odbc_fetch_array($officeResult)){
+                $officeCURRENTBET = $row["CURRENTBET"];
+                $officeRsltToday  = $row[$RSLT];
+            }
+        }else{
+            $queryResult = odbc_exec($odbc,$getCurrentBetQuery);
+            $officeResult = odbc_exec($odbc,$getOfficeQuery);
+            while($row = odbc_fetch_array($queryResult)){
+                $CURRENTBET = $row["CURRENTBET"];
+            }
+            while($row = odbc_fetch_array($officeResult)){
+                $officeCURRENTBET = $row["CURRENTBET"];
+            }
+        }
+        switch ($operation){
+            case "addBet":
+                $newCURRENTBET = $CURRENTBET + $money; // money = BetAmount (must be negative)
+                $updateCURRENTBETQuery = "update cust.dbf as a set a.CURRENTBET = '". $newCURRENTBET ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                odbc_exec($odbc,$updateCURRENTBETQuery);
+                break;
+            case "subtractBet":
+                $newCURRENTBET = $CURRENTBET - $money; // money = BetAmount
+                $updateCURRENTBETQuery = "update cust.dbf as a set a.CURRENTBET = '". $newCURRENTBET ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                odbc_exec($odbc,$updateCURRENTBETQuery);
+                break;
+            case "pendingToWin":
+                $newRsltToday = $rsltToday + $money;
+                $officeTemp = $officeRsltToday + ($money * -1);
+//                $officeNewRsltToday = $officeTemp * -1;
+                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $newRsltToday ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
+            case "pendingToLose":
+                $newRsltToday = $rsltToday - $money;
+                $officeTemp = $officeRsltToday - ($money * -1);
+//                $officeNewRsltToday = $officeTemp * -1;
+                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $newRsltToday ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
+            case "loseToWin":
+                // lose to win
+                $rslt = $rsltToday + $money[0];
+                $newRsltToday = $rslt + $money[1];
+                $officeRslt = $officeRsltToday + ($money[0] * -1);
+                $officeTemp = $officeRslt + ($money[1] * -1);
+//                $officeNewRsltToday = $officeTemp * -1;
+                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $newRsltToday ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
+            case "winToLose":
+                // win to lose
+                $rslt = $rsltToday - $money[1]; // minus previous winAmount
+                $newRsltToday = $rslt - $money[0]; // minus betamount
+                $officeRslt = $officeRsltToday - ($money[1] * -1);
+                $officeTemp = $officeRslt - ($money[0] * -1);
+//                $officeNewRsltToday = $officeTemp * -1;
+                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $newRsltToday ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
+            case "winToAborted":
+                // win to aborted
+                $rslt = $rsltToday - $money[1]; // minus previous winAmount
+                $officeTemp = $officeRsltToday - ($money[1] * -1);
+//                $officeRslt = $officeTemp * -1;
+                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $rslt ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
+            case "loseToAborted":
+                // lose to aborted
+                $rslt = $rsltToday - $money[0]; // minus previous winAmount
+                $officeTemp = $officeRsltToday - ($money[0] * -1);
+//                $officeRslt = $officeTemp * -1;
+                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $rslt ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
+            case "noPayoutToAborted":
+                // noPayout to aborted
+                $newCURRENTBET = $CURRENTBET + $money;
+                $rslt = $rsltToday - $money; // minus previous winAmount
+                $officeTemp = $officeRsltToday - ($money * -1);
+//                $officeRslt = $officeTemp * -1;
+//                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $rslt ."',a.CURRENTBET = '". $newCURRENTBET ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $newRSLT = "update cust.dbf as a set a.CURRENTBET = '". $newCURRENTBET ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
+            case "AbortedToWin":
+                // aborted to win
+                $rslt = $rsltToday + $money[1]; // minus previous winAmount
+                $officeTemp = $officeRsltToday + ($money[1] * -1);
+                $newRSLT = "update cust.dbf as a set ". $RSLT ." = '". $rslt ."' where ucase(NAME) = '". strtoupper($username) ."'";
+                $officeNewRSLT = "update cust.dbf as a set ". $RSLT ." = '". $officeTemp ."' where ucase(NAME) = '". strtoupper($office) ."'";
+                odbc_exec($odbc,$newRSLT);
+                odbc_exec($odbc,$officeNewRSLT);
+                break;
         }
     }
 }

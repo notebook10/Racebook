@@ -108,9 +108,9 @@ div#raceTrackName {
 th.pp-class{width:6%;}
 td.pp-class{font-weight: bold;}
 table.dailydouble th:nth-child(2){width:6%;}
-body{background: transparent;overflow-y: scroll;}
+body{background: transparent;overflow-y: scroll !important;}
 #upcomingRacesDiv{text-align: center;}
-#upcomingRacesDiv > h1{background: #ededed;padding: 10px;color:#000;font-weight: bold;}
+#upcomingRacesDiv > h1, #confirmationHeader{background: #ededed;padding: 10px;color:#000;font-weight: bold;text-align: center;}
 .loader{
     background: url("../images/ajax-loader.gif");
     background-repeat: no-repeat;

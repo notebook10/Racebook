@@ -1,10 +1,3 @@
-{{--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">--}}
-{{--<link rel="stylesheet" href="{{ asset('css/sweetalert.css') }}">--}}
-{{--<link rel="stylesheet" href="{{ asset('css/datatables.min.css') }}">--}}
-{{--<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>--}}
-{{--<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>--}}
-{{--<script src="{{ asset('js/sweetalert.min.js') }}"></script>--}}
-{{--<script src="{{ asset('js/jquery.datatables.js') }}"></script>--}}
 <?php date_default_timezone_set('America/Los_Angeles'); ?>
 <style>
     .defeat, .lose{color: #000;background: #f5856e !important;}
@@ -14,16 +7,24 @@
     .nopayout{color:#fff;background: orange !important;}
     th,td{text-align: center;white-space: nowrap;}
     thead{background: #e6efff;}
+    #datepickerPast{text-align: center;cursor: pointer;}
 </style>
 <div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="jumbotron text-center">
-                <h1>Past Bets</h1>
+                <?php
+                if (!isset($_SESSION)) session_start();
+                if(!isset($_SESSION["username"])){
+                    echo "<h1>Session Expired! Please login again.</h1>";
+                }else{
+                    echo "<h1>Past Bets</h1>";
+                }
+                ?>
             </div>
             <div>
                 <div style="text-align: center;">
-                    <input type="text" id="datepickerPast"  value="<?php echo date('Y-m-d',time()) ?>">
+                    View bets for : <input type="text" id="datepickerPast"  value="<?php echo date('Y-m-d',time()) ?>">
                 </div>
                 <table class="table table-responsive table-bordered table-striped" id="tblNewPast">
                     <thead>
@@ -55,17 +56,6 @@
             maxDate : -1
         });
         loadNewPastDataTable(BASE_URL,CURRENT_DATE,userID);
-//        loadHistoryDataTable();
-//        function loadHistoryDataTable(){
-//            $("#tblHistory").on('draw.dt',function(){
-//                console.log("Loading");
-//            }).DataTable({
-//                "aaSorting": [],
-//                oLanguage: {
-//                    sProcessing: "TEST"
-//                },
-//            });
-//        }
         $("#datepickerPast").on("change",function(){
             var selectedDate = $(this).val();
             loadNewPastDataTable(BASE_URL,selectedDate,userID);

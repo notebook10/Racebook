@@ -10,6 +10,24 @@
                     <input type="hidden" name="_token" value="{{ csrf_token() }}">
                     <input type="hidden" name="betsOperation" id="betsOperation" value="0">
                     <input type="hidden" name="betId" id="betId">
+                    <input type="hidden" name="grading_statua" id="grading_status">
+                    <input type="hidden" name="race_date" id="race_date">
+                    <div>
+                        <select name="dsn" id="dsn" class="form-control">
+                            <option selected disabled>-- SELECT DSN --</option>
+                            <option value="floyd">Floyd</option>
+                            <option value="webbet">Webbet</option>
+                            <option value="nanc">123confirm</option>
+                            <option value="mqc">myqualitychoice</option>
+                            <option value="abc">abconfirm</option>
+                            <option value="myoptions">myoptions123</option>
+                            <option value="backdoor">backdoorbets</option>
+                            <option value="daveyk">daveyk</option>
+                            <option value="luck">luckspeed</option>
+                            <option value="lowpro">playlowpro</option>
+                            <option value="duckhook">duckhook365</option>
+                        </select>
+                    </div>
                     <div>
                         <label for="playerID">Player ID:</label>
                         <input type="text" class="form-control" id="player_id" name="player_id" placeholder="Player ID">

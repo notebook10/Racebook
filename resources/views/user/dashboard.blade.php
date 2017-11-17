@@ -7,8 +7,6 @@
 <script src="{{ asset('js/dashboard.js') }}"></script>
 <?php
     date_default_timezone_set('America/Los_Angeles');
-    use App\Horses;
-//    $currentDate = date('mdy',time());
     $currentDate = date('mdy',time() + 86400);
 ?>
 <noscript>
@@ -19,26 +17,24 @@
 </style>
 <?php
     if (!isset($_SESSION)) session_start();
-    echo "NAME: " . $_SESSION["username"];
-    // GET balance
-    $odbc = odbc_connect($_SESSION["dsn"],'','');
-    $query = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($_SESSION["username"]) ."'";
-    $queryResult = odbc_exec($odbc,$query);
-    echo "<br/>";
-    while($row = odbc_fetch_array($queryResult)){
-        var_dump($row["CURRENTBET"]);
-        $_SESSION["BALANCE"] = $row["BALANCE"] + $row["CAP"] + $row["CURRENTBET"] + $row["MON_RSLT"] + $row["TUE_RSLT"] + $row["WED_RSLT"] + $row["THU_RSLT"] + $row["FRI_RSLT"] + $row["SAT_RSLT"] + $row["SUN_RSLT"];
-//        $_SESSION["BALANCE"] = "QWe";
-    }
-//    echo \App\Http\Controllers\AdminController::findDSN($_SESSION["NAME"]);
-    echo "<br/>" . $_SESSION["BALANCE"];
+    if(!isset($_SESSION["username"])){
+        $message = "<div class='jumbotron text-center'><h1>Session Expired! Please login again.</h1></div>";
+        echo $message;
+    }else{
+        $odbc = odbc_connect($_SESSION["dsn"],'','');
+        $query = "select * from cust.dbf as a where ucase(NAME) = '". strtoupper($_SESSION["username"]) ."'";
+        $queryResult = odbc_exec($odbc,$query);
+        while($row = odbc_fetch_array($queryResult)){
+            $_SESSION["CURRENTBET"] = $row["CURRENTBET"];
+            $_SESSION["BALANCE"] = $row["BALANCE"] + $row["CAP"] + $row["CURRENTBET"] + $row["MON_RSLT"] + $row["TUE_RSLT"] + $row["WED_RSLT"] + $row["THU_RSLT"] + $row["FRI_RSLT"] + $row["SAT_RSLT"] + $row["SUN_RSLT"];
+        }
 ?>
 <input type="hidden" id="hiddenURL" value="{{ URL::to('/') }}">
 <input type="hidden" name="_token" value="{{csrf_token()}}">
 <div class="container">
     <div class="row">
         <div class="col-md-4 col-tracks">
-            <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('F d, Y h:i:s', time()); ?></h3>
+            <h3 id="date" data-date="<?php echo date('mdy',time()); ?>">TRACKS RACING TODAY - <?php echo date('m/d/y h:i:s', time()); ?></h3>
             <h5 id="pdt" class="clock"></h5>
             <h5 id="mdt" class="clock"></h5>
             <h5 id="cdt" class="clock"></h5>
@@ -115,13 +111,6 @@
                 <div>
                     <label class="s-wager">Select Wager Type: </label>
                     <select id="selectWager" class="form-control">
-                        {{--<option value="wps">Win/Place/Show</option>--}}
-                        {{--<option value="dailydouble">Daily Double</option>--}}
-                        {{--<option value="superfecta">Superfecta</option>--}}
-                        {{--<option value="exacta">Exacta</option>--}}
-                        {{--<option value="exactabox">Exacta Box</option>--}}
-                        {{--<option value="trifecta">Trifecta</option>--}}
-                        {{--<option value="trifectabox">Trifecta Box</option>--}}
                     </select>
                     <input type="hidden" id="selectedTrkAndRace" data-trk="" data-raceNum="">
                     <input type="hidden" id="selectedTrack">
@@ -130,14 +119,16 @@
                     <input type="hidden" id="selectedDate">
                 </div>
                 <div id="tempRaces"></div>
+                <div class="loader"></div>
                 <div id="submitBet" style="display: none;text-align: center;">
                     <input type="text" id="betAmount" class="form-control" placeholder="Put your bet">
                     <button id="submitBetButton" class="btn btn-success"><span class="glyphicon glyphicon-ok"></span> SUBMIT BET</button>
-                    {{--<button id="clearAll" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> CLEAR ALL</button>--}}
+                    <button id="clearAll" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> CLEAR ALL</button>
                 </div>
             </div>
             <div id="betTicket">
                 <!-- Confirm Bet -->
+                <h1 id="confirmationHeader">Confirmation</h1>
                 <div id="ticket" class="loader2">
                     <table id="ticketTbl" class="table table-bordered table-striped ">
                         <thead>
@@ -150,11 +141,14 @@
                     </table>
                     <div id="betActions">
                         <div class="loader"></div>
-                            <button class="btn btn-success" id="confirmBet">CONFIRM BET</button>
-                            <a href="{{ URL::to('/') }}" class="btn btn-danger">ABORT BET</a>
+                        <button class="btn btn-success" id="confirmBet"><span class="glyphicon glyphicon-ok"></span> CONFIRM BET</button>
+                            <a href="{{ URL::to('/dashboard') }}" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> ABORT BET</a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+<?php
+    }
+?>

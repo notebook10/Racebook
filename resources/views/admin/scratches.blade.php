@@ -2,8 +2,8 @@
 <div class="container">
     <?php
         session_start();
-        $_SESSION["test"] = "B1588";
-        echo $_SESSION["test"];
+//        $_SESSION["test"] = "B1588";
+//        echo $_SESSION["test"];
     ?>
     <div class="jumbotron text-center">
         <h1>SCRATCHES</h1>

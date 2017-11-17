@@ -77,7 +77,7 @@ $("document").ready(function(){
                                         date : raceDate
                                     },
                                     success : function(respo){
-                                        console.log(respo);
+                                        console.log(respo);ss
                                         for(var i = firstRace; i <= raceTimeArr.length; i++){
                                             if(respo[i-1] == "lt"){
                                             }else if(respo[i-1] == "gt"){
@@ -252,9 +252,6 @@ $("document").ready(function(){
             }
         });
         fooFunction2(BASE_URL,trk,num,post);
-        $('html, body').animate({
-            scrollTop: $(".col-md-8").offset().top
-        }, 2000);
     });
     //ACCORDION
     var acc = document.getElementsByClassName("accordion");
@@ -277,7 +274,6 @@ $("document").ready(function(){
         var ddselectedRaceNum = parseInt($("#selectedRaceNum").val()) + parseInt(1);
         var selectedDate = $("#selectedDate").val();
         selectedWagerPrev = $("#selectWager option:selected").text();
-        $(".loader").css("display","block");
         $.ajax({
             "url" : BASE_URL + '/dashboard/getHorsesPerRace',
             type : "POST",
@@ -453,7 +449,6 @@ $("document").ready(function(){
                     else if($(this).data("key") == 19){$(this).css({"background":"#FF00FF","color":"#fff"});}
                     else if($(this).data("key") == 20){$(this).css({"background":"#9932CC","color":"#fff"});}
                 });
-                $(".loader").css("display","none");
             },
             error : function(){
                 swal("Something went wrong!","Please try again.","error");
@@ -948,9 +943,6 @@ $("document").ready(function(){
                                 betString.substring(0, betString.length - 2) + ")</td><td>" + amount + "</td></tr><tr><td>Total Wager:</td><td>" + amount + "</td></tr>");
                             displayConfirmationDiv();
                         }
-                        $('html, body').animate({
-                            scrollTop: $("#betActions").offset().top
-                        }, 2000);
                     }else{
                         swal({title:" The minimum stake for this wager is $" + minimumBet,text:"",type:"warning"});
                         $("button.confirm").on("click", function(){

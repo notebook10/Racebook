@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 use App\Bets;
 use App\Horses;
 use App\Minimum;
+use App\Payout;
+use App\Results;
 use App\Timezone;
 use App\Wager;
 use Illuminate\Http\Request;
@@ -28,7 +30,7 @@ class HomeController extends Controller
         }
     }
     public function login(Request $request){
-        HomeController::logout();
+//        HomeController::logout();
         $username = $request->input('username');
         $password = $request->input('password');
         $data = [
@@ -46,11 +48,11 @@ class HomeController extends Controller
             if(Auth::attempt(['username' => $username, 'password' => $password])){
                 return Redirect::to('/admin/dashboard');
             }else{
-//                return Redirect::to('/')
-//                    ->withErrors([
-//                        'validate' => 'Wrong Email or Password!',
-//                    ]);
-                return "Who u?";
+                return Redirect::to('/admin2')
+                    ->withErrors([
+                        'validate' => 'Wrong Email or Password!',
+                    ]);
+//                return "Who u?";
             }
         }
     }
@@ -73,8 +75,8 @@ class HomeController extends Controller
         Auth::logout();
         if (!isset($_SESSION)) session_start();
         session_destroy();
-        return view('user/landing');
-//        return Redirect::to('/');
+//        return view('user/landing');
+        return Redirect::to('/dashboard');
     }
     public function dashboard(){
         date_default_timezone_set('America/Los_Angeles');
@@ -417,7 +419,7 @@ class HomeController extends Controller
         date_default_timezone_set(date_default_timezone_get());
         $dt = strtotime($selectedDate);
         $res['start'] = date('N', $dt)==1 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('last monday', $dt));
-        $res['end'] = date('N', $dt)==7 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('next sunday', $dt));
+        $res['end'] = date('N', $dt)==7 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('next sunday', $dt)); // Y-m-d
         $weekDays = [];
         $weekDays['monday'] = $res['start'];
         $weekDays['tuesday'] = date('Y-m-d',strtotime($res['start']) + 86400);
@@ -432,26 +434,28 @@ class HomeController extends Controller
         $thu = HomeController::totalBetsPerDay($weekDays["thursday"]);
         $fri = HomeController::totalBetsPerDay($weekDays["friday"]);
         $sat = HomeController::totalBetsPerDay($weekDays["saturday"]);
-        $sun =HomeController::totalBetsPerDay($weekDays["sunday"]);
-        $formattedBalance = number_format($mon + $tue + $wed + $thu + $fri + $sat + $sun,2);
+        $sun = HomeController::totalBetsPerDay($weekDays["sunday"]);
+        $formattedBalance = $mon + $tue + $wed + $thu + $fri + $sat + $sun;
         $totalPerDay = [
             'start' => $res['start'],
             'end' => $res['end'],
-            'monday' => number_format($mon,2),
-            'tuesday' => number_format($tue,2),
-            'wednesday' => number_format($wed,2),
-            'thursday' => number_format($thu,2),
-            'friday' => number_format($fri,2),
-            'saturday' => number_format($sat,2),
-            'sunday' => number_format($sun,2),
-            'balance' => $formattedBalance
+            'monday' => number_format(round($mon),2),
+            'tuesday' => number_format(round($tue),2),
+            'wednesday' => number_format(round($wed),2),
+            'thursday' => number_format(round($thu),2),
+            'friday' => number_format(round($fri),2),
+            'saturday' => number_format(round($sat),2),
+            'sunday' => number_format(round($sun),2),
+            'balance' => number_format(round($formattedBalance))
         ];
         return $totalPerDay;
     }
     public static function totalBetsPerDay($date){
+        $mdy = date('mdy',strtotime($date));
         $bets = DB::table("bets")
             ->where("player_id",$_SESSION["username"])
-            ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59'])
+//            ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59'])
+            ->where("race_date",$mdy)
             ->where("result","!=",0)
             ->where("result","!=",3)
             ->where("result","!=",4)
@@ -477,5 +481,97 @@ class HomeController extends Controller
             }
         }
         return $total;
+    }
+    public function displayResults(){
+        date_default_timezone_set('America/Los_Angeles');
+        $tracksModel = new Tracks();
+        $date = date('mdy',time());
+        $racingTracks = $tracksModel->getAllTracks($date);
+        $dataArray = [
+            'tracks' => $racingTracks
+        ];
+        $theme = Theme::uses('default')->layout('layout')->setTitle('Results');
+        return $theme->of('user/results',$dataArray)->render();
+    }
+    public function getTracksByDate(Request $request){
+        $selectedDate = $request->input("date");
+        $date = date('mdy',strtotime($selectedDate));
+        $tracksModel = new Tracks();
+        $racingTracks = $tracksModel->getAllTracks($date);
+        return $racingTracks;
+    }
+    public function getResultsForDisplay(Request $request){
+        $trk = $request->input("trk");
+        $date = $request->input("date");
+        $minimumModel = new Minimum();
+        $payoutModel = new Payout();
+        $resultsModel = new Results();
+        $minimum = $minimumModel->getMinimum(["trk" => $trk, "date" => $date]);
+        $results = $resultsModel->getResultsWithTrkDate(["trk" => $trk, "date" => $date]);
+        $payout = $payoutModel->getPayout(["trk" => $trk, "date" => $date]);
+        $array = [];
+        foreach ($results as $index => $value){
+            $resArray = ["trk" => $results[$index]->track_code,"date" => $results[$index]->race_date, "num" => $results[$index]->race_number,"wager" => strtolower($results[$index]->wager), "result" => $results[$index]->race_winners];
+//            HomeController::getMinimumForRes($resArray);
+//            HomeController::getPayoutForRes($resArray);
+//            if($results[$index]->wager == "wps"){
+//                array_push($array,["trk" => $results[$index]->track_code,"date" => $results[$index]->race_date, "num" => $results[$index]->race_number,"wager" => $results[$index]->wager ,"result" => $results[$index]->race_winners, "payout" => HomeController::getPayoutForRes($resArray), "minimum" => HomeController::getMinimumForRes($resArray), "horse" => HomeController::getHorseName($resArray)]);
+//            }else{
+                array_push($array,["trk" => $results[$index]->track_code,"date" => $results[$index]->race_date, "num" => $results[$index]->race_number,"wager" => $results[$index]->wager ,"result" => $results[$index]->race_winners, "payout" => HomeController::getPayoutForRes($resArray), "minimum" => HomeController::getMinimumForRes($resArray)]);
+//            }
+        }
+        return $array;
+//        $minres = $resultsModel->getResultsAndDividend(["trk" => $trk, "date" => $date]);
+    }
+    public static function getMinimumForRes($dataArray){
+        $min = DB::table("minimum")
+            ->where("track_code",$dataArray["trk"])
+            ->where("race_date",$dataArray["date"])
+            ->where("race_number",$dataArray["num"])
+            ->first();
+        $decoded = json_decode($min->content,true);
+        return $decoded[$dataArray["wager"]];
+    }
+    public static function getPayoutForRes($dataArray){
+        $payout = DB::table("payout")
+            ->where("track_code",$dataArray["trk"])
+            ->where("race_date",$dataArray["date"])
+            ->where("race_number",$dataArray["num"])
+            ->first();
+        $decoded = json_decode($payout->content,true);
+        switch($dataArray["wager"]){
+            case "exacta":
+                return [$decoded["exactaPayout"]];
+                break;
+            case "trifecta":
+                return [$decoded["trifectaPayout"]];
+                break;
+            case "superfecta":
+                return [$decoded["superfectaPayout"]];
+                break;
+            case "dailydouble":
+                return [$decoded["ddPayout"]];
+                break;
+            case "quinella":
+                return [$decoded["quinellaPayout"]];
+                break;
+            case "wps":
+                return [$decoded["wPayout"],$decoded["1pPayout"],$decoded["2pPayout"],$decoded["1sPayout"],$decoded["2sPayout"],$decoded["3sPayout"]];
+                break;
+        }
+    }
+    public static function getHorseName($dataArray){
+        $horseNameArray = [];
+        $explode = explode(",", $dataArray["result"]);
+        foreach ($explode as $index => $value){
+            $temp = DB::table("horses")
+                ->where("race_date",$dataArray["date"])
+                ->where("race_track",$dataArray["trk"])
+                ->where("race_number","Race " . $dataArray["num"])
+                ->where("pnumber", $value)
+                ->first();
+            array_push($horseNameArray,$temp->horse);
+        }
+        return $horseNameArray;
     }
 }

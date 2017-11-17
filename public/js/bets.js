@@ -63,6 +63,7 @@ $("document").ready(function(){
                 $.each(data, function(i,v){
                     $("#raceTrack").append("<option value='"+ data[i]["code"] +"'>"+ data[i]["name"] +"</option>");
                 });
+                $("#betModal").find("div.tempDiv").replaceWith("");
                 $("#betModal").modal("show");
             },
             error : function(xhr, status,error){
@@ -205,14 +206,16 @@ $("document").ready(function(){
     var optionsBets = {
         success: function(response){
             if(response == 0){
-                swal("Bet Saved!","","success");
+                swal("Bet Saved!");
+            }else if(response == 2){
+                swal("Balance not enough!");
             }else{
-                swal("Failed!","","error");
+                swal("Failed!");
             }
             $("button.confirm").on("click", function(){
-                $("#betModal").modal("hide");
-                clearFrm();
-                location.reload();
+                // $("#betModal").modal("hide");
+                // clearFrm();
+                // location.reload();
             });
         }
     };
@@ -248,6 +251,9 @@ $("document").ready(function(){
                         $("#player_id").val(respo["player_id"]);
                         $("#amount").val(respo["bet_amount"]);
                         $("#raceTrack").val(respo["race_track"]);
+                        $("#grading_status").val(respo["grading_status"]);
+                        $("#dsn").val(respo["dsn"]);
+                        $("#race_date").val(respo["race_date"]);
                         // $("#result").val($.cookie("result"));
                         // $("#winamount").val($.cookie("winamount"));
                         $.ajax({

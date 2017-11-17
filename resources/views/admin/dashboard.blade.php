@@ -6,7 +6,7 @@
         <div class="col-md-12">
             <div class="jumbotron text-center">
                 <h1>Administrator</h1>
-                <h5>{{ \Illuminate\Support\Facades\Auth::user()->id }}</h5>
+                <h5>{{ \Illuminate\Support\Facades\Auth::user()->firstname }}</h5>
             </div>
             <?php
                 use App\Tracks;
