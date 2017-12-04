@@ -1256,7 +1256,8 @@ class AdminController extends Controller
 //                'win_amount' => number_format($value->win_amount,2),
                 'win_amount' => $winAmount,
                 'created_at' => $value->created_at,
-                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
+                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>",
+                'dsn' => $value->dsn
             ];
             array_push($tempObj["data"],$tempArr);
         }
@@ -1294,7 +1295,8 @@ class AdminController extends Controller
                 'result' => $res,
                 'win_amount' => number_format($value->win_amount,2),
                 'created_at' => $value->created_at,
-                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>"
+                'action' => "<input type='button' class='btn btn-primary editBet' value='EDIT' data-id='". $value->id ."'>",
+                'dsn' => $value->dsn
             ];
             array_push($tempObj["data"],$tempArr);
         }
@@ -1303,8 +1305,9 @@ class AdminController extends Controller
     public function getPendingBetsHome(Request $request){
         $selectedDate = $request->input("date");
         $id = $request->input('id');
+        $dsn = $request->input('dsn');
         $betsModel = new Bets();
-        $betsBySelectedDate = $betsModel->getPendingBetsHome($selectedDate,$id);
+        $betsBySelectedDate = $betsModel->getPendingBetsHome($selectedDate,$id,$dsn);
         $tempArr = [];
         $tempObj = [
             'data' => []
@@ -1342,8 +1345,9 @@ class AdminController extends Controller
     public function getPastHome(Request $request){
         $selectedDate = $request->input("date");
         $id = $request->input('id');
+        $dsn = $request->input('dsn');
         $betsModel = new Bets();
-        $betsBySelectedDate = $betsModel->getPastBetsHome($selectedDate,$id);
+        $betsBySelectedDate = $betsModel->getPastBetsHome($selectedDate,$id,$dsn);
         $tempArr = [];
         $tempObj = [
             'data' => []
@@ -1829,6 +1833,36 @@ class AdminController extends Controller
                 odbc_exec($odbc,$newRSLT);
                 odbc_exec($odbc,$officeNewRSLT);
                 break;
+        }
+    }
+    public function raceTime(){
+        $horseModel = new Horses();
+        $racesTime = $horseModel->getRacesTime(["raceDate" => "112917"]);
+        $dataArray = [
+            'raceTime' => $racesTime
+        ];
+        $theme = Theme::uses('admin')->layout('layout')->setTitle('RaceTime');
+        return $theme->of('admin/raceTime',$dataArray)->render();
+    }
+    public function submitRaceTime(Request $request){
+        $horseModel = new Horses();
+        $newTime = trim($request->input("time"));
+        $explode = explode(':',$newTime);
+        if($explode[0] < 10){
+            $sTime = " " . $newTime;
+        }else{
+            $sTime = $newTime;
+        }
+        $update = $horseModel->updateRaceTime([
+            "date" => $request->input("date"),
+            "trk" => $request->input("trk"),
+            "num" => $request->input("num"),
+            "newTime" => $sTime,
+        ]);
+        if($update){
+            return 0;
+        }else{
+            return 1;
         }
     }
 }

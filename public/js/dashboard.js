@@ -15,8 +15,10 @@ $("document").ready(function(){
     var userId = $("#userId").val();
     var selectedWagerPrev = "";
     var openRaces2 = [];
-    setTimeout(getUpcomingRaces,3000);
-    $(".loader").css("display","block");
+    if(userId != ""){
+        setTimeout(getUpcomingRaces,3000);
+    }
+    // $(".loader").css("display","block");
     $(".trkName").on("click",function(){
         if($(this).hasClass("collapsed")){
             $(this).next("div.panel-body").find("div.raceNum").remove();
@@ -24,21 +26,21 @@ $("document").ready(function(){
             var raceDate = $(this).data("date");
             // Validate track code if it have a timezone
             $(".loader").css("display","block");
-            $.ajax({
-                "url" : BASE_URL + "/dashboard/validateTrackTmz",
-                type : "POST",
-                data : {
-                    _token : $('[name="_token"]').val(),
-                    code : code
-                },
-                success : function(response){
-                    setTimeout(function(){
-                        $(".loader").css("display","none");
-                    },1000);
-                    if(response == ""){
-                        swal("Unavailable","This Race Track is currently unavailable.","error");
-                        // Timezone field unavailable sa tbl timezone
-                    }else{
+            // $.ajax({
+            //     "url" : BASE_URL + "/dashboard/validateTrackTmz",
+            //     type : "POST",
+            //     data : {
+            //         _token : $('[name="_token"]').val(),
+            //         code : code
+            //     },
+            //     success : function(response){
+            //         setTimeout(function(){
+            //             $(".loader").css("display","none");
+            //         },1000);
+            //         if(response == ""){
+            //             swal("Unavailable","This Race Track is currently unavailable.","error");
+            //             // Timezone field unavailable sa tbl timezone
+            //         }else{
                         $.ajax({
                             "url" : BASE_URL + "/dashboard/getRaces",
                             type : "POST",
@@ -49,10 +51,15 @@ $("document").ready(function(){
                             },
                             dataType: "json",
                             success : function(response){
+
+                                setTimeout(function(){
+                                    $(".loader").css("display","none");
+                                },1000);
+
                                 var od = JSON.stringify(response);
                                 var obj = JSON.parse(od);
-                                var raceCount = "";
-                                var raceTime = "";
+                                // var raceCount = "";
+                                // var raceTime = "";
                                 var raceTimeArr = [];
                                 var race = []; //array to get first race number
                                 $.each(obj, function(index, value){
@@ -66,7 +73,7 @@ $("document").ready(function(){
                                     }
                                 });
                                 var firstRace = race[0].replace(/\D/g,'');
-                                var tempArr = "";
+                                // var tempArr = "";
                                 $.ajax({
                                     "url" : BASE_URL + '/dashboard/checkIfOpen',
                                     type : "get",
@@ -89,7 +96,7 @@ $("document").ready(function(){
                                         }else{
                                             // No open race
                                             $(".panel-body."+ code).html("");
-                                            $(".panel-body."+ code).append("<div class='noRace'>No races available</div>");
+                                            $(".panel-body."+ code).append("<div class='noRace'>All race closed on this track</div>");
                                         }
                                         $(".closed").css("display","none");
                                     },
@@ -102,12 +109,12 @@ $("document").ready(function(){
                                 swal(err,"Please try again","error");
                             }
                         });
-                    }
-                },
-                error : function(xhr, status, err){
-                    swal(err,"Please try again","error");
-                }
-            });
+            //         }
+            //     },
+            //     error : function(xhr, status, err){
+            //         swal(err,"Please try again","error");
+            //     }
+            // });
 
         }else{
             $(".panel-body div.raceNum").remove();
@@ -643,6 +650,13 @@ $("document").ready(function(){
                             if (ppArray.length <= 1) {
                                 swal({title:"Ticket has no selection.",text : "",type : "warning"});
                             } else {
+                                if(amount < .50){
+                                    if(ppArray.length <= 8){
+                                        swal({title : "Superfecta Bet combinations must be higher than 5 if bet amount is lower than .50", text : "", type : "warning"});
+                                        return false;
+                                    }
+                                }
+                                console.log(ppArray);
                                 var firstArr = [];
                                 var secondArr = [];
                                 var thirdArr = [];
@@ -972,7 +986,7 @@ $("document").ready(function(){
     });
     $("#confirmBet").unbind("dblclick");
     $("#confirmBet").on("click",function(evt){
-        $(".loader").css("display","block");
+        $(".loader3").css("display","block");
         $("#confirmBet,.btn-danger").attr("disabled",true);
         $("#betActions").css("pointer-events","none");
         var betType = $("#selectWager").val();
@@ -1135,7 +1149,7 @@ $("document").ready(function(){
         });
         // Remove Loading
         $(document).ajaxStop(function(){
-            $(".loader").css("display","none");
+            $(".loader,.loader3").css("display","none");
             $("#confirmBet,.btn-danger").attr("disabled",false);
             $("#betActions").css("pointer-events","auto");
         });
@@ -1150,8 +1164,10 @@ $("document").ready(function(){
     $('.panel-group').on('hidden.bs.collapse', toggleIcon);
     $('.panel-group').on('shown.bs.collapse', toggleIcon);
 
-    setInterval(getServerTime, 1000);
-    setInterval(getUpcomingRaces,60000);
+    if(userId != ""){
+        setInterval(getServerTime, 1000);
+        setInterval(getUpcomingRaces,60000);
+    }
     function getServerTime(){
         $.ajax({
             "url" : BASE_URL + "/dashboard/getServerTime",

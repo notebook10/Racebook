@@ -153,5 +153,7 @@ Route::group(['middleware' => ['auth']],function(){
         Route::any('odbc','AdminController@testODBC');
         Route::get('scratches','AdminController@scratches');
         Route::post('getScratchesToday','AdminController@getScratchesToday');
+        Route::get('raceTime','AdminController@raceTime');
+        Route::post('submitRaceTime','AdminController@submitRaceTime');
     });
 });

@@ -140,7 +140,7 @@
                         <tbody></tbody>
                     </table>
                     <div id="betActions">
-                        <div class="loader"></div>
+                        <div class="loader3"></div>
                         <button class="btn btn-success" id="confirmBet"><span class="glyphicon glyphicon-ok"></span> CONFIRM BET</button>
                             <a href="{{ URL::to('/dashboard') }}" class="btn btn-danger"><span class="glyphicon glyphicon-remove"></span> ABORT BET</a>
                     </div>

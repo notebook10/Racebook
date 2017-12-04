@@ -15,7 +15,7 @@ class Timezone extends Model
     public function getTimezoneByCode($trackCode){
         return DB::table($this->table)
             ->where("track_code",$trackCode)
-            ->first();
+            ->first(["time_zone","track_name"]);
     }
     public function getTimezoneByID($id){
         return DB::table($this->table)

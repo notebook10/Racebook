@@ -1119,7 +1119,7 @@ class Bets extends Model
             ->where('status',0)
             ->get();
     }
-    public function getPendingBetsHome($date,$id){
+    public function getPendingBetsHome($date,$id,$dsn){
         date_default_timezone_set('America/Los_Angeles');
         $currentRaceDate = date('mdy',strtotime($date));
         return DB::table($this->table)
@@ -1128,9 +1128,10 @@ class Bets extends Model
             ->where('race_date',$currentRaceDate)
             ->where('status',0)
             ->where('player_id',$id)
+            ->where('dsn',$dsn)
             ->get();
     }
-    public function getPastBetsHome($date,$id){
+    public function getPastBetsHome($date,$id,$dsn){
         date_default_timezone_set('America/Los_Angeles');
         $currentRaceDate = date('mdy',strtotime($date));
         return DB::table($this->table)
@@ -1139,6 +1140,7 @@ class Bets extends Model
             ->where('race_date',$currentRaceDate)
             ->where('status','!=',0)
             ->where('player_id',$id)
+            ->where('dsn',$dsn)
             ->get();
     }
     public function gradePendingDD($dataArray){

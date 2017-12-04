@@ -12,6 +12,8 @@ class Tracks extends Model
         return DB::table($this->table)
             ->where('date',$date)
             ->where('visibility',0)
+            ->join('tracks_timezone','tracks.code','=','tracks_timezone.track_code')
+            ->where('tracks_timezone.time_zone','!=','')
 //            ->orWhere('_showTemp',1)
             ->get();
     }

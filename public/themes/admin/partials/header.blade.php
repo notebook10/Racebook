@@ -21,8 +21,13 @@
                 <li>
                     <a href="timezones">Timezones</a>
                 </li>
-                <li>
-                    <a href="horses">Horses</a>
+                <li  class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#">Info
+                        <span class="caret"></span></a>
+                    <ul class="dropdown-menu">
+                        <li><a href="horses">Horses</a></li>
+                        <li><a href="raceTime">RaceTime</a></li>
+                    </ul>
                 </li>
                 <li>
                     <a href="wager">Wager</a>
@@ -31,16 +36,16 @@
                     <a href="bets">PastBets</a>
                 </li>
                 <li>
-                    <a href="pendingBets">PendingBets</a>
+                    <a href="pendingBets">Pending</a>
                 </li>
                 <li>
                     <a href="results">Results</a>
                 </li>
                 <li>
-                    <a href="http://58.69.12.117/racebookdata/" target="_blank">Download</a>
+                    <a href="http://58.69.12.117/racebookdata" target="_blank">Download</a>
                 </li>
                 <li>
-                    <a href="http://58.69.12.117/racebookdata/results.php" target="_blank">GetResults</a>
+                    <a href="http://58.69.12.117/racebookdata/results.php?key=<?php echo \Illuminate\Support\Facades\Auth::id() ?>" target="_blank">GetResults</a>
                 </li>
                 {{--<li>--}}
                     {{--<a href="http://58.69.12.117/racebookdata/scratch.php" target="_blank">GetScratch</a>--}}
@@ -49,7 +54,7 @@
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#">Scratches
                         <span class="caret"></span></a>
                     <ul class="dropdown-menu">
-                        <li><a href="http://58.69.12.117/racebookdata/scratch.php" target="_blank">GetScratch</a></li>
+                        <li><a href="http://58.69.12.117/racebookdata/scratch.php?key=<?php echo \Illuminate\Support\Facades\Auth::id() ?>" target="_blank">GetScratch</a></li>
                         <li><a href="scratches">ViewScratches</a></li>
                     </ul>
                 </li>

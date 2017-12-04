@@ -47,16 +47,17 @@
         var BASE_URL = $("#hdnURL").val();
         var userID = $("#userId").val();
         var CURRENT_DATE = $("#datepickerPending").val();
+        var dsn = $("#data").val();
         $("#datepickerPending").datepicker({
             dateFormat: "yy-mm-dd",
             maxDate : -1
         });
-        loadNewPendingDataTable(CURRENT_DATE,BASE_URL,userID);
+        loadNewPendingDataTable(CURRENT_DATE,BASE_URL,userID,dsn);
         $("#datepickerPending").on("change",function(){
             var date = $(this).val();
-            loadNewPendingDataTable(date,BASE_URL,userID);
+            loadNewPendingDataTable(date,BASE_URL,userID,dsn);
         });
-        function loadNewPendingDataTable(date,url,id){
+        function loadNewPendingDataTable(date,url,id,dsn){
             $("#tblNewPending").dataTable().fnDestroy();
             $("#tblNewPending").DataTable({
                 "aaSorting": [],
@@ -67,7 +68,8 @@
                     "data" : {
                         _token: $('[name="_token"]').val(),
                         date : date,
-                        id : id
+                        id : id,
+                        dsn : dsn
                     }
                 },
                 "columns": [

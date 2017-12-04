@@ -5,7 +5,9 @@ $("document").ready(function(){
         dateFormat: "yy-mm-dd",
         maxDate : -1
     });
-    loadHistory(BASE_URL,CURRENT_DATE);
+    if($("#userId").val() != ""){
+        loadHistory(BASE_URL,CURRENT_DATE);
+    }
     $("#btnHistory").on("click",function(){
         $("#historyModal").modal("show");
     });
@@ -19,7 +21,8 @@ $("document").ready(function(){
             type : "POST",
             data : {
                 _token : $('[name="_token"]').val(),
-                date : date
+                date : date,
+                dsn : $("#data").val()
             },
             success : function (response) {
                 console.log(response);

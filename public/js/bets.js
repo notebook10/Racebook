@@ -416,6 +416,7 @@ function loadTestDataTable(url,date){
         },
         "columns": [
             { "data": "player_id" },
+            { "data": "dsn" },
             { "data": "race_number" },
             { "data": "race_track" },
             { "data": "bet_type" },
@@ -450,6 +451,7 @@ function loadPendingDataTable(url,date){
         },
         "columns": [
             { "data": "player_id" },
+            { "data": "dsn" },
             { "data": "race_number" },
             { "data": "race_track" },
             { "data": "bet_type" },

@@ -11,14 +11,15 @@ class Horses extends Model
         return DB::table($this->table)
             ->where('race_track',$trackCode)
             ->where('race_date',$date)
-            ->get();
+//            ->get(['pnumber','pp','horse','jockey','race_time','race_number','race_date','race_track']);
+            ->get(['race_time','race_number']);
     }
     public function getHorsesPerRace($trackCode, $date, $num){
         return DB::table($this->table)
             ->where('race_track',$trackCode)
             ->where('race_date',$date)
             ->where('race_number', "Race " . $num)
-            ->get();
+            ->get(['pnumber','pp','horse','jockey','race_time','race_number','race_date','race_track']);
     }
     public function getRaceTime($trackCode, $date, $num){
         return DB::table($this->table)
@@ -38,7 +39,7 @@ class Horses extends Model
         return DB::table($this->table)
             ->where('race_date',$date)
             ->whereBetween('race_time',[" " . $start," " . $end]) // -------------------------
-            ->get();
+            ->get(['pnumber','pp','horse','jockey','race_time','race_number','race_date','race_track']);
     }
     public function getHorsesByDate($date){
         return DB::table($this->table)
@@ -69,6 +70,21 @@ class Horses extends Model
             ->where("id",$id)
             ->update([
                 "pp" => $pnum
+            ]);
+    }
+    public function getRacesTime($dataArray){
+        return DB::table($this->table)
+            ->where("race_date",$dataArray["raceDate"])
+            ->groupBy('race_number','race_track','race_time')
+            ->get(['race_track','race_number','race_time']);
+    }
+    public function updateRaceTime($dataArray){
+        return DB::table($this->table)
+            ->where("race_date",$dataArray["date"])
+            ->where("race_track",$dataArray["trk"])
+            ->where("race_number",$dataArray["num"])
+            ->update([
+                "race_time" => $dataArray["newTime"]
             ]);
     }
 }

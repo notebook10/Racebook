@@ -360,11 +360,6 @@ class HomeController extends Controller
             }else{
                 array_push($resArr, "gt"); // ok
             }
-//            if(strtotime($dateSlashed . " " . $postTimeArr[$key]) < strtotime($convertTemp)){
-//                array_push($resArr, "lt"); // close
-//            }else{
-//                array_push($resArr, "gt"); // ok
-//            }
         }
         return $resArr;
     }
@@ -416,6 +411,7 @@ class HomeController extends Controller
     public function getWeek(Request $request){
         if (!isset($_SESSION)) session_start();
         $selectedDate = $request->input('date');
+        $dsn = $request->input("dsn");
         date_default_timezone_set(date_default_timezone_get());
         $dt = strtotime($selectedDate);
         $res['start'] = date('N', $dt)==1 ? date('Y-m-d', $dt) : date('Y-m-d', strtotime('last monday', $dt));
@@ -428,13 +424,13 @@ class HomeController extends Controller
         $weekDays['friday'] = date('Y-m-d',strtotime($weekDays['thursday']) + 86400);
         $weekDays['saturday'] = date('Y-m-d',strtotime($weekDays['friday']) + 86400);
         $weekDays['sunday'] = $res['end'];
-        $mon = HomeController::totalBetsPerDay($weekDays["monday"]);
-        $tue = HomeController::totalBetsPerDay($weekDays["tuesday"]);
-        $wed = HomeController::totalBetsPerDay($weekDays["wednesday"]);
-        $thu = HomeController::totalBetsPerDay($weekDays["thursday"]);
-        $fri = HomeController::totalBetsPerDay($weekDays["friday"]);
-        $sat = HomeController::totalBetsPerDay($weekDays["saturday"]);
-        $sun = HomeController::totalBetsPerDay($weekDays["sunday"]);
+        $mon = HomeController::totalBetsPerDay($weekDays["monday"],$dsn);
+        $tue = HomeController::totalBetsPerDay($weekDays["tuesday"],$dsn);
+        $wed = HomeController::totalBetsPerDay($weekDays["wednesday"],$dsn);
+        $thu = HomeController::totalBetsPerDay($weekDays["thursday"],$dsn);
+        $fri = HomeController::totalBetsPerDay($weekDays["friday"],$dsn);
+        $sat = HomeController::totalBetsPerDay($weekDays["saturday"],$dsn);
+        $sun = HomeController::totalBetsPerDay($weekDays["sunday"],$dsn);
         $formattedBalance = $mon + $tue + $wed + $thu + $fri + $sat + $sun;
         $totalPerDay = [
             'start' => $res['start'],
@@ -450,7 +446,7 @@ class HomeController extends Controller
         ];
         return $totalPerDay;
     }
-    public static function totalBetsPerDay($date){
+    public static function totalBetsPerDay($date,$dsn){
         $mdy = date('mdy',strtotime($date));
         $bets = DB::table("bets")
             ->where("player_id",$_SESSION["username"])
@@ -469,7 +465,8 @@ class HomeController extends Controller
 //                    ->where("player_id",Auth::user()->id)
 //                    ->whereBetween('created_at',[$date . ' 00:00:00',$date . ' 23:59:59']);
 //            })
-            ->get();
+            ->where('dsn',$dsn)
+            ->get(['result','win_amount','bet_amount']);
         $total = 0;
         foreach ($bets as $index => $value){
             if($value->result == 1){

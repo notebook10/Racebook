@@ -28,6 +28,7 @@ date_default_timezone_set('America/Los_Angeles');
                         <thead>
                         <tr>
                             <th>Player ID</th>
+                            <th>DSN</th>
                             <th>Race Number</th>
                             <th>Race Track</th>
                             <th>Bet Type</th>
